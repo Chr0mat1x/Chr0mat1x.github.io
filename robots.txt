@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://chr0mat1x.github.io/chr0mat1x-site/sitemap.xml
+Sitemap: https://chr0mat1x.github.io/sitemap.xml
