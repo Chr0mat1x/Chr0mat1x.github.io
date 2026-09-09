@@ -7,6 +7,26 @@ window.addEventListener('load', () => setTimeout(hidePreloader, 400));
 document.addEventListener('DOMContentLoaded', () => setTimeout(hidePreloader, 600));
 // Аварийное скрытие через 2 секунды в любом случае
 setTimeout(hidePreloader, 2000);
+// ============ REVEAL ON SCROLL ============
+const revealEls = document.querySelectorAll('.reveal');
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('reveal--visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => io.observe(el));
+} else {
+  // Нет IntersectionObserver — показываем всё сразу
+  document.documentElement.classList.add('reveal-fallback');
+}
+// Страховка: если за 3 сек что-то осталось скрытым — показываем всё
+setTimeout(() => document.documentElement.classList.add('reveal-fallback'), 3000);
+
+// ============ HEADER SCROLL ============
 
 // ============ HEADER SCROLL ============
 const header = document.getElementById('header');
