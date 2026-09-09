@@ -41,46 +41,26 @@ document.querySelectorAll('a, button, summary, input, textarea').forEach(el => {
   el.addEventListener('mouseleave', () => cursor.classList.remove('cursor--big'));
 });
 
-// ============ REVEAL ON SCROLL ============
-const revealEls = document.querySelectorAll('.reveal');
-
-// Мгновенно показываем всё, что уже попадает в первый экран — без таймеров и наблюдателей
-function revealInView() {
-  revealEls.forEach(el => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      el.classList.add('reveal--visible');
-    }
-  });
-}
-revealInView();
-window.addEventListener('load', revealInView);
-
-if ('IntersectionObserver' in window) {
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('reveal--visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12 });
-  revealEls.forEach(el => {
-    if (!el.classList.contains('reveal--visible')) observer.observe(el);
-  });
-  // Страховка: если через 3 сек ничего не проявилось — показываем всё
-  setTimeout(() => {
-    const anyVisible = document.querySelector('.reveal--visible');
-    if (!anyVisible) document.documentElement.classList.add('reveal-fallback');
-  }, 3000);
-} else {
-  revealEls.forEach(el => el.classList.add('reveal--visible'));
-}
-
 // ============ CONTACT FORM ============
 const form = document.getElementById('form');
 const formStatus = document.getElementById('formStatus');
 const submitBtn = document.getElementById('submitBtn');
+
+// Локализация сообщений формы: RU по умолчанию, EN если <html lang="en">
+const isEn = document.documentElement.lang === 'en';
+const MSG = isEn ? {
+  fill: 'Fill in your name and contact — otherwise we can\'t reach you.',
+  sending: 'Sending...',
+  sent: 'Request sent! We\'ll get back to you within a day.',
+  errorNote: 'Open your mail app — the message is pre-filled, just hit send.',
+  button: 'Send request'
+} : {
+  fill: 'Заполните имя и контакт — без них не свяжемся.',
+  sending: 'Отправляем...',
+  sent: 'Заявка отправлена! Ответим в течение дня.',
+  errorNote: 'Открываем почту — отправьте письмо оттуда.',
+  button: 'Отправить заявку'
+};
 
 // Ссылки на поля берём один раз на верхнем уровне
 const fieldName = form.querySelector('input[name="name"]');
@@ -102,19 +82,18 @@ form.addEventListener('submit', e => {
   });
 
   if (!valid) {
-    formStatus.textContent = 'Заполните имя и контакт — без них не свяжемся.';
+    formStatus.textContent = MSG.fill;
     formStatus.className = 'form__status form__status--err';
     return;
   }
 
-  // ============ ОТПРАВКА ЗАЯВКИ НА ПОЧТУ ============
-  // Форма отправляется через Formspree на sumarokovart@gmail.com
+  // ============ ОТПРАВКА ЗАЯВКИ ============
   submitBtn.disabled = true;
-  submitBtn.textContent = 'Отправляем...';
+  submitBtn.textContent = MSG.sending;
 
   const finish = () => {
     submitBtn.disabled = false;
-    submitBtn.textContent = 'Отправить заявку';
+    submitBtn.textContent = MSG.button;
   };
 
   fetch('https://formspree.io/f/xrpgkdze', {
@@ -124,7 +103,7 @@ form.addEventListener('submit', e => {
   })
     .then(res => {
       if (res.ok) {
-        formStatus.textContent = 'Заявка отправлена! Ответим в течение дня.';
+        formStatus.textContent = MSG.sent;
         formStatus.className = 'form__status form__status--ok';
         form.reset();
       } else {
@@ -133,12 +112,12 @@ form.addEventListener('submit', e => {
     })
     .catch(() => {
       // Резервный путь — открыть почтовую программу с готовым письмом
-      const subject = encodeURIComponent('Заявка с сайта Chr0mat1x');
+      const subject = encodeURIComponent(isEn ? 'Request from Chr0mat1x website' : 'Заявка с сайта Chr0mat1x');
       const body = encodeURIComponent(
-        `Имя: ${fieldName.value.trim()}\nКонтакт: ${fieldContact.value.trim()}\nО проекте: ${fieldMessage.value.trim() || '—'}`
+        `${isEn ? 'Name' : 'Имя'}: ${fieldName.value.trim()}\n${isEn ? 'Contact' : 'Контакт'}: ${fieldContact.value.trim()}\n${isEn ? 'Project' : 'О проекте'}: ${fieldMessage.value.trim() || (isEn ? '—' : '—')}`
       );
       window.location.href = `mailto:sumarokovart@gmail.com?subject=${subject}&body=${body}`;
-      formStatus.textContent = 'Открываем почту — отправьте письмо оттуда.';
+      formStatus.textContent = MSG.errorNote;
       formStatus.className = 'form__status form__status--ok';
     })
     .finally(finish);
