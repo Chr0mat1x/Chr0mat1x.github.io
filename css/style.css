@@ -484,17 +484,17 @@ html.js.reveal-fallback .reveal { opacity: 1; transform: none; }
   transition: transform .7s cubic-bezier(.6,.05,.9,.3), opacity .4s ease, visibility .7s;
 }
 
-/* ----- REVEAL v2: подъём-проявление через clip-path ----- */
+/* ----- REVEAL v2: подъём + размытие (blur не ломает IntersectionObserver) ----- */
 html.js .reveal {
   opacity: 0;
   transform: translateY(26px);
-  clip-path: inset(0 0 100% 0);
-  transition: opacity .85s ease, transform .85s cubic-bezier(.2,.7,.3,1), clip-path .85s ease;
+  filter: blur(8px);
+  transition: opacity .85s ease, transform .85s cubic-bezier(.2,.7,.3,1), filter .85s ease;
 }
 html.js .reveal--visible {
-  opacity: 1; transform: translateY(0); clip-path: inset(0 0 0 0);
+  opacity: 1; transform: translateY(0); filter: blur(0);
 }
-html.js.reveal-fallback .reveal { opacity: 1; transform: none; clip-path: none; }
+html.js.reveal-fallback .reveal { opacity: 1; transform: none; filter: none; }
 html.js.reveal-fallback .section__title .l { opacity: 1; transform: none; }
 
 /* ----- Небольшой каскад для групп карточек ----- */
@@ -579,8 +579,8 @@ body:active .cursor { transform: translate(-50%, -50%) scale(.85); }
    контент гарантированно виден
    ================================================================ */
 @media (prefers-reduced-motion: reduce) {
-  html.js .reveal { opacity: 1; transform: none; clip-path: none; transition: none; }
-  html.js.reveal-fallback .reveal { opacity: 1; transform: none; clip-path: none; }
+  html.js .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+  html.js.reveal-fallback .reveal { opacity: 1; transform: none; filter: none; }
   html.js .section__title .l { opacity: 1; transform: none; transition: none; }
   html.js .section__title::after { content: none; }
   .preloader { animation: none; opacity: 0; visibility: hidden; }
