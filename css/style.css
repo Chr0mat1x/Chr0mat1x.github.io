@@ -437,3 +437,156 @@ html.js.reveal-fallback .reveal { opacity: 1; transform: none; }
   html.js .reveal { opacity: 1; transform: none; transition: none; }
   .preloader { animation: none; opacity: 0; visibility: hidden; }
 }
+/* ================================================================
+   ART MOTION — кинематографичные анимации (ч/б, премиум)
+   Всё подчинено prefers-reduced-motion (см. нижний блок)
+   ================================================================ */
+
+/* ----- Кинематографичное зерно (создаётся JS'ом) ----- */
+.grain {
+  position: fixed; inset: 0; z-index: 950;
+  pointer-events: none;
+  opacity: .06;
+  mix-blend-mode: overlay;
+  background-size: 300px 300px;
+  background-repeat: repeat;
+  animation: grainJitter 1.2s steps(8) infinite;
+}
+@keyframes grainJitter {
+  0%   { background-position: 0 0; }
+  25%  { background-position: -80px -120px; }
+  50%  { background-position: 40px -60px; }
+  75%  { background-position: -120px 90px; }
+  100% { background-position: 90px 50px; }
+}
+
+/* ----- Тонкая линия прогресса скролла ----- */
+.progress {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: var(--black);
+  transform-origin: 0 0;
+  z-index: 120;
+  pointer-events: none;
+}
+
+/* ----- ПРЕЛОАДЕР: буквы по одной + смахивание панели ----- */
+.preloader__text .pl {
+  display: inline-block;
+  opacity: 0; transform: translateY(18px) scale(.3);
+  font-size: 1.6rem;
+  transition: opacity .5s ease, transform .5s cubic-bezier(.2,.7,.3,1);
+  transition-delay: calc(var(--i) * 70ms);
+}
+.preloader__text--in .pl { opacity: 1; transform: translateY(0) scale(1); }
+.preloader--hidden {
+  opacity: 0; visibility: hidden;
+  transform: translateY(-100%);
+  transition: transform .7s cubic-bezier(.6,.05,.9,.3), opacity .4s ease, visibility .7s;
+}
+
+/* ----- REVEAL v2: подъём-проявление через clip-path ----- */
+html.js .reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  clip-path: inset(0 0 100% 0);
+  transition: opacity .85s ease, transform .85s cubic-bezier(.2,.7,.3,1), clip-path .85s ease;
+}
+html.js .reveal--visible {
+  opacity: 1; transform: translateY(0); clip-path: inset(0 0 0 0);
+}
+html.js.reveal-fallback .reveal { opacity: 1; transform: none; clip-path: none; }
+html.js.reveal-fallback .section__title .l { opacity: 1; transform: none; }
+
+/* ----- Небольшой каскад для групп карточек ----- */
+html.js .services > .reveal:nth-child(2), html.js .pricing > .reveal:nth-child(2) { transition-delay: 90ms; }
+html.js .services > .reveal:nth-child(3), html.js .pricing > .reveal:nth-child(3) { transition-delay: 180ms; }
+html.js .why > .reveal:nth-child(2) { transition-delay: 70ms; }
+html.js .why > .reveal:nth-child(3) { transition-delay: 140ms; }
+html.js .why > .reveal:nth-child(4) { transition-delay: 210ms; }
+
+/* ----- ЗАГОЛОВКИ: посимвольный «шторм» (буквы из-под маски) ----- */
+html.js .section__title { position: relative; overflow: hidden; display: inline-block; }
+html.js .section__title .l {
+  display: inline-block; white-space: pre;
+  transform: translateY(115%);
+  opacity: 0;
+  transition: transform .6s cubic-bezier(.2,.7,.3,1) calc(var(--i) * 18ms), opacity .5s ease calc(var(--i) * 18ms);
+}
+html.js .section__title.title--in .l { transform: translateY(0); opacity: 1; }
+html.js .section__title::after {
+  content: ''; position: absolute; left: 105%; top: 50%;
+  width: 26px; height: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .5s ease;
+}
+html.js .section__title.title--in::after { transform: scaleX(1); }
+html:not(.js) .section__title .l { opacity: 1; transform: none; }
+html:not(.js) .section__title::after { content: none; }
+
+/* ----- HERO: параллакс-сетка (JS управляет transform-ом) ----- */
+
+/* ----- БЕГУЩАЯ СТРОКА (создаётся JS'ом) ----- */
+.marquee {
+  position: relative; z-index: 5;
+  background: var(--black); color: var(--white);
+  overflow: hidden;
+  padding: 18px 0;
+  border-top: 1px solid rgba(255,255,255,.12);
+  transform: rotate(-1.2deg) scale(1.02);
+}
+.marquee__track {
+  display: flex; width: max-content;
+  animation: marqueeScroll var(--speed, 28s) linear infinite;
+}
+.marquee__item {
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 800; letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 0 40px;
+}
+.marquee__item:nth-child(even) span { color: transparent; -webkit-text-stroke: 1.4px var(--white); }
+@keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (max-width: 720px) { .marquee { font-size: 1.15rem; padding: 12px 0; } .marquee__item { padding: 0 24px; } }
+
+/* ----- КНОПКИ: магнит (JS) + фирменная инверсия на hover ----- */
+.btn { position: relative; overflow: hidden; will-change: transform; }
+
+/* ----- КАРТОЧКИ: прожектор за курсором + подъём ----- */
+.service, .price { position: relative; overflow: hidden; will-change: transform; }
+.service::after, .price::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(220px at var(--mx, 50%) var(--my, 50%), rgba(0,0,0,.16), transparent 70%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.service:hover::after, .price:hover::after { opacity: 1; }
+.price:hover { transform: translateY(-6px); }
+
+/* ----- FAQ: плавный аккордеон ----- */
+.faq__item { display: grid; grid-template-rows: auto 0fr; transition: grid-template-rows .45s ease; }
+.faq__item[open] { grid-template-rows: auto 1fr; }
+.faq__item > * { min-height: 0; overflow: hidden; }
+
+/* ----- СЧЁТЧИКИ ----- */
+.stat__num { font-variant-numeric: tabular-nums; }
+
+/* ----- КУРСОР: отклик на нажатие ----- */
+body:active .cursor { transform: translate(-50%, -50%) scale(.85); }
+
+/* ================================================================
+   УВАЖАЕМ НАСТРОЙКУ «уменьшить анимации» — всё отключаем,
+   контент гарантированно виден
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html.js .reveal { opacity: 1; transform: none; clip-path: none; transition: none; }
+  html.js.reveal-fallback .reveal { opacity: 1; transform: none; clip-path: none; }
+  html.js .section__title .l { opacity: 1; transform: none; transition: none; }
+  html.js .section__title::after { content: none; }
+  .preloader { animation: none; opacity: 0; visibility: hidden; }
+  .grain { display: none; }
+  .marquee__track { animation: none; }
+  .hero__grid { animation: none; }
+  .btn::before { transition: none; transform: none; }
+  .faq__item { transition: none; }
+}

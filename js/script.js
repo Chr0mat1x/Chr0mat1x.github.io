@@ -3,8 +3,8 @@ function hidePreloader() {
   const preloader = document.getElementById('preloader');
   if (preloader) preloader.classList.add('preloader--hidden');
 }
-window.addEventListener('load', () => setTimeout(hidePreloader, 400));
-document.addEventListener('DOMContentLoaded', () => setTimeout(hidePreloader, 600));
+window.addEventListener('load', () => setTimeout(hidePreloader, 1700));
+document.addEventListener('DOMContentLoaded', () => setTimeout(hidePreloader, 1700));
 // Аварийное скрытие через 2 секунды в любом случае
 setTimeout(hidePreloader, 2000);
 // ============ REVEAL ON SCROLL ============
@@ -147,3 +147,189 @@ form.addEventListener('submit', e => {
 [fieldName, fieldContact].forEach(field => {
   field.addEventListener('input', () => field.classList.remove('invalid'));
 });
+// ================================================================
+// ART MOTION — кинематографичные анимации и интерактив
+// Каждая фича изолирована: сбой одной не ломает остальные
+// ================================================================
+(function () {
+  const d = document;
+  const IS_EN = d.documentElement.lang === 'en';
+  const fine = ('matchMedia' in window) &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const rAF = cb => (requestAnimationFrame || (f => setTimeout(f, 16)))(cb);
+  const guard = fn => { try { fn(); } catch (e) { /* не рушим сайт */ } };
+
+  // ---- КИНЕМАТОГРАФИЧНОЕ ЗЕРНО ----
+  guard(() => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300">' +
+      '<filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter>' +
+      '<rect width="100%" height="100%" filter="url(%23n)"/></svg>';
+    const g = d.createElement('div');
+    g.className = 'grain';
+    g.style.backgroundImage = "url('data:image/svg+xml;charset=utf-8," +
+      encodeURIComponent(svg).replace(/'/g, '%27') + "')";
+    d.body.appendChild(g);
+  });
+
+  // ---- ЛИНИЯ ПРОГРЕССА СКРОЛЛА ----
+  guard(() => {
+    const bar = d.createElement('div');
+    bar.className = 'progress';
+    d.body.appendChild(bar);
+    const upd = () => {
+      const h = d.documentElement.scrollHeight - window.innerHeight;
+      const p = h > 0 ? Math.min(1, Math.max(0, window.scrollY / h)) : 0;
+      bar.style.transform = `scaleX(${p})`;
+    };
+    window.addEventListener('scroll', upd, { passive: true });
+    window.addEventListener('resize', upd, { passive: true });
+    upd();
+  });
+
+  // ---- ПРЕЛОАДЕР: разбивка на буквы с каскадом ----
+  guard(() => {
+    const pl = d.querySelector('.preloader__text');
+    if (!pl) return;
+    const chars = Array.from(pl.textContent);
+    pl.textContent = '';
+    chars.forEach((ch, i) => {
+      const s = d.createElement('span');
+      s.className = 'pl';
+      s.style.setProperty('--i', i);
+      s.textContent = ch;
+      pl.appendChild(s);
+    });
+    rAF(() => rAF(() => pl.classList.add('preloader__text--in')));
+  });
+
+  // ---- БЕГУЩАЯ СТРОКА под hero ----
+  guard(() => {
+    const words = IS_EN ? ['Black', 'White', 'Code'] : ['Чёрное', 'Белое', 'Код'];
+    const strip = d.createElement('div');
+    strip.className = 'marquee';
+    strip.setAttribute('aria-hidden', 'true');
+    const track = d.createElement('div');
+    track.className = 'marquee__track';
+    const build = arr => arr.forEach(w => {
+      const it = d.createElement('span');
+      it.className = 'marquee__item';
+      const b = d.createElement('span');
+      b.textContent = w;
+      it.appendChild(b);
+      track.appendChild(it);
+    });
+    const half = [];
+    for (let k = 0; k < 5; k++) half.push.apply(half, words);
+    build(half);
+    build(half); // дублируем для бесшовного цикла (-50%)
+    strip.appendChild(track);
+    const hero = d.getElementById('hero');
+    const services = d.getElementById('services');
+    if (hero && services) hero.parentNode.insertBefore(strip, services);
+    else d.body.insertBefore(strip, d.body.firstChild);
+  });
+// ---- РАЗБИВКА ЗАГОЛОВКОВ на буквы ----
+  guard(() => {
+    d.querySelectorAll('.section__title').forEach(t => {
+      if (t.querySelector('.l')) return;
+      const chars = Array.from(t.textContent);
+      t.textContent = '';
+      chars.forEach((ch, i) => {
+        const s = d.createElement('span');
+        s.className = 'l';
+        s.style.setProperty('--i', i);
+        s.textContent = ch === ' ' ? '\u00A0' : ch;
+        t.appendChild(s);
+      });
+    });
+  });
+
+  // ---- ОБЁРТКА текста кнопок в span.t (заливка под текстом) ----
+  guard(() => {
+    d.querySelectorAll('.btn').forEach(b => {
+      if (!b.querySelector('.t')) {
+        const wrap = d.createElement('span');
+        wrap.className = 't';
+        while (b.firstChild) wrap.appendChild(b.firstChild);
+        b.appendChild(wrap);
+      }
+    });
+  });
+
+  // ---- СЧЁТЧИКИ СТАТИСТИКИ ----
+  const runCounter = el => {
+    const m = el.textContent.match(/^(\d+)(.*)$/);
+    if (!m) return;
+    const target = +m[1], suffix = m[2];
+    const dur = 1300, t0 = performance.now();
+    const ease = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+    const tick = () => {
+      const p = Math.min(1, (performance.now() - t0) / dur);
+      el.textContent = Math.round(ease(p) * target) + suffix;
+      if (p < 1) rAF(tick);
+    };
+    tick();
+  };
+
+  // ---- Наблюдатель: заголовки + счётчики по мере появления ----
+  guard(() => {
+    const els = Array.from(d.querySelectorAll('.section__title'))
+      .map(el => ({ el, run: t => t.classList.add('title--in') }))
+      .concat(Array.from(d.querySelectorAll('.stat__num'))
+        .map(el => ({ el, run: runCounter })));
+    if (!('IntersectionObserver' in window)) { els.forEach(o => o.run(o.el)); return; }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          const o = els.find(x => x.el === en.target);
+          if (o) o.run(en.target);
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.25 });
+    els.forEach(o => io.observe(o.el));
+  });
+
+  // ---- Мышиные эффекты (параллакс, магнит, прожектор) — только на ПК ----
+  if (fine) {
+    guard(() => {
+      const hero = d.getElementById('hero');
+      if (!hero) return;
+      const grid = hero.querySelector('.hero__grid');
+      const content = hero.querySelector('.container');
+      window.addEventListener('scroll', () => {
+        if (grid) grid.style.transform = `translateY(${window.scrollY * .15}px)`;
+      }, { passive: true });
+      if (content) {
+        hero.addEventListener('mousemove', e => {
+          const tx = (e.clientX / window.innerWidth - .5) * 10;
+          const ty = (e.clientY / window.innerHeight - .5) * 8;
+          content.style.transform = `translate(${tx}px, ${ty}px)`;
+        });
+        hero.addEventListener('mouseleave', () => { content.style.transform = ''; });
+      }
+    });
+
+    guard(() => {
+      d.querySelectorAll('.btn').forEach(b => {
+        b.addEventListener('mousemove', e => {
+          const r = b.getBoundingClientRect();
+          const dx = ((e.clientX - r.left) / r.width - .5) * 12;
+          const dy = ((e.clientY - r.top) / r.height - .5) * 8;
+          b.style.transform = `translate(${dx}px, ${dy}px)`;
+        });
+        b.addEventListener('mouseleave', () => { b.style.transform = ''; });
+      });
+    });
+
+    guard(() => {
+      d.querySelectorAll('.service, .price').forEach(c => {
+        c.addEventListener('mousemove', e => {
+          const r = c.getBoundingClientRect();
+          c.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+          c.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+        });
+      });
+    });
+  }
+})();
