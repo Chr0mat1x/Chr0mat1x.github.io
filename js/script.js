@@ -234,12 +234,25 @@ form.addEventListener('submit', e => {
       if (t.querySelector('.l')) return;
       const chars = Array.from(t.textContent);
       t.textContent = '';
+      const newWord = () => {
+        const w = d.createElement('span');
+        w.className = 'w';
+        w.style.whiteSpace = 'nowrap';
+        t.appendChild(w);
+        return w;
+      };
+      let cur = newWord();
       chars.forEach((ch, i) => {
-        const s = d.createElement('span');
-        s.className = 'l';
-        s.style.setProperty('--i', i);
-        s.textContent = ch === ' ' ? '\u00A0' : ch;
-        t.appendChild(s);
+        if (ch === ' ' || ch === '\u00A0') {
+          t.appendChild(d.createTextNode('\u0020'));
+          cur = newWord();
+        } else {
+          const s = d.createElement('span');
+          s.className = 'l';
+          s.style.setProperty('--i', i);
+          s.textContent = ch;
+          cur.appendChild(s);
+        }
       });
     });
   });
