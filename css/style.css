@@ -590,3 +590,41 @@ body:active .cursor { transform: translate(-50%, -50%) scale(.85); }
   .btn::before { transition: none; transform: none; }
   .faq__item { transition: none; }
 }
+/* ================================================================
+   ART v2 — передовые эффекты (курсор-шлейф, риппл, 3D-наклон)
+   ================================================================ */
+
+/* Сглаженная точка-хвост за курсором (создаётся JS'ом) */
+.cursor-dot {
+  position: fixed; width: 6px; height: 6px;
+  background: var(--black);
+  border-radius: 50%; pointer-events: none;
+  mix-blend-mode: difference; z-index: 999;
+}
+
+/* Чернильный риппл по клику (создаётся JS'ом) */
+.ripple {
+  position: absolute; border-radius: 50%;
+  background: rgba(0,0,0,.28);
+  transform: scale(0); opacity: .9;
+  pointer-events: none; z-index: 5;
+  animation: rippleAnim .55s ease-out forwards;
+}
+@keyframes rippleAnim {
+  0%   { transform: scale(0);   opacity: .9; }
+  100% { transform: scale(1);   opacity: 0; }
+}
+
+/* Плавный 3D-наклон карточек (JS задаёт transform) */
+.service, .price {
+  transition: transform .16s ease-out, background .3s ease, color .3s ease, border-color .3s ease;
+}
+/* Hero-заголовок: 3D-плоскость + масштаб на скролле (JS) */
+.hero__title { transform-style: preserve-3d; }
+
+/* Уважаем «уменьшить анимации» */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-dot { display: none; }
+  .ripple { display: none; }
+  .hero__title { transform: none; opacity: 1; }
+}

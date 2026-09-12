@@ -346,3 +346,119 @@ form.addEventListener('submit', e => {
     });
   }
 })();
+// ================================================================
+// ART v2 — передовые эффекты (шлейф курсора, hero cinematic, декрипт,
+// 3D-наклон карточек, чернильный риппл)
+// ================================================================
+(function () {
+  const d = document;
+  const rAF = cb => (requestAnimationFrame || (f => setTimeout(f, 16)))(cb);
+  const guard = fn => { try { fn(); } catch (e) {} };
+  const mm = q => ('matchMedia' in window) ? window.matchMedia(q).matches : null;
+  const fine = mm('(hover: hover) and (pointer: fine)') === true;
+  const reduced = mm('(prefers-reduced-motion: reduce)') === true;
+
+  // 1) Сглаживающая точка-хвост за курсором
+  guard(() => {
+    if (!fine || reduced) return;
+    const dot = d.createElement('div');
+    dot.className = 'cursor-dot';
+    d.body.appendChild(dot);
+    let tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+    let cx = tx, cy = ty;
+    d.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+    const loop = () => {
+      cx += (tx - cx) * .22; cy += (ty - cy) * .22;
+      dot.style.transform = `translate(${cx - 3}px, ${cy - 3}px)`;
+      rAF(loop);
+    };
+    loop();
+  });
+
+  // 2) Hero: масштаб+затухание при скролле, 3D-наклон за мышкой
+  guard(() => {
+    const hero = d.getElementById('hero');
+    const title = hero && hero.querySelector('.hero__title');
+    if (!hero || !title) return;
+    let rotX = 0, rotY = 0, sc = 1, op = 1;
+    const apply = () => {
+      title.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${sc})`;
+      title.style.opacity = String(op);
+    };
+    const onScroll = () => {
+      const p = Math.min(1, Math.max(0, window.scrollY / (window.innerHeight * .75)));
+      sc = 1 - p * .4; op = 1 - p * .9;
+      apply();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    if (fine && !reduced) {
+      hero.addEventListener('mousemove', e => {
+        rotY = ((e.clientX / window.innerWidth) - .5) * 8;
+        rotX = ((e.clientY / window.innerHeight) - .5) * -6;
+        apply();
+      });
+      hero.addEventListener('mouseleave', () => { rotX = 0; rotY = 0; apply(); });
+    }
+  });
+
+  // 3) Хакер-декрипт заголовков (буквы «расшифровываются» в слово)
+  const runScramble = title => {
+    const letters = Array.from(title.querySelectorAll('.l'));
+    if (!letters.length) return;
+    const real = letters.map(L => L.textContent);
+    const glyphs = 'ABCDEFGHIJKLMNOPQRSTUVWXYZабвгдежзиклмнопрстуфхцчшщъыьэюя0123456789';
+    const dur = 900, t0 = performance.now();
+    const rnd = () => glyphs[Math.floor(Math.random() * glyphs.length)];
+    const tick = () => {
+      const p = Math.min(1, (performance.now() - t0) / dur);
+      const settled = Math.floor(p * letters.length);
+      letters.forEach((L, i) => { L.textContent = (p >= 1 || i < settled) ? real[i] : rnd(); });
+      if (p < 1) rAF(tick);
+    };
+    tick();
+  };
+  guard(() => {
+    if (reduced) return;
+    const titles = Array.from(d.querySelectorAll('.section__title'));
+    if (!('IntersectionObserver' in window)) { titles.forEach(runScramble); return; }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) { runScramble(en.target); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.2 });
+    titles.forEach(t => io.observe(t));
+  });
+
+  // 4) 3D-наклон карточек услуг и тарифов
+  guard(() => {
+    if (!fine || reduced) return;
+    d.querySelectorAll('.service, .price').forEach(c => {
+      c.addEventListener('mousemove', e => {
+        const r = c.getBoundingClientRect();
+        const ry = ((e.clientX - r.left) / r.width - .5) * 6;
+        const rx = ((e.clientY - r.top) / r.height - .5) * -6;
+        c.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-3px)`;
+      });
+      c.addEventListener('mouseleave', () => { c.style.transform = ''; });
+    });
+  });
+
+  // 5) Чернильный риппл по клику (кнопки + карточки)
+  guard(() => {
+    if (reduced) return;
+    d.querySelectorAll('.btn, .service, .price').forEach(el => {
+      el.addEventListener('click', function (e) {
+        const r = d.createElement('span');
+        r.className = 'ripple';
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        r.style.width = r.style.height = size + 'px';
+        r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        r.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        this.appendChild(r);
+        setTimeout(() => r.remove(), 600);
+      });
+    });
+  });
+})();
