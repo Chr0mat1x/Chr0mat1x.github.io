@@ -505,10 +505,10 @@ html.js .why > .reveal:nth-child(3) { transition-delay: 140ms; }
 html.js .why > .reveal:nth-child(4) { transition-delay: 210ms; }
 
 /* ----- ЗАГОЛОВКИ: посимвольный «шторм» (буквы из-под маски) ----- */
-html.js .section__title { position: relative; overflow: hidden; display: inline-block; }
+html.js .section__title { position: relative; display: inline-block; line-height: 1.2; }
 html.js .section__title .l {
-  display: inline-block; white-space: pre;
-  transform: translateY(115%);
+  display: inline-block; vertical-align: baseline; white-space: pre;
+  transform: translateY(.95em);
   opacity: 0;
   transition: transform .6s cubic-bezier(.2,.7,.3,1) calc(var(--i) * 18ms), opacity .5s ease calc(var(--i) * 18ms);
 }
