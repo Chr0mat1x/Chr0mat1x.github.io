@@ -462,3 +462,24 @@ form.addEventListener('submit', e => {
     });
   });
 })();
+// ================================================================
+// ART v3 — 3D-наклон формы заявки за курсором
+// ================================================================
+(function () {
+  const d = document;
+  const guard = fn => { try { fn(); } catch (e) {} };
+  guard(() => {
+    if (!('matchMedia' in window)) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const form = d.querySelector('.form');
+    if (!form) return;
+    form.addEventListener('mousemove', e => {
+      const r = form.getBoundingClientRect();
+      const ry = ((e.clientX - r.left) / r.width - .5) * 5;
+      const rx = ((e.clientY - r.top) / r.height - .5) * -5;
+      form.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    form.addEventListener('mouseleave', () => { form.style.transform = ''; });
+  });
+})();
