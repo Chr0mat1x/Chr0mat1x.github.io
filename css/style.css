@@ -574,7 +574,7 @@ html:not(.js) .section__title::after { content: none; }
 .price:hover { transform: translateY(-6px); }
 
 /* ----- FAQ: плавный аккордеон ----- */
-.faq__item { display: grid; grid-template-rows: auto 0fr; transition: grid-template-rows .45s ease; }
+.faq__item { display: grid; grid-template-rows: auto 0fr; transition: grid-template-rows .55s cubic-bezier(.4,.05,.7,.5); }
 .faq__item[open] { grid-template-rows: auto 1fr; }
 .faq__item > * { min-height: 0; overflow: hidden; }
 
