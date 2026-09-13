@@ -294,8 +294,18 @@ section[id] { scroll-margin-top: 90px; }
   transition: opacity .2s;
 }
 .faq__item summary::-webkit-details-marker { display: none; }
-.faq__item summary::after { content: '+'; font-size: 1.4rem; transition: transform .3s; }
-.faq__item[open] summary::after { transform: rotate(45deg); }
+.faq__item summary::after {
+  content: '+';
+  font-size: 1.4rem;
+  transform: rotate(0deg);
+  transition:
+    transform .35s cubic-bezier(.2,.7,.3,1);
+}
+.faq__item[open] summary::after {
+  transform: rotate(45deg);
+  transition:
+    transform .45s cubic-bezier(.4,.05,.7,.5);
+}
 .faq__item p { padding: 0 0 22px; color: #444; max-width: 640px; }
 
 /* ============ CONTACT ============ */
