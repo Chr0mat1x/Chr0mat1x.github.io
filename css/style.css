@@ -632,7 +632,6 @@ body:active .cursor { transform: translate(-50%, -50%) scale(.85); }
    ART v3 — 3D DEPTH (перспективы, флипы, парящая карточка)
    ================================================================ */
 .section, .hero { perspective: 1200px; }
-.process { perspective: 900px; }
 .pricing { perspective: 1000px; }
 
 /* Секции «открываются» с 3D-наклоном */
@@ -655,18 +654,12 @@ html.js .section__title.title--in .l {
 .price--featured { transform: translateZ(16px); }
 .price--featured:hover { transform: translateZ(30px) translateY(-4px); }
 
-/* Шаги процесса входят с 3D-поворотом (каскад) */
-html.js .process__step.reveal:nth-child(odd) { transform: translateY(26px) rotateY(9deg); }
-html.js .process__step.reveal:nth-child(even) { transform: translateY(26px) rotateY(-9deg); }
-html.js .process__step.reveal--visible { transform: translateY(0) rotateY(0deg); }
-
 /* Форма заявки — 3D-наклон (JS) */
 .form { transition: transform .16s ease-out; will-change: transform; }
 
 /* Уважаем «уменьшить анимации» для v3 */
 @media (prefers-reduced-motion: reduce) {
-  html.js .reveal, html.js.reveal-fallback .reveal,
-  html.js .process__step.reveal, html.js .process__step.reveal--visible {
+  html.js .reveal, html.js.reveal-fallback .reveal {
     opacity: 1; transform: none; filter: none; transition: none;
   }
   html.js .section__title .l { opacity: 1; transform: none; transition: none; }
