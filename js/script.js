@@ -508,6 +508,7 @@ form.addEventListener('submit', e => {
     const STEPS = 150;                // ступеней фронта проявления
     const EDGE = 6;                   // резкость края проявления
     const MAXMASK = 600000;           // предел площади маски, px
+    const FALL = .38;                  // темп падения лепестков (1 — как было)
     const TAU = Math.PI * 2;
     const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
@@ -653,10 +654,11 @@ form.addEventListener('submit', e => {
     }
 
     function fall(p, dt) {
-      p.x += p.vx * dt * .06;
-      p.y += p.vy * dt * .06;
-      p.rot += p.vr * dt * .0016;
-      p.flip += dt * .0016;
+      const t = dt * FALL;              // общий множитель темпа
+      p.x += p.vx * t * .06;
+      p.y += p.vy * t * .06;
+      p.rot += p.vr * t * .0016;
+      p.flip += t * .0016;
       if (p.y > height + 40 || p.x < -40) p.on = 0;
       else drawPetal(ctx, p);
     }
