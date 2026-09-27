@@ -1,4 +1,4 @@
-// ============ PRELOADER ============
+﻿// ============ PRELOADER ============
 function hidePreloader() {
   const preloader = document.getElementById('preloader');
   if (preloader) preloader.classList.add('preloader--hidden');
@@ -485,504 +485,157 @@ form.addEventListener('submit', e => {
 })();
 
 // ================================================================
-// ART v5 — Чёрно-белая цветущая ветка сакуры (Hero Sakura)
-// Ч/б лайн-арт по референсу: почти горизонтальная ветка входит из правого
-// края, слева уходит вверх, на ней крупные 5-лепестковые цветы с тычинками
-// и группы бутонов на концах побегов, вниз срываются лепестки.
+// ART — сакура в hero. Исходный рисунок не перерисовывается: картинка
+// img/sakura.png показывается как есть, а img/sakura-grow.png задаёт
+// порядок проявления — сперва проступает ветка справа налево, затем по
+// фронту раскрываются цветы и бутоны. Поверх — только падающие лепестки.
 // ================================================================
-(function () {
-  const d = document;
+(function (d) {
+  if (!d) return;
   const guard = fn => { try { fn(); } catch (e) {} };
+
   guard(() => {
     const canvas = d.getElementById('heroSakura');
     if (!canvas || !canvas.getContext) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const rAF = cb => (requestAnimationFrame || (f => setTimeout(f, 16)))(cb);
+    // Пути абсолютные: на /en/ относительные ушли бы в /en/img/
+    const ART = '/img/sakura.png';
+    const GROW = '/img/sakura-grow.png';
+    const RATIO = 571 / 307;          // пропорции исходного рисунка
+    const REVEAL = 2500;              // мс на проявление
+    const STEPS = 150;                // ступеней фронта проявления
+    const EDGE = 6;                   // резкость края проявления
+    const MAXMASK = 600000;           // предел площади маски, px
     const TAU = Math.PI * 2;
-
-    // -------- Мелочи --------
     const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const easeOut = t => 1 - (1 - t) * (1 - t);
-    const easeSoft = t => 1 - (1 - t) * (1 - t) * (1 - t);
-    const hash = n => {                    // предсказуемый «рандом» 0..1
-      const s = Math.sin(n * 12.9898) * 43758.5453;
-      return s - Math.floor(s);
-    };
 
-    // -------- Сцена --------
-    // Дизайн-координаты: dx — влево от правого края hero, dy — вниз от верхнего.
-    // Бокс BOX_W × BOX_H переносится на холст с общим масштабом scale.
-    const BOX_W = 900, BOX_H = 480, PAD = 80;
-    const reduced = ('matchMedia' in window) &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const fine = ('matchMedia' in window) &&
-      window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    // Точки на ветке, от которых отрываются падающие лепестки.
+    const SPOTS = [[.04, .57], [.11, .55], [.18, .61], [.25, .64], [.32, .62],
+                   [.39, .60], [.46, .63], [.53, .62], [.60, .57], [.67, .54],
+                   [.75, .52], [.82, .47], [.89, .37], [.96, .31]];
 
-    let width = 0, height = 0, dpr = 1, scale = 1, inset = 0;
-    let elapsed = 0, last = 0, animId = null, running = false, started = false;
-    let growEnd = 3, bloomEnd = 4;         // посчитаются по скелету
-    let baked = false, layer = null;       // слой с выросшим «деревом»
-    let par = 0, parY = 0, parTX = 0, parTY = 0;
-    const sprites = new Map();             // кэш отрисованных цветов и бутонов
+    const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
 
-    // -------- Скелет ветки --------
-    // pts — узлы осевой линии, w — толщина [у основания, на конце],
-    // at — где ветка крепится к родителю (доля его длины),
-    // speed — скорость роста в дизайн-пикселях за секунду, bump — «сучковатость».
-    const TRUNK = 0;
-    const limbs = [
-      // Ветка из референса: толстая у входа справа, прогибается дугой
-      // вниз в середине и уходит вверх к тонкому левому концу.
-      { pts: [[-70, 238], [100, 272], [280, 310], [450, 312], [590, 284], [700, 258], [800, 242]],
-        w: [30, 5], speed: 340, bump: .18 },
-      // короткие веточки вверх — на правом конце они несут гроздь бутонов
-      { pts: [[0, 258], [26, 222], [50, 190], [70, 164]],
-        w: [5, 1.6], parent: TRUNK, at: .14, speed: 400, bump: .12 },
-      { pts: [[0, 300], [24, 266], [46, 238]],
-        w: [4.4, 1.5], parent: TRUNK, at: .28, speed: 410, bump: .12 },
-      // веточки вниз
-      { pts: [[0, 306], [26, 336], [48, 360]],
-        w: [4, 1.4], parent: TRUNK, at: .4, speed: 420, bump: .12 },
-      { pts: [[0, 282], [24, 310], [44, 330]],
-        w: [4, 1.4], parent: TRUNK, at: .2, speed: 420, bump: .12 },
-      { pts: [[0, 264], [22, 292], [40, 312]],
-        w: [3.4, 1.2], parent: TRUNK, at: .8, speed: 430, bump: .12 },
-      { pts: [[0, 300], [20, 270], [42, 248]],
-        w: [3.2, 1.2], parent: TRUNK, at: .55, speed: 430, bump: .12 },
-      { pts: [[0, 300], [20, 274], [38, 256]],
-        w: [3.2, 1.2], parent: TRUNK, at: .6, speed: 430, bump: .12 }
-    ];
+    const artImg = new Image();
+    const growImg = new Image();
+    artImg.decoding = growImg.decoding = 'async';
 
-
-
-    // -------- Цветы и бутоны --------
-    // l — ветка, t — доля по её длине, off — смещение от оси (знак = сторона),
-    // r — радиус, sq — ракурс (сжатие), hero — крупный цветок с тычинками,
-    // d — задержка распускания, bud — цветок распускается из бутона.
-    const F = (l, t, off, r, sq, hero, d, bud) => ({
-      l, t, off, r, sq, hero: hero ? 1 : 0, d, bud: bud ? 1 : 0
-    });
-    const B = (l, t, off, r, d) => ({ l, t, off, r, d });
-
-    // В референсе цветы сидят прямо на линии ветки — она проходит через их
-    // центры, и лепестки её перекрывают. Крупные у входа справа и в середине,
-    // к левому концу мельче; сверху справа — веточка с бутонами.
-    const blooms = [
-      F(0, .05, -6, 40, .95, 1, .18),           // у входа справа
-      F(0, .12, 7, 46, .95, 1, .24),
-      F(0, .19, -6, 50, .96, 1, .28),
-      F(0, .27, 8, 54, .97, 1, .30),
-      F(0, .35, -7, 56, .98, 1, .32),           // самый крупный
-      F(0, .44, 7, 48, .96, 1, .26),
-      F(0, .53, -6, 40, .94, 1, .22),
-      F(0, .62, 6, 32, .92, 0, .16),
-      F(0, .72, -5, 24, .90, 0, .11),           // дальше ветка почти голая
-      F(0, .87, 5, 19, .86, 0, .08),            // маленькая группа на кончике
-      F(0, .97, -4, 15, .82, 0, .05),
-      F(1, .45, -10, 20, .84, 0, .08),          // на веточках
-      F(1, .90, 8, 15, .80, 0, .05),
-      F(3, .60, 10, 17, .82, 0, .06)
-    ];
-
-    const buds = [
-      B(0, .03, 5, 7, .05), B(0, .10, -6, 6, .10), B(0, .22, 6, 6, .12),
-      B(0, .34, -5, 6, .16), B(0, .48, 5, 5, .14), B(0, .58, -4, 5, .10),
-      B(0, .70, 4, 4, .08), B(0, .84, -4, 4, .05),
-      B(1, .10, 8, 6, .05), B(1, .35, -7, 6, .10), B(1, .60, 7, 5, .12),
-      B(1, .85, -6, 5, .08), B(1, .99, 5, 5, .04),   // гроздь справа сверху
-      B(2, .40, 7, 5, .05), B(2, .75, -5, 5, .08), B(2, .99, 4, 5, .04),
-      B(3, .50, 5, 5, .05), B(3, .99, -4, 4, .04),
-      B(4, .45, 5, 5, .05), B(4, .99, -4, 4, .04),
-      B(5, .55, -4, 4, .05), B(5, .99, 4, 4, .04),
-      B(6, .50, 4, 4, .05), B(6, .99, -3, 4, .04),
-      B(7, .55, -4, 4, .05), B(7, .99, 4, 4, .04)
-    ];
-
-    // -------- Геометрия --------
-    function smooth(pts, per) {            // Catmull-Rom → плотная полилиния
-      const out = [], n = pts.length;
-      for (let i = 0; i < n - 1; i++) {
-        const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || pts[i + 1];
-        for (let s = 0; s < per; s++) {
-          const t = s / per, t2 = t * t, t3 = t2 * t;
-          out.push({
-            x: .5 * (2 * p1[0] + (-p0[0] + p2[0]) * t +
-              (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 +
-              (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
-            y: .5 * (2 * p1[1] + (-p0[1] + p2[1]) * t +
-              (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 +
-              (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
-          });
-        }
-      }
-      out.push({ x: pts[n - 1][0], y: pts[n - 1][1] });
-      return out;
-    }
-
-    function pointAt(sp, cum, dist) {      // точка, касательная и нормаль по длине
-      const total = cum[cum.length - 1];
-      const s = clamp(dist, 0, total);
-      let j = 1;
-      while (j < cum.length - 1 && cum[j] < s) j++;
-      const a = sp[j - 1], b = sp[j];
-      const t = clamp((s - cum[j - 1]) / Math.max(.0001, cum[j] - cum[j - 1]), 0, 1);
-      const dx = b.x - a.x, dy = b.y - a.y, m = Math.hypot(dx, dy) || 1;
-      return {
-        x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t),
-        tx: dx / m, ty: dy / m, nx: -dy / m, ny: dx / m
-      };
-    }
-
-    function widthAt(lb, t) {
-      return Math.max(.9, lerp(lb.w[0], lb.w[1], t) * (1 + lb.bump * Math.sin(t * 9.2 + lb.seed)));
-    }
-
-    function buildTree() {
-      limbs.forEach((lb, i) => {
-        if (lb.parent != null) {           // прирастаем точно к телу родителя
-          const p = limbs[lb.parent];
-          const at = pointAt(p.sp, p.cum, p.len * lb.at);
-          lb.pts[0] = [-at.x, at.y];       // родитель живёт в экранных X — возвращаем в дизайн
-        }
-        // зеркалим X: дальше всё живёт в экранных координатах
-        // (dx влево от правого края = -X, dy вниз = +Y)
-        lb.sp = smooth(lb.pts.map(p => [-p[0], p[1]]), 7);
-        lb.cum = [0];
-        let total = 0;
-        for (let j = 1; j < lb.sp.length; j++) {
-          total += Math.hypot(lb.sp[j].x - lb.sp[j - 1].x, lb.sp[j].y - lb.sp[j - 1].y);
-          lb.cum.push(total);
-        }
-        lb.len = total || 1;
-        lb.tan = lb.sp.map((p, j) => {
-          const a = lb.sp[Math.max(0, j - 1)], b = lb.sp[Math.min(lb.sp.length - 1, j + 1)];
-          const dx = b.x - a.x, dy = b.y - a.y, m = Math.hypot(dx, dy) || 1;
-          return { x: dx / m, y: dy / m };
-        });
-        lb.seed = i * 3.7 + 1;
-        if (lb.parent == null) {
-          lb.t0 = 0;
-        } else {
-          const p = limbs[lb.parent];
-          lb.t0 = p.t0 + (p.t1 - p.t0) * lb.at + .05;
-        }
-        lb.t1 = lb.t0 + Math.max(.28, lb.len / lb.speed);
-      });
-
-      growEnd = limbs.reduce((m, l) => Math.max(m, l.t1), 0);
-
-      const anchor = o => {
-        const lb = limbs[o.l];
-        const p = pointAt(lb.sp, lb.cum, lb.len * o.t);
-        o.ax = p.x; o.ay = p.y;            // точка крепления на ветке
-        o.ox = -p.nx * o.off;              // off > 0 — «ниже» ветки (внешняя сторона)
-        o.oy = -p.ny * o.off;
-        o.cx = p.x + o.ox;                 // центр цветка
-        o.cy = p.y + o.oy;
-        return o;
-      };
-
-      blooms.forEach((fl, i) => {
-        anchor(fl);
-        fl.seed = 7.3 + i * 2.1;
-        fl.at = limbs[fl.l].t1 + fl.d;     // момент распускания
-      });
-      buds.forEach((bd, i) => {
-        anchor(bd);
-        bd.seed = 31.7 + i * 3.3;
-        bd.at = limbs[bd.l].t1 + bd.d;     // момент появления
-      });
-      // цветы «из бутона»: бутон раскрывается за секунду до цветка
-      blooms.slice().forEach((fl, i) => {
-        if (!fl.bud) return;
-        fl.at += .75;
-        buds.push(anchor({
-          l: fl.l, t: fl.t, off: fl.off, r: fl.r * .42, d: fl.d,
-          seed: 90.5 + i, at: fl.at - .75, into: fl
-        }));
-      });
-
-      bloomEnd = blooms.reduce((m, f) => Math.max(m, f.at + 1.05), 0);
-      blooms.sort((a, b) => b.r - a.r);    // крупные цветы поверх мелких
-    }
-
-    // -------- Дерево --------
-    function drawLimb(g, lb, prog) {       // ствол/ветка как сужающаяся «лента»
-      const p = clamp(prog, 0, 1);
-      if (p <= .002) return;
-      const total = lb.len, stop = total * p;
-      const left = [], right = [];
-      for (let j = 0; j < lb.sp.length; j++) {
-        if (lb.cum[j] > stop) break;
-        const pt = lb.sp[j], tan = lb.tan[j];
-        const hw = widthAt(lb, lb.cum[j] / total) * .5;
-        left.push([pt.x - tan.y * hw, pt.y + tan.x * hw]);
-        right.push([pt.x + tan.y * hw, pt.y - tan.x * hw]);
-      }
-      if (p < 1) {                         // ровный «растущий» срез на конце
-        const tip = pointAt(lb.sp, lb.cum, stop);
-        const hw = widthAt(lb, p) * .24;
-        left.push([tip.x - tip.ty * hw, tip.y + tip.tx * hw]);
-        right.push([tip.x + tip.ty * hw, tip.y - tip.tx * hw]);
-      }
-      if (left.length < 2) return;
-      g.beginPath();
-      g.moveTo(left[0][0], left[0][1]);
-      for (let j = 1; j < left.length; j++) g.lineTo(left[j][0], left[j][1]);
-      for (let j = right.length - 1; j >= 0; j--) g.lineTo(right[j][0], right[j][1]);
-      g.closePath();
-      g.fillStyle = '#0a0a0a';
-      g.fill();
-    }
-
-    function bakeLayer() {                 // выросшее дерево — в отдельный слой
-      const w = BOX_W + PAD * 2, h = BOX_H + PAD * 2;
-      if (!layer) {
-        layer = d.createElement('canvas');
-      }
-      if (layer.width !== Math.ceil(w * dpr) || layer.height !== Math.ceil(h * dpr)) {
-        layer.width = Math.ceil(w * dpr);
-        layer.height = Math.ceil(h * dpr);
-      }
-      const g = layer.getContext('2d');
-      g.setTransform(dpr, 0, 0, dpr, 0, 0);
-      g.clearRect(0, 0, w, h);
-      g.translate(BOX_W + PAD, PAD);       // слой живёт в дизайн-координатах
-      limbs.forEach(lb => drawLimb(g, lb, 1));
-      baked = true;
-    }
-
-    // ============================================================
-    // Отрисовка: лепесток, цветок, бутон
-    // ============================================================
-    function petalPath(g, len, wid, notch, point) {   // лепесток «смотрит» вверх (−Y)
-      const n = clamp(notch, 0, 1), p = clamp(point || 0, 0, 1);
-      const tip = -len * (.95 + .1 * p);
-      g.beginPath();
-      g.moveTo(0, 0);
-      g.bezierCurveTo(-wid * 1.05, -len * .26, -wid * 1.08, -len * .72, -wid * .58, tip);
-      if (n > 0) {
-        g.quadraticCurveTo(-wid * .3, -len * (.97 - .12 * n), 0, -len * (.97 - .1 * n));
-        g.quadraticCurveTo(wid * .3, -len * (.97 - .12 * n), wid * .58, tip);
-      } else {                                          // для бутонов — острый кончик
-        g.quadraticCurveTo(0, -len * (1.02 + .18 * p), wid * .58, tip);
-      }
-      g.bezierCurveTo(wid * 1.08, -len * .72, wid * 1.05, -len * .26, 0, 0);
-      g.closePath();
-    }
-
-    function paintFlower(g, r, seed, open, hero, sq) {
-      const base = hash(seed) * TAU;
-      const lw = Math.max(.6, r * .022);             // тонкий контур, как в референсе
-      g.save();
-      g.rotate(base);
-      g.scale(1, sq);
-      for (let i = 0; i < 5; i++) {
-        const o = clamp((open - i * .09) / .5, 0, 1);   // лепестки раскрываются по очереди
-        if (o <= 0) continue;
-        const e = easeSoft(o);
-        const len = r * lerp(.62, 1, e) * (.95 + .1 * hash(seed + i * 7.1));
-        const wid = len * (.68 + .06 * hash(seed + i * 13.7));   // округлый лепесток
-        g.save();
-        g.rotate(i * TAU / 5 + (1 - e) * -1.15 + (hash(seed + i * 3.3) - .5) * .18);
-        petalPath(g, len, wid, 1);
-        g.fillStyle = 'rgba(255,255,255,.92)';
-        g.fill();
-        g.lineWidth = lw;
-        g.strokeStyle = 'rgba(10,10,10,.6)';
-        g.stroke();
-        g.lineWidth = Math.max(.4, r * .018);          // прожилки на лепестке
-        g.strokeStyle = 'rgba(10,10,10,.12)';
-        for (let v = -1; v <= 1; v += 2) {
-          g.beginPath();
-          g.moveTo(v * wid * .18, -len * .2);
-          g.quadraticCurveTo(v * wid * .36, -len * .52, v * wid * .3, -len * .8);
-          g.stroke();
-        }
-        g.restore();
-      }
-      g.restore();
-
-      g.save();
-      g.rotate(base);
-      g.scale(1, sq);
-      if (hero && open > .8) {                         // короткие тычинки внутри цветка
-        const n = 11 + Math.floor(hash(seed + 21.3) * 6);
-        g.lineWidth = Math.max(.4, r * .012);
-        g.strokeStyle = 'rgba(10,10,10,.3)';
-        for (let i = 0; i < n; i++) {
-          const a = i * TAU / n + (hash(seed + i * 5.5) - .5) * .45;
-          const len = r * (.34 + hash(seed + i * 9.1) * .22);
-          const ex = Math.cos(a) * len, ey = Math.sin(a) * len;
-          g.beginPath();
-          g.moveTo(Math.cos(a) * r * .05, Math.sin(a) * r * .05);
-          g.quadraticCurveTo(Math.cos(a + .1) * len * .7, Math.sin(a + .1) * len * .7, ex, ey);
-          g.stroke();
-          g.beginPath();
-          g.arc(ex, ey, Math.max(.5, r * .016), 0, TAU);
-          g.fillStyle = 'rgba(10,10,10,.4)';
-          g.fill();
-        }
-      }
-      const cn = 8 + Math.floor(hash(seed + 31.7) * 5);  // мелкие пыльники в центре
-      for (let i = 0; i < cn; i++) {
-        const a = i * TAU / cn + (hash(seed + i * 11.3) - .5) * .8;
-        const d2 = r * (.06 + hash(seed + i * 17.9) * .2);
-        g.beginPath();
-        g.arc(Math.cos(a) * d2, Math.sin(a) * d2, r * (.022 + hash(seed + i * 23.1) * .022), 0, TAU);
-        g.fillStyle = 'rgba(10,10,10,.8)';
-        g.fill();
-      }
-      g.save();                                        // чашелистик у основания
-      g.translate(0, r * .1);
-      g.scale(.5, 1);
-      g.beginPath();
-      g.arc(0, 0, r * .1, 0, TAU);
-      g.fillStyle = 'rgba(10,10,10,.85)';
-      g.fill();
-      g.restore();
-      g.restore();
-    }
-
-    function paintBud(g, r, seed, open) {
-      const lw = Math.max(.7, r * .1);
-      g.save();
-      g.rotate((hash(seed) - .5) * .6);
-      for (let i = -1; i <= 1; i++) {                  // три сомкнутых лепестка
-        const k = i === 0 ? 1.05 : .8;
-        g.save();
-        g.rotate(i * (.3 + .4 * open));
-        petalPath(g, r * 2 * k * (1 + .08 * open), r * .42 * (i === 0 ? 1 : .88), 0, 1);
-        g.fillStyle = 'rgba(255,255,255,.97)';
-        g.fill();
-        g.lineWidth = lw;
-        g.strokeStyle = 'rgba(10,10,10,.85)';
-        g.stroke();
-        g.restore();
-      }
-      g.beginPath();                                   // чашелистик
-      g.moveTo(-r * .5, 0);
-      g.quadraticCurveTo(0, -r * .32, r * .5, 0);
-      g.quadraticCurveTo(0, r * .18, -r * .5, 0);
-      g.fillStyle = 'rgba(10,10,10,.85)';
-      g.fill();
-      g.restore();
-    }
-
-    function sprite(kind, r, seed, hero, sq) {         // кэш готовых цветов/бутонов
-      const key = [kind, r.toFixed(1), seed.toFixed(1), hero ? 1 : 0, sq.toFixed(2), dpr].join('|');
-      const hit = sprites.get(key);
-      if (hit) return hit;
-      const size = Math.ceil(kind === 'flower' ? r * (hero ? 3.4 : 2.9) : r * 5.4);
-      const c = d.createElement('canvas');
-      c.width = c.height = Math.max(1, Math.ceil(size * dpr));
-      const g = c.getContext('2d');
-      g.setTransform(dpr, 0, 0, dpr, 0, 0);
-      g.translate(size / 2, size / 2);
-      if (kind === 'flower') paintFlower(g, r, seed, 1, hero, sq);
-      else paintBud(g, r, seed, 1);
-      const rec = { c, size };
-      sprites.set(key, rec);
-      return rec;
-    }
-
-
-
-    // ============================================================
-    // Размещение цветов и бутонов
-    // ============================================================
-    function stock(g, o) {                 // цветоножка от ветки к цветку/бутону
-      const mx = (o.ax + o.cx) / 2 - (o.cy - o.ay) * .14;
-      const my = (o.ay + o.cy) / 2 + (o.cx - o.ax) * .14;
-      g.beginPath();
-      g.moveTo(o.ax, o.ay);
-      g.quadraticCurveTo(mx, my, o.cx, o.cy);
-      g.lineWidth = Math.max(1.1, o.r * .13);
-      g.lineCap = 'round';
-      g.strokeStyle = '#0a0a0a';
-      g.stroke();
-    }
-
-    const outward = o => Math.atan2(o.oy, o.ox) + Math.PI / 2;
-
-    function drawBloom(g, fl, t) {
-      const open = clamp((t - fl.at) / 1.0, 0, 1);       // распускание
-      if (open <= 0) return;
-      stock(g, fl);
-      g.save();
-      g.translate(fl.cx, fl.cy);
-      g.rotate(outward(fl) + (hash(fl.seed) - .5) * .6);
-      if (open < 1) {                                    // живая отрисовка раскрытия
-        const s = lerp(.34, 1, easeOut(open));
-        g.scale(s, s);
-        paintFlower(g, fl.r, fl.seed, open, fl.hero, fl.sq);
-      } else {                                           // дальше — готовый спрайт
-        const k = reduced ? 1 : 1 + Math.sin(t * 1.05 + fl.seed) * .012;
-        g.scale(k, k);
-        const sp = sprite('flower', fl.r, fl.seed, fl.hero, fl.sq);
-        g.drawImage(sp.c, -sp.size / 2, -sp.size / 2, sp.size, sp.size);
-      }
-      g.restore();
-    }
-
-    function drawBud(g, bd, t) {
-      const age = t - bd.at;
-      if (age <= 0) return;
-      const open = bd.into ? clamp((t - (bd.into.at - .55)) / .55, 0, 1) : 0;
-      if (open >= 1) return;                             // бутон стал цветком
-      const pop = clamp(age / .35, 0, 1);                // появление с лёгким «пыхом»
-      stock(g, bd);
-      g.save();
-      g.translate(bd.cx, bd.cy);
-      g.rotate(outward(bd) + (hash(bd.seed) - .5) * 1.1);
-      const s = easeOut(pop) * (1 + .14 * (1 - pop));
-      g.scale(s, s);
-      if (open > 0) {
-        paintBud(g, bd.r, bd.seed, open);
-      } else {
-        const sp = sprite('bud', bd.r, bd.seed, 0, 1);
-        g.drawImage(sp.c, -sp.size / 2, -sp.size / 2, sp.size, sp.size);
-      }
-      g.restore();
-    }
-
-    // ============================================================
-    // Опадающие лепестки
-    // ============================================================
+    let ready = false;                // картинки загружены и пригодны
+    let width = 1, height = 1, dpr = 1;
+    let box = { x: 0, y: 0, w: 1, h: 1 };
+    let comp = null, cctx = null;     // готовая к показу ветка
+    let artCv = null;                 // исходный рисунок, не перетирается
+    let mask = null, mctx = null;     // текущая маска проявления
+    let levels = null, pix = null, pix32 = null;
+    let shown = -1;                   // какая ступень маски уже в холсте
+    let t0 = 0, raf = 0, on = false, away = false;
+    let parX = 0, parY = 0;
     const petals = [];
+    const lut = new Uint8Array(256);
 
-    const screenPos = o => ({ x: width - inset + par + o.cx * scale, y: parY + o.cy * scale });
+    // ---------------------------------------------------------- геометрия
+    // Ведём рисунок от правого края — так он и нарисован: ветка входит
+    // в кадр справа, а тонкий кончик уходит влево.
+    function layout() {
+      const r = canvas.getBoundingClientRect();
+      width = Math.max(1, Math.round(r.width || window.innerWidth));
+      height = Math.max(1, Math.round(r.height || window.innerHeight));
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.ceil(width * dpr);
+      canvas.height = Math.ceil(height * dpr);
 
-    function pickBloom(t) {
-      const open = blooms.filter(f => t > f.at + 1.1);
-      if (!open.length) return null;
-      for (let k = 0; k < 6; k++) {                      // крупные цветы сыплются охотнее
-        const f = open[Math.floor(Math.random() * open.length)];
-        if (Math.random() < f.r / 46 + .22) return f;
-      }
-      return open[Math.floor(Math.random() * open.length)];
+      const wide = width >= 900;
+      const w = clamp(width * (wide ? .48 : .92), 260, 800);
+      const h = w / RATIO;
+      box = { x: width - w, y: 0, w, h };
+      build();
     }
 
-    function placePetal(p, t) {
-      const f = pickBloom(t);
-      if (!f) { p.on = 0; return; }
-      const s = screenPos(f);
-      const k = Math.max(.55, scale);
-      p.x = s.x + (Math.random() - .5) * f.r * scale * 1.2;
-      p.y = s.y + (Math.random() - .5) * f.r * scale * 1.2;
-      p.vx = -(5 + Math.random() * 13) * k;              // лёгкий снос влево
+    function build() {
+      // Маску держим не крупнее MAXMASK — иначе проявление будет рваным
+      // и проход по пикселям станет тяжёлым на телефонах.
+      const res = Math.min(dpr, Math.sqrt(MAXMASK / (box.w * box.h)));
+      const mw = Math.max(1, Math.round(box.w * res));
+      const mh = Math.max(1, Math.round(box.h * res));
+
+      // artCv — нетронутый рисунок. comp каждый раз собирается заново:
+      // накладывать маску прямо на comp нельзя, destination-in съедал бы
+      // картинку безвозвратно уже на первых кадрах.
+      artCv = d.createElement('canvas');
+      artCv.width = mw; artCv.height = mh;
+      const actx = artCv.getContext('2d');
+      actx.clearRect(0, 0, mw, mh);
+      actx.drawImage(artImg, 0, 0, mw, mh);
+
+      comp = d.createElement('canvas');
+      comp.width = mw; comp.height = mh;
+      cctx = comp.getContext('2d');
+
+      mask = d.createElement('canvas');
+      mask.width = mw; mask.height = mh;
+      mctx = mask.getContext('2d', { willReadFrequently: true });
+
+      const g = d.createElement('canvas');
+      g.width = mw; g.height = mh;
+      const gc = g.getContext('2d', { willReadFrequently: true });
+      gc.drawImage(growImg, 0, 0, mw, mh);
+      const data = gc.getImageData(0, 0, mw, mh).data;
+
+      levels = new Uint8Array(mw * mh);
+      for (let i = 0, j = 0; i < levels.length; i++, j += 4) {
+        levels[i] = data[j];          // карта роста ч/б, все каналы равны
+      }
+      pix = mctx.createImageData(mw, mh);
+      pix32 = new Uint32Array(pix.data.buffer);
+      shown = -1;
+    }
+
+    // ------------------------------------------------- фронт проявления
+    // Формируем маску по карте роста: пиксель появляется, когда фронт
+    // доходит до его значения. Ступени считаем с запасом, чтобы при
+    // p = 1 был виден весь рисунок целиком.
+    function maskTo(p) {
+      const thr = p * 300 - 24;
+      for (let i = 0; i < 256; i++) {
+        const v = Math.round((thr - i) * EDGE);
+        lut[i] = v < 0 ? 0 : v > 255 ? 255 : v;
+      }
+      for (let i = 0; i < levels.length; i++) {
+        pix32[i] = (lut[levels[i]] << 24) | 0x00ffffff;
+      }
+      mctx.putImageData(pix, 0, 0);
+      cctx.globalCompositeOperation = 'source-over';
+      cctx.clearRect(0, 0, comp.width, comp.height);
+      cctx.drawImage(artCv, 0, 0);
+      cctx.globalCompositeOperation = 'destination-in';
+      cctx.drawImage(mask, 0, 0);
+      cctx.globalCompositeOperation = 'source-over';
+    }
+
+    // --------------------------------------------------------- лепестки
+    function spawn(p) {
+      const s = SPOTS[(Math.random() * SPOTS.length) | 0];
+      const k = box.w / 980;
+      p.x = box.x + s[0] * box.w + (Math.random() - .5) * 30 * k;
+      p.y = box.y + s[1] * box.h + (Math.random() - .5) * 22 * k;
+      p.vx = -(4 + Math.random() * 11) * k;          // лёгкий снос влево
       p.vy = (7 + Math.random() * 13) * k;
-      p.r = 6 + Math.random() * 6;                       // радиус в дизайн-пикселях
+      p.r = (5 + Math.random() * 6) * k;
       p.rot = Math.random() * TAU;
-      p.vr = (Math.random() - .5) * 2.6;
-      p.flip = Math.random() * TAU;                      // «порхание» лепестка
-      p.fs = 1.1 + Math.random() * 1.8;
-      p.ph = Math.random() * TAU;
-      p.a = .55 + Math.random() * .45;
-      p.on = 1;
+      p.vr = (Math.random() - .5) * 2.2;
+      p.flip = Math.random() * TAU;                 // «порхание» лепестка
+      p.a = .5 + Math.random() * .45;
+    }
+
+    function petalPath(g, rx, ry) {
+      g.beginPath();
+      g.moveTo(0, -ry);
+      g.bezierCurveTo(rx, -ry * .5, rx, ry * .6, 0, ry);
+      g.bezierCurveTo(-rx, ry * .6, -rx, -ry * .5, 0, -ry);
+      g.closePath();
     }
 
     function drawPetal(g, p) {
@@ -990,178 +643,136 @@ form.addEventListener('submit', e => {
       g.translate(p.x, p.y);
       g.rotate(p.rot);
       g.scale(Math.max(.08, Math.abs(Math.cos(p.flip))), 1);
-      const r = p.r * scale;
-      petalPath(g, r * 1.7, r * .9, 1);
-      g.fillStyle = `rgba(255,255,255,${(p.a * .97).toFixed(3)})`;
+      petalPath(g, p.r * 1.7, p.r * .9);
+      g.fillStyle = 'rgba(255,255,255,' + p.a.toFixed(3) + ')';
       g.fill();
-      g.lineWidth = Math.max(.55, r * .12);
-      g.strokeStyle = `rgba(10,10,10,${(p.a * .8).toFixed(3)})`;
+      g.lineWidth = Math.max(.55, p.r * .12);
+      g.strokeStyle = 'rgba(10,10,10,' + (p.a * .8).toFixed(3) + ')';
       g.stroke();
       g.restore();
     }
 
-    // ============================================================
-    // Размеры, кадр и жизненный цикл
-    // ============================================================
-    function initPetals() {
-      const n = width < 720 ? 12 : 24;
-      petals.length = 0;
-      for (let i = 0; i < n; i++) {
-        petals.push({ t0: bloomEnd * .55 + i * .34 });   // сыплются по одному, не залпом
-      }
+    function fall(p, dt) {
+      p.x += p.vx * dt * .06;
+      p.y += p.vy * dt * .06;
+      p.rot += p.vr * dt * .0016;
+      p.flip += dt * .0016;
+      if (p.y > height + 40 || p.x < -40) p.on = 0;
+      else drawPetal(ctx, p);
     }
 
-    function layout() {
-      const rect = canvas.getBoundingClientRect();
-      width = Math.max(1, Math.round(rect.width || window.innerWidth));
-      height = Math.max(1, Math.round(rect.height || window.innerHeight));
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.ceil(width * dpr);
-      canvas.height = Math.ceil(height * dpr);
-      scale = clamp(Math.min(width / 1440, height / 900) *
-        (width < 720 ? .62 : 1), .34, 1.6);
-      inset = width < 720 ? Math.min(70, width * .16) : 0;   // на телефоне ветка не упирается в край
+    // ------------------------------------------------------------- кадры
+    function paint() {                                // разовая отрисовка
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      sprites.clear();
-      baked = false;
-      initPetals();
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(comp, box.x, box.y, box.w, box.h);
     }
 
-    function render(t, dt) {
+    function frame(ts) {
+      raf = 0;
+      if (!on || !ready) return;
+      if (!t0) t0 = ts;
+      const k = box.w / 980;
+      const el = ts - t0;
+      const p = clamp(el / REVEAL, 0, 1);
+
+      const st = Math.round(p * (STEPS - 1));
+      if (st !== shown) { maskTo(p); shown = st; }
+
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
-      par += (parTX - par) * .05;
-      parY += (parTY - parY) * .05;
-      const sway = reduced ? 0 : Math.sin(t * .48) * .0045 + Math.sin(t * 1.27 + 1.7) * .0016;
-
+      // Едва заметное покачивание — рисунок остаётся живым после проявления.
+      const sway = Math.sin(el / 3100) * 1.5 * k;
       ctx.save();
-      ctx.translate(width - inset + par, parY);   // якорь у правого края hero
-      ctx.rotate(sway);                      // ветка чуть качается на ветру
-      ctx.scale(scale, scale);
-
-      if (baked && layer) {
-        ctx.drawImage(layer, -(BOX_W + PAD), -PAD, BOX_W + PAD * 2, BOX_H + PAD * 2);
-      } else {
-        limbs.forEach(lb => drawLimb(ctx, lb,
-          clamp((t - lb.t0) / Math.max(.001, lb.t1 - lb.t0), 0, 1)));
-        if (t >= growEnd) bakeLayer();       // выросло — переносим в слой
-      }
-      buds.forEach(bd => drawBud(ctx, bd, t));
-      blooms.forEach(fl => drawBloom(ctx, fl, t));
+      ctx.translate(box.x + box.w / 2 + parX, box.y + box.h / 2 + parY);
+      ctx.rotate(sway * .0012);
+      ctx.translate(-box.w / 2, -box.h / 2);
+      ctx.drawImage(comp, 0, 0, box.w, box.h);
       ctx.restore();
 
-      if (reduced) return;
+      const want = width < 720 ? 9 : 18;
+      while (petals.length < want) petals.push({ on: 0 });
+      for (let i = 0; i < petals.length; i++) {
+        const q = petals[i];
+        if (!q.on) {
+          if (p > .55 + (i % 7) * .045) spawn(q);   // сыплются по одному
+          else continue;
+        }
+        fall(q, 16);
+      }
 
-      // лепестки летят в экранных пикселях — рисуем уже вне «ветки»
-      petals.forEach(p => {
-        if (t < p.t0) return;
-        if (!p.on) placePetal(p, t);
-        if (!p.on) return;
-        p.vy += 22 * dt;                              // гравитация
-        p.x += (p.vx + Math.sin(t * 1.25 + p.ph) * 16) * dt;
-        p.y += p.vy * dt;
-        p.rot += p.vr * dt;
-        p.flip += p.fs * dt;
-        if (p.y > height + 50 || p.x < -60) placePetal(p, t);
-        drawPetal(ctx, p);
-      });
-    }
-
-    function frame(now) {
-      animId = null;
-      if (!last) last = now;
-      const dt = clamp((now - last) / 1000, 0, .05);
-      last = now;
-      elapsed += dt;
-      render(elapsed, dt);
-      if (running) animId = rAF(frame);
+      raf = requestAnimationFrame(frame);
     }
 
     function start() {
-      if (running || reduced) return;
-      running = true;
-      last = 0;
-      animId = rAF(frame);
+      if (on || !ready || calm.matches) return;   // при спокойной анимации не крутим
+      on = true;
+      t0 = 0;
+      raf = requestAnimationFrame(frame);
     }
 
     function stop() {
-      running = false;
-      if (animId) cancelAnimationFrame(animId);
-      animId = null;
+      on = false;
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
     }
 
-    let visible = true;
-
+    // -------------------------------------------------------------- запуск
     function boot() {
-      buildTree();
+      if (!artImg.naturalWidth || !growImg.naturalWidth) return;  // hero пуст
+      ready = true;
       layout();
 
-      const relayout = () => {                     // ресайз и загрузка шрифтов
-        layout();
-        if (reduced) {
-          elapsed = bloomEnd + 2;
-          render(elapsed, 0);
-        } else if (visible && started) {
-          start();
-        }
-      };
-
-      // шрифты могут изменить высоту hero — пересчитываем сцену
-      if (d.fonts && d.fonts.ready && d.fonts.ready.then) {
-        d.fonts.ready.then(() => relayout()).catch(() => {});
+      if (calm.matches) {                      // без анимации — статичный кадр
+        maskTo(1);
+        shown = STEPS - 1;
+        paint();
+      } else {
+        start();
       }
-
-      let rz = null;
-      window.addEventListener('resize', () => {
-        clearTimeout(rz);
-        rz = setTimeout(relayout, 160);
-      }, { passive: true });
-
-      if (reduced) {                               // уважаем «уменьшить анимацию»
-        elapsed = bloomEnd + 2;
-        render(elapsed, 0);                        // одна статичная распустившаяся ветка
-        return;
-      }
-
-      const begin = () => {
-        if (!started) {
-          started = true;
-          // даём прелоадеру уехать, чтобы рост ветки было видно
-          setTimeout(start, Math.max(0, 1750 - performance.now()));
-        } else {
-          start();
-        }
-      };
 
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver(es => {
-          es.forEach(en => {
-            visible = en.isIntersecting;
-            if (visible) begin(); else stop();     // вне экрана — не жжём батарею
+          es.forEach(e => {
+            if (e.isIntersecting) { away = false; start(); }
+            else { away = true; stop(); }
           });
         }, { threshold: 0 });
         io.observe(canvas);
-
-        d.addEventListener('visibilitychange', () => {
-          if (d.hidden) stop();
-          else if (visible) start();
-        });
-      } else {
-        begin();
       }
 
-      if (fine) {                            // лёгкий параллакс от мыши (как у контента hero)
+      d.addEventListener('visibilitychange', () => {
+        if (d.hidden) stop();
+        else if (!away) start();
+      });
+
+      let rz = 0;
+      window.addEventListener('resize', () => {
+        clearTimeout(rz);
+        rz = setTimeout(() => {
+          if (!ready) return;
+          layout();
+          if (calm.matches) { maskTo(1); paint(); }   // статичный кадр — перерисуем
+        }, 180);
+      }, { passive: true });
+
+      if (fine) {                             // лёгкий параллакс за курсором
         window.addEventListener('mousemove', e => {
-          parTX = (e.clientX / window.innerWidth - .5) * -7;
-          parTY = (e.clientY / window.innerHeight - .5) * -5;
+          parX = (e.clientX / window.innerWidth - .5) * -8;
+          parY = (e.clientY / window.innerHeight - .5) * -6;
         }, { passive: true });
       }
 
       window.addEventListener('beforeunload', stop);
     }
 
-    boot();
+    let got = 0;
+    const hit = () => { if (++got === 2) boot(); };
+    artImg.onload = growImg.onload = hit;
+    artImg.onerror = growImg.onerror = hit;
+    artImg.src = ART;
+    growImg.src = GROW;
   });
-})();
+})(document);
 
