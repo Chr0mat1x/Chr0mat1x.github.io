@@ -483,3 +483,225 @@ form.addEventListener('submit', e => {
     form.addEventListener('mouseleave', () => { form.style.transform = ''; });
   });
 })();
+
+// ================================================================
+// ART v4 — Чёрно-белая цветущая ветка сакуры (Hero Sakura)
+// ================================================================
+(function () {
+  const d = document;
+  const guard = fn => { try { fn(); } catch (e) {} };
+  guard(() => {
+    const canvas = d.getElementById('heroSakura');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = 0, height = 0;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let animId = null;
+    let startTime = performance.now();
+
+    const branchSegments = [
+      { x1: 1.02, y1: -0.02, x2: 0.88, y2: 0.12, t0: 0.00, t1: 0.20, w1: 13, w2: 9.5 },
+      { x1: 0.88, y1: 0.12,  x2: 0.76, y2: 0.22, t0: 0.15, t1: 0.40, w1: 9.5, w2: 6.5 },
+      { x1: 0.76, y1: 0.22,  x2: 0.64, y2: 0.28, t0: 0.32, t1: 0.60, w1: 6.5, w2: 4.2 },
+      { x1: 0.64, y1: 0.28,  x2: 0.54, y2: 0.31, t0: 0.50, t1: 0.80, w1: 4.2, w2: 2.2 },
+      { x1: 0.54, y1: 0.31,  x2: 0.45, y2: 0.33, t0: 0.70, t1: 1.00, w1: 2.2, w2: 1.2 },
+      { x1: 0.88, y1: 0.12,  x2: 0.80, y2: 0.05, t0: 0.20, t1: 0.45, w1: 5.5, w2: 3.2 },
+      { x1: 0.80, y1: 0.05,  x2: 0.72, y2: 0.02, t0: 0.38, t1: 0.65, w1: 3.2, w2: 1.5 },
+      { x1: 0.72, y1: 0.02,  x2: 0.66, y2: 0.01, t0: 0.55, t1: 0.82, w1: 1.5, w2: 0.8 },
+      { x1: 0.76, y1: 0.22,  x2: 0.70, y2: 0.34, t0: 0.35, t1: 0.60, w1: 5.0, w2: 2.8 },
+      { x1: 0.70, y1: 0.34,  x2: 0.63, y2: 0.44, t0: 0.52, t1: 0.80, w1: 2.8, w2: 1.5 },
+      { x1: 0.63, y1: 0.44,  x2: 0.58, y2: 0.50, t0: 0.72, t1: 0.98, w1: 1.5, w2: 0.8 },
+      { x1: 0.64, y1: 0.28,  x2: 0.57, y2: 0.20, t0: 0.52, t1: 0.75, w1: 3.2, w2: 1.6 },
+      { x1: 0.57, y1: 0.20,  x2: 0.50, y2: 0.16, t0: 0.68, t1: 0.92, w1: 1.6, w2: 0.8 },
+      { x1: 0.54, y1: 0.31,  x2: 0.48, y2: 0.39, t0: 0.74, t1: 0.95, w1: 1.8, w2: 0.8 }
+    ];
+
+    const flowers = [
+      { rx: 0.88, ry: 0.12, bloomDelay: 1.0, size: 14, angle: 0.3 },
+      { rx: 0.80, ry: 0.05, bloomDelay: 1.3, size: 13, angle: -0.5 },
+      { rx: 0.72, ry: 0.02, bloomDelay: 1.8, size: 11, angle: 0.8 },
+      { rx: 0.66, ry: 0.01, bloomDelay: 2.1, size: 9,  angle: -0.2 },
+      { rx: 0.84, ry: 0.09, bloomDelay: 1.5, size: 10, angle: 1.1 },
+      { rx: 0.76, ry: 0.22, bloomDelay: 1.2, size: 15, angle: -0.7 },
+      { rx: 0.70, ry: 0.34, bloomDelay: 1.7, size: 14, angle: 0.4 },
+      { rx: 0.63, ry: 0.44, bloomDelay: 2.2, size: 13, angle: -0.9 },
+      { rx: 0.58, ry: 0.50, bloomDelay: 2.6, size: 11, angle: 0.2 },
+      { rx: 0.67, ry: 0.38, bloomDelay: 2.0, size: 9,  angle: 1.4 },
+      { rx: 0.64, ry: 0.28, bloomDelay: 1.6, size: 14, angle: 0.6 },
+      { rx: 0.57, ry: 0.20, bloomDelay: 2.0, size: 12, angle: -0.3 },
+      { rx: 0.50, ry: 0.16, bloomDelay: 2.5, size: 10, angle: 0.9 },
+      { rx: 0.54, ry: 0.31, bloomDelay: 2.2, size: 13, angle: -0.6 },
+      { rx: 0.48, ry: 0.39, bloomDelay: 2.7, size: 11, angle: 0.5 },
+      { rx: 0.45, ry: 0.33, bloomDelay: 2.8, size: 10, angle: -1.2 },
+      { rx: 0.75, ry: 0.16, bloomDelay: 1.4, size: 8,  angle: 0.1 },
+      { rx: 0.59, ry: 0.25, bloomDelay: 2.3, size: 7,  angle: -0.8 },
+      { rx: 0.52, ry: 0.35, bloomDelay: 2.9, size: 8,  angle: 1.0 }
+    ];
+
+    const petals = [];
+    for (let i = 0; i < 22; i++) {
+      petals.push({
+        x: 0.4 + Math.random() * 0.65,
+        y: Math.random() * 1.1 - 0.1,
+        speedY: 0.0003 + Math.random() * 0.00045,
+        speedX: -0.00015 - Math.random() * 0.00025,
+        swaySpeed: 1.2 + Math.random() * 1.8,
+        swayAmp: 0.0008 + Math.random() * 0.0012,
+        phase: Math.random() * Math.PI * 2,
+        size: 5 + Math.random() * 6,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 1.5,
+        opacity: 0.4 + Math.random() * 0.45
+      });
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width || window.innerWidth;
+      height = rect.height || window.innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', resize, { passive: true });
+    resize();
+
+    function drawFlower(cx, cy, radius, progress, baseAngle) {
+      if (progress <= 0) return;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(baseAngle);
+      ctx.scale(progress, progress);
+      const petalNum = 5;
+      for (let i = 0; i < petalNum; i++) {
+        const a = (i * 2 * Math.PI) / petalNum;
+        ctx.save();
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(-radius * 0.45, -radius * 0.45, -radius * 0.55, -radius * 0.85, -radius * 0.18, -radius);
+        ctx.lineTo(0, -radius * 0.85);
+        ctx.lineTo(radius * 0.18, -radius);
+        ctx.bezierCurveTo(radius * 0.55, -radius * 0.85, radius * 0.45, -radius * 0.45, 0, 0);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+        ctx.shadowBlur = 4;
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = 'rgba(10, 10, 10, 0.8)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(10, 10, 10, 0.85)';
+      ctx.fill();
+      for (let j = 0; j < 5; j++) {
+        const ta = (j * 2 * Math.PI) / 5 + 0.3;
+        ctx.beginPath();
+        ctx.arc(Math.cos(ta) * radius * 0.4, Math.sin(ta) * radius * 0.4, 1.1, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(10, 10, 10, 0.7)';
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawFallingPetal(x, y, size, rot, opacity) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-size * 0.4, -size * 0.4, -size * 0.5, -size * 0.85, -size * 0.15, -size);
+      ctx.lineTo(0, -size * 0.82);
+      ctx.lineTo(size * 0.15, -size);
+      ctx.bezierCurveTo(size * 0.5, -size * 0.85, size * 0.4, -size * 0.4, 0, 0);
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.88})`;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+      ctx.shadowBlur = 3;
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = `rgba(10, 10, 10, ${opacity * 0.65})`;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    const reduced = ('matchMedia' in window) && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function render(now) {
+      const elapsed = reduced ? 10 : (now - startTime) / 1000;
+      ctx.clearRect(0, 0, width, height);
+
+      const branchGrowthDuration = 2.6;
+      const branchProgress = reduced ? 1 : Math.min(1, elapsed / branchGrowthDuration);
+      const windSway = reduced ? 0 : Math.sin(elapsed * 0.8) * 0.003;
+
+      branchSegments.forEach(seg => {
+        if (branchProgress <= seg.t0) return;
+        const segP = Math.min(1, (branchProgress - seg.t0) / (seg.t1 - seg.t0));
+        if (segP <= 0) return;
+        const ease = segP * (2 - segP);
+        const x1 = seg.x1 * width;
+        const y1 = (seg.y1 + windSway * (seg.t0 + 0.2)) * height;
+        const targetX2 = (seg.x1 + (seg.x2 - seg.x1) * ease) * width;
+        const targetY2 = (seg.y1 + (seg.y2 - seg.y1) * ease + windSway * (seg.t1 + 0.2)) * height;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(targetX2, targetY2);
+        ctx.strokeStyle = '#0a0a0a';
+        ctx.lineWidth = seg.w1 - (seg.w1 - seg.w2) * ease;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+      });
+
+      flowers.forEach(fl => {
+        if (!reduced && elapsed < fl.bloomDelay) return;
+        const flowerAge = reduced ? 10 : (elapsed - fl.bloomDelay);
+        const bloomDur = 0.85;
+        let bloomScale = 1;
+        if (!reduced) {
+          if (flowerAge < bloomDur) {
+            const p = flowerAge / bloomDur;
+            bloomScale = Math.sin(p * Math.PI * 0.5) * (1 + 0.15 * (1 - p));
+          } else {
+            const breathe = Math.sin(elapsed * 1.5 + fl.rx * 10) * 0.03;
+            bloomScale = 1 + breathe;
+          }
+        }
+        const fx = fl.rx * width;
+        const fy = (fl.ry + windSway * 1.2) * height;
+        drawFlower(fx, fy, fl.size, bloomScale, fl.angle + windSway * 3);
+      });
+
+      if (!reduced) {
+        petals.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX + Math.sin(elapsed * p.swaySpeed + p.phase) * p.swayAmp;
+          p.rot += p.rotSpeed * 0.02;
+          if (p.y > 1.05 || p.x < 0.25) {
+            p.y = -0.05;
+            p.x = 0.55 + Math.random() * 0.45;
+          }
+          drawFallingPetal(p.x * width, p.y * height, p.size, p.rot, p.opacity);
+        });
+      }
+
+      if (!reduced) {
+        animId = requestAnimationFrame(render);
+      }
+    }
+
+    animId = requestAnimationFrame(render);
+
+    window.addEventListener('beforeunload', () => {
+      if (animId) cancelAnimationFrame(animId);
+    });
+  });
+})();
