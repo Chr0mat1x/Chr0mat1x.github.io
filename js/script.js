@@ -486,222 +486,703 @@ form.addEventListener('submit', e => {
 
 // ================================================================
 // ART v4 — Чёрно-белая цветущая ветка сакуры (Hero Sakura)
+// Ч/б лайн-арт по референсу: сучковатый ствол входит из верхнего
+// правого угла, дальше идут веточки, на них бутоны и крупные
+// 5-лепестковые цветы с тычинками, с ветки срываются лепестки.
 // ================================================================
 (function () {
   const d = document;
   const guard = fn => { try { fn(); } catch (e) {} };
   guard(() => {
     const canvas = d.getElementById('heroSakura');
-    if (!canvas) return;
+    if (!canvas || !canvas.getContext) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let width = 0, height = 0;
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
-    let animId = null;
-    let startTime = performance.now();
+    const rAF = cb => (requestAnimationFrame || (f => setTimeout(f, 16)))(cb);
+    const TAU = Math.PI * 2;
 
-    const branchSegments = [
-      { x1: 1.02, y1: -0.02, x2: 0.88, y2: 0.12, t0: 0.00, t1: 0.20, w1: 13, w2: 9.5 },
-      { x1: 0.88, y1: 0.12,  x2: 0.76, y2: 0.22, t0: 0.15, t1: 0.40, w1: 9.5, w2: 6.5 },
-      { x1: 0.76, y1: 0.22,  x2: 0.64, y2: 0.28, t0: 0.32, t1: 0.60, w1: 6.5, w2: 4.2 },
-      { x1: 0.64, y1: 0.28,  x2: 0.54, y2: 0.31, t0: 0.50, t1: 0.80, w1: 4.2, w2: 2.2 },
-      { x1: 0.54, y1: 0.31,  x2: 0.45, y2: 0.33, t0: 0.70, t1: 1.00, w1: 2.2, w2: 1.2 },
-      { x1: 0.88, y1: 0.12,  x2: 0.80, y2: 0.05, t0: 0.20, t1: 0.45, w1: 5.5, w2: 3.2 },
-      { x1: 0.80, y1: 0.05,  x2: 0.72, y2: 0.02, t0: 0.38, t1: 0.65, w1: 3.2, w2: 1.5 },
-      { x1: 0.72, y1: 0.02,  x2: 0.66, y2: 0.01, t0: 0.55, t1: 0.82, w1: 1.5, w2: 0.8 },
-      { x1: 0.76, y1: 0.22,  x2: 0.70, y2: 0.34, t0: 0.35, t1: 0.60, w1: 5.0, w2: 2.8 },
-      { x1: 0.70, y1: 0.34,  x2: 0.63, y2: 0.44, t0: 0.52, t1: 0.80, w1: 2.8, w2: 1.5 },
-      { x1: 0.63, y1: 0.44,  x2: 0.58, y2: 0.50, t0: 0.72, t1: 0.98, w1: 1.5, w2: 0.8 },
-      { x1: 0.64, y1: 0.28,  x2: 0.57, y2: 0.20, t0: 0.52, t1: 0.75, w1: 3.2, w2: 1.6 },
-      { x1: 0.57, y1: 0.20,  x2: 0.50, y2: 0.16, t0: 0.68, t1: 0.92, w1: 1.6, w2: 0.8 },
-      { x1: 0.54, y1: 0.31,  x2: 0.48, y2: 0.39, t0: 0.74, t1: 0.95, w1: 1.8, w2: 0.8 }
+    // -------- Мелочи --------
+    const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const easeOut = t => 1 - (1 - t) * (1 - t);
+    const easeSoft = t => 1 - (1 - t) * (1 - t) * (1 - t);
+    const hash = n => {                    // предсказуемый «рандом» 0..1
+      const s = Math.sin(n * 12.9898) * 43758.5453;
+      return s - Math.floor(s);
+    };
+
+    // -------- Сцена --------
+    // Дизайн-координаты: dx — влево от правого края hero, dy — вниз от верхнего.
+    // Бокс BOX_W × BOX_H переносится на холст с общим масштабом scale.
+    const BOX_W = 780, BOX_H = 620, PAD = 60;
+    const reduced = ('matchMedia' in window) &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fine = ('matchMedia' in window) &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    let width = 0, height = 0, dpr = 1, scale = 1;
+    let elapsed = 0, last = 0, animId = null, running = false, started = false;
+    let growEnd = 3, bloomEnd = 4;         // посчитаются по скелету
+    let baked = false, layer = null;       // слой с выросшим «деревом»
+    let par = 0, parY = 0, parTX = 0, parTY = 0;
+    const sprites = new Map();             // кэш отрисованных цветов и бутонов
+
+    // -------- Скелет ветки --------
+    // pts — узлы осевой линии, w — толщина [у основания, на конце],
+    // at — где ветка крепится к родителю (доля его длины),
+    // speed — скорость роста в дизайн-пикселях за секунду, bump — «сучковатость».
+    const TRUNK = 0;
+    const limbs = [
+      { pts: [[-70, -70], [10, 12], [100, 84], [196, 142], [306, 184], [420, 214], [512, 228], [578, 236]],
+        w: [34, 7], speed: 360, bump: .18 },
+      { pts: [[100, 84], [152, 38], [214, 8], [296, -12], [382, -22]],
+        w: [14, 3.2], parent: TRUNK, at: .29, speed: 400, bump: .14 },
+      { pts: [[306, 184], [338, 248], [350, 318], [344, 392], [322, 458], [292, 512]],
+        w: [15, 3], parent: TRUNK, at: .585, speed: 400, bump: .16 },
+      { pts: [[196, 142], [224, 104], [252, 76], [276, 56]],
+        w: [8, 2.4], parent: TRUNK, at: .435, speed: 440, bump: .12 },
+      { pts: [[240, -2], [268, 24], [288, 48]],
+        w: [6.5, 2.2], parent: 1, at: .38, speed: 440, bump: .12 },
+      { pts: [[348, 310], [394, 330], [432, 340]],
+        w: [6.5, 2.2], parent: 2, at: .35, speed: 440, bump: .12 },
+      { pts: [[336, 424], [382, 442], [414, 452]],
+        w: [6, 2], parent: 2, at: .72, speed: 440, bump: .12 },
+      { pts: [[424, 214], [470, 196], [508, 184]],
+        w: [7, 2.4], parent: TRUNK, at: .74, speed: 440, bump: .12 },
+      { pts: [[100, 84], [128, 58], [152, 42]],
+        w: [7, 2.4], parent: TRUNK, at: .315, speed: 420, bump: .12 },
+      { pts: [[238, 90], [264, 84], [286, 92]],
+        w: [5, 1.8], parent: 3, at: .55, speed: 460, bump: .1 },
+      { pts: [[346, 348], [300, 362], [270, 372]],
+        w: [6, 2.2], parent: 2, at: .55, speed: 440, bump: .12 },
+      { pts: [[404, 332], [420, 300], [430, 276]],
+        w: [5, 1.8], parent: 5, at: .6, speed: 460, bump: .1 },
+      { pts: [[44, 40], [86, 20], [124, 12]],
+        w: [6, 2.2], parent: TRUNK, at: .19, speed: 430, bump: .12 },
+      { pts: [[312, 26], [338, 12], [362, 8]],
+        w: [4.5, 1.6], parent: 4, at: .55, speed: 460, bump: .1 },
+      { pts: [[472, 196], [494, 168], [502, 144]],
+        w: [5, 1.8], parent: 7, at: .62, speed: 460, bump: .1 },
+      { pts: [[578, 236], [606, 262], [620, 292]],
+        w: [5, 1.6], parent: TRUNK, at: .93, speed: 430, bump: .1 }
     ];
 
-    const flowers = [
-      { rx: 0.88, ry: 0.12, bloomDelay: 1.0, size: 14, angle: 0.3 },
-      { rx: 0.80, ry: 0.05, bloomDelay: 1.3, size: 13, angle: -0.5 },
-      { rx: 0.72, ry: 0.02, bloomDelay: 1.8, size: 11, angle: 0.8 },
-      { rx: 0.66, ry: 0.01, bloomDelay: 2.1, size: 9,  angle: -0.2 },
-      { rx: 0.84, ry: 0.09, bloomDelay: 1.5, size: 10, angle: 1.1 },
-      { rx: 0.76, ry: 0.22, bloomDelay: 1.2, size: 15, angle: -0.7 },
-      { rx: 0.70, ry: 0.34, bloomDelay: 1.7, size: 14, angle: 0.4 },
-      { rx: 0.63, ry: 0.44, bloomDelay: 2.2, size: 13, angle: -0.9 },
-      { rx: 0.58, ry: 0.50, bloomDelay: 2.6, size: 11, angle: 0.2 },
-      { rx: 0.67, ry: 0.38, bloomDelay: 2.0, size: 9,  angle: 1.4 },
-      { rx: 0.64, ry: 0.28, bloomDelay: 1.6, size: 14, angle: 0.6 },
-      { rx: 0.57, ry: 0.20, bloomDelay: 2.0, size: 12, angle: -0.3 },
-      { rx: 0.50, ry: 0.16, bloomDelay: 2.5, size: 10, angle: 0.9 },
-      { rx: 0.54, ry: 0.31, bloomDelay: 2.2, size: 13, angle: -0.6 },
-      { rx: 0.48, ry: 0.39, bloomDelay: 2.7, size: 11, angle: 0.5 },
-      { rx: 0.45, ry: 0.33, bloomDelay: 2.8, size: 10, angle: -1.2 },
-      { rx: 0.75, ry: 0.16, bloomDelay: 1.4, size: 8,  angle: 0.1 },
-      { rx: 0.59, ry: 0.25, bloomDelay: 2.3, size: 7,  angle: -0.8 },
-      { rx: 0.52, ry: 0.35, bloomDelay: 2.9, size: 8,  angle: 1.0 }
+
+
+    // -------- Цветы и бутоны --------
+    // l — ветка, t — доля по её длине, off — смещение от оси (знак = сторона),
+    // r — радиус, sq — ракурс (сжатие), hero — крупный цветок с тычинками,
+    // d — задержка распускания, bud — цветок распускается из бутона.
+    const F = (l, t, off, r, sq, hero, d, bud) => ({
+      l, t, off, r, sq, hero: hero ? 1 : 0, d, bud: bud ? 1 : 0
+    });
+    const B = (l, t, off, r, d) => ({ l, t, off, r, d });
+
+    const blooms = [
+      F(0, .30, -36, 35, .94, 0, .06, 1),
+      F(0, .44, 60, 52, 1, 1, .30),          // главный цветок
+      F(0, .55, -24, 18, .82, 0, .10),
+      F(0, .63, 54, 45, .96, 1, .42),        // второй крупный
+      F(0, .74, -44, 30, .90, 0, .24),
+      F(0, .86, 38, 25, .86, 0, .18),
+      F(0, .97, -15, 15, .80, 0, .14),
+      F(1, .24, 32, 27, .92, 0, .10),
+      F(1, .52, 28, 21, .82, 0, .14, 1),
+      F(1, .78, -24, 16, .86, 0, .10),
+      F(1, .97, 10, 12, .76, 0, .05),
+      F(2, .16, -34, 22, .86, 0, .10),
+      F(2, .32, 48, 38, .95, 1, .34),
+      F(2, .52, -38, 30, .88, 0, .20),
+      F(2, .70, 40, 25, .90, 0, .14, 1),
+      F(2, .88, -28, 17, .80, 0, .10),
+      F(3, .62, 28, 18, .86, 0, .10),
+      F(3, .95, 8, 11, .76, 0, .05),
+      F(4, .80, 24, 16, .86, 0, .10),
+      F(5, .75, -26, 15, .80, 0, .10, 1),
+      F(6, .85, 22, 14, .80, 0, .10),
+      F(7, .70, -28, 17, .86, 0, .10),
+      F(8, .80, 19, 13, .80, 0, .05),
+      F(9, .80, -21, 14, .80, 0, .10),
+      F(10, .85, 17, 12, .78, 0, .05),
+      F(11, .80, -19, 13, .80, 0, .05),
+      F(12, .85, 15, 12, .78, 0, .05),
+      F(13, .80, -17, 13, .80, 0, .05),
+      F(14, .80, 15, 11, .78, 0, .05),
+      F(15, .80, -15, 12, .78, 0, .05)
     ];
 
-    const petals = [];
-    for (let i = 0; i < 22; i++) {
-      petals.push({
-        x: 0.4 + Math.random() * 0.65,
-        y: Math.random() * 1.1 - 0.1,
-        speedY: 0.0003 + Math.random() * 0.00045,
-        speedX: -0.00015 - Math.random() * 0.00025,
-        swaySpeed: 1.2 + Math.random() * 1.8,
-        swayAmp: 0.0008 + Math.random() * 0.0012,
-        phase: Math.random() * Math.PI * 2,
-        size: 5 + Math.random() * 6,
-        rot: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 1.5,
-        opacity: 0.4 + Math.random() * 0.45
+    const buds = [
+      B(0, .20, 42, 10, .05), B(0, .50, 34, 9, .12),
+      B(1, .99, -8, 9, .05), B(2, .97, 10, 10, .08),
+      B(3, .99, -12, 10, .05), B(4, .97, -10, 8, .05),
+      B(5, .97, 12, 9, .05), B(6, .96, 14, 9, .05),
+      B(7, .96, 14, 10, .05), B(8, .98, 10, 8, .05),
+      B(9, .95, -10, 9, .05), B(10, .97, -12, 8, .05),
+      B(11, .93, -10, 8, .05), B(12, .95, 12, 9, .05),
+      B(13, .97, -10, 8, .05), B(14, .95, 10, 8, .05),
+      B(15, .98, -12, 9, .05)
+    ];
+
+    // -------- Геометрия --------
+    function smooth(pts, per) {            // Catmull-Rom → плотная полилиния
+      const out = [], n = pts.length;
+      for (let i = 0; i < n - 1; i++) {
+        const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || pts[i + 1];
+        for (let s = 0; s < per; s++) {
+          const t = s / per, t2 = t * t, t3 = t2 * t;
+          out.push({
+            x: .5 * (2 * p1[0] + (-p0[0] + p2[0]) * t +
+              (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 +
+              (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+            y: .5 * (2 * p1[1] + (-p0[1] + p2[1]) * t +
+              (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 +
+              (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
+          });
+        }
+      }
+      out.push({ x: pts[n - 1][0], y: pts[n - 1][1] });
+      return out;
+    }
+
+    function pointAt(sp, cum, dist) {      // точка, касательная и нормаль по длине
+      const total = cum[cum.length - 1];
+      const s = clamp(dist, 0, total);
+      let j = 1;
+      while (j < cum.length - 1 && cum[j] < s) j++;
+      const a = sp[j - 1], b = sp[j];
+      const t = clamp((s - cum[j - 1]) / Math.max(.0001, cum[j] - cum[j - 1]), 0, 1);
+      const dx = b.x - a.x, dy = b.y - a.y, m = Math.hypot(dx, dy) || 1;
+      return {
+        x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t),
+        tx: dx / m, ty: dy / m, nx: -dy / m, ny: dx / m
+      };
+    }
+
+    function widthAt(lb, t) {
+      return Math.max(.9, lerp(lb.w[0], lb.w[1], t) * (1 + lb.bump * Math.sin(t * 9.2 + lb.seed)));
+    }
+
+    function buildTree() {
+      limbs.forEach((lb, i) => {
+        if (lb.parent != null) {           // прирастаем точно к телу родителя
+          const p = limbs[lb.parent];
+          const at = pointAt(p.sp, p.cum, p.len * lb.at);
+          lb.pts[0] = [-at.x, at.y];       // родитель живёт в экранных X — возвращаем в дизайн
+        }
+        // зеркалим X: дальше всё живёт в экранных координатах
+        // (dx влево от правого края = -X, dy вниз = +Y)
+        lb.sp = smooth(lb.pts.map(p => [-p[0], p[1]]), 7);
+        lb.cum = [0];
+        let total = 0;
+        for (let j = 1; j < lb.sp.length; j++) {
+          total += Math.hypot(lb.sp[j].x - lb.sp[j - 1].x, lb.sp[j].y - lb.sp[j - 1].y);
+          lb.cum.push(total);
+        }
+        lb.len = total || 1;
+        lb.tan = lb.sp.map((p, j) => {
+          const a = lb.sp[Math.max(0, j - 1)], b = lb.sp[Math.min(lb.sp.length - 1, j + 1)];
+          const dx = b.x - a.x, dy = b.y - a.y, m = Math.hypot(dx, dy) || 1;
+          return { x: dx / m, y: dy / m };
+        });
+        lb.seed = i * 3.7 + 1;
+        if (lb.parent == null) {
+          lb.t0 = 0;
+        } else {
+          const p = limbs[lb.parent];
+          lb.t0 = p.t0 + (p.t1 - p.t0) * lb.at + .05;
+        }
+        lb.t1 = lb.t0 + Math.max(.28, lb.len / lb.speed);
       });
+
+      growEnd = limbs.reduce((m, l) => Math.max(m, l.t1), 0);
+
+      const anchor = o => {
+        const lb = limbs[o.l];
+        const p = pointAt(lb.sp, lb.cum, lb.len * o.t);
+        o.ax = p.x; o.ay = p.y;            // точка крепления на ветке
+        o.ox = -p.nx * o.off;              // off > 0 — «ниже» ветки (внешняя сторона)
+        o.oy = -p.ny * o.off;
+        o.cx = p.x + o.ox;                 // центр цветка
+        o.cy = p.y + o.oy;
+        return o;
+      };
+
+      blooms.forEach((fl, i) => {
+        anchor(fl);
+        fl.seed = 7.3 + i * 2.1;
+        fl.at = limbs[fl.l].t1 + fl.d;     // момент распускания
+      });
+      buds.forEach((bd, i) => {
+        anchor(bd);
+        bd.seed = 31.7 + i * 3.3;
+        bd.at = limbs[bd.l].t1 + bd.d;     // момент появления
+      });
+      // цветы «из бутона»: бутон раскрывается за секунду до цветка
+      blooms.slice().forEach((fl, i) => {
+        if (!fl.bud) return;
+        fl.at += .75;
+        buds.push(anchor({
+          l: fl.l, t: fl.t, off: fl.off, r: fl.r * .42, d: fl.d,
+          seed: 90.5 + i, at: fl.at - .75, into: fl
+        }));
+      });
+
+      bloomEnd = blooms.reduce((m, f) => Math.max(m, f.at + 1.05), 0);
+      blooms.sort((a, b) => b.r - a.r);    // крупные цветы поверх мелких
     }
 
-    function resize() {
+    // -------- Дерево --------
+    function drawLimb(g, lb, prog) {       // ствол/ветка как сужающаяся «лента»
+      const p = clamp(prog, 0, 1);
+      if (p <= .002) return;
+      const total = lb.len, stop = total * p;
+      const left = [], right = [];
+      for (let j = 0; j < lb.sp.length; j++) {
+        if (lb.cum[j] > stop) break;
+        const pt = lb.sp[j], tan = lb.tan[j];
+        const hw = widthAt(lb, lb.cum[j] / total) * .5;
+        left.push([pt.x - tan.y * hw, pt.y + tan.x * hw]);
+        right.push([pt.x + tan.y * hw, pt.y - tan.x * hw]);
+      }
+      if (p < 1) {                         // ровный «растущий» срез на конце
+        const tip = pointAt(lb.sp, lb.cum, stop);
+        const hw = widthAt(lb, p) * .24;
+        left.push([tip.x - tip.ty * hw, tip.y + tip.tx * hw]);
+        right.push([tip.x + tip.ty * hw, tip.y - tip.tx * hw]);
+      }
+      if (left.length < 2) return;
+      g.beginPath();
+      g.moveTo(left[0][0], left[0][1]);
+      for (let j = 1; j < left.length; j++) g.lineTo(left[j][0], left[j][1]);
+      for (let j = right.length - 1; j >= 0; j--) g.lineTo(right[j][0], right[j][1]);
+      g.closePath();
+      g.fillStyle = '#0a0a0a';
+      g.fill();
+    }
+
+    function bakeLayer() {                 // выросшее дерево — в отдельный слой
+      const w = BOX_W + PAD * 2, h = BOX_H + PAD * 2;
+      if (!layer) {
+        layer = d.createElement('canvas');
+      }
+      if (layer.width !== Math.ceil(w * dpr) || layer.height !== Math.ceil(h * dpr)) {
+        layer.width = Math.ceil(w * dpr);
+        layer.height = Math.ceil(h * dpr);
+      }
+      const g = layer.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, w, h);
+      g.translate(BOX_W + PAD, PAD);       // слой живёт в дизайн-координатах
+      limbs.forEach(lb => drawLimb(g, lb, 1));
+      baked = true;
+    }
+
+    // ============================================================
+    // Отрисовка: лепесток, цветок, бутон
+    // ============================================================
+    function petalPath(g, len, wid, notch, point) {   // лепесток «смотрит» вверх (−Y)
+      const n = clamp(notch, 0, 1), p = clamp(point || 0, 0, 1);
+      const tip = -len * (.95 + .1 * p);
+      g.beginPath();
+      g.moveTo(0, 0);
+      g.bezierCurveTo(-wid * .95, -len * .24, -wid, -len * .68, -wid * .52, tip);
+      if (n > 0) {
+        g.quadraticCurveTo(-wid * .26, -len * (.95 - .2 * n), 0, -len * (.95 - .17 * n));
+        g.quadraticCurveTo(wid * .26, -len * (.95 - .2 * n), wid * .52, tip);
+      } else {                                          // для бутонов — острый кончик
+        g.quadraticCurveTo(0, -len * (1.02 + .18 * p), wid * .52, tip);
+      }
+      g.bezierCurveTo(wid, -len * .68, wid * .95, -len * .24, 0, 0);
+      g.closePath();
+    }
+
+    function paintFlower(g, r, seed, open, hero, sq) {
+      const base = hash(seed) * TAU;
+      const lw = Math.max(.7, r * .055);
+      g.save();
+      g.rotate(base);
+      g.scale(1, sq);
+      for (let i = 0; i < 5; i++) {
+        const o = clamp((open - i * .09) / .5, 0, 1);   // лепестки раскрываются по очереди
+        if (o <= 0) continue;
+        const e = easeSoft(o);
+        const len = r * lerp(.55, 1, e) * (.93 + .14 * hash(seed + i * 7.1));
+        const wid = len * (.52 + .05 * hash(seed + i * 13.7));
+        g.save();
+        g.rotate(i * TAU / 5 + (1 - e) * -1.15 + (hash(seed + i * 3.3) - .5) * .18);
+        petalPath(g, len, wid, 1);
+        g.fillStyle = 'rgba(255,255,255,.97)';
+        g.fill();
+        g.lineWidth = lw;
+        g.strokeStyle = 'rgba(10,10,10,.9)';
+        g.stroke();
+        g.lineWidth = Math.max(.5, r * .028);          // прожилки на лепестке
+        g.strokeStyle = 'rgba(10,10,10,.15)';
+        for (let v = -1; v <= 1; v += 2) {
+          g.beginPath();
+          g.moveTo(v * wid * .18, -len * .2);
+          g.quadraticCurveTo(v * wid * .36, -len * .52, v * wid * .3, -len * .8);
+          g.stroke();
+        }
+        g.restore();
+      }
+      g.restore();
+
+      g.save();
+      g.rotate(base);
+      g.scale(1, sq);
+      if (hero && open > .8) {                         // длинные тычинки-«усики»
+        const n = 9 + Math.floor(hash(seed + 21.3) * 5);
+        g.lineWidth = Math.max(.6, r * .022);
+        g.strokeStyle = 'rgba(10,10,10,.5)';
+        for (let i = 0; i < n; i++) {
+          const a = i * TAU / n + (hash(seed + i * 5.5) - .5) * .5;
+          const len = r * (.95 + hash(seed + i * 9.1) * .6);
+          const ex = Math.cos(a) * len, ey = Math.sin(a) * len;
+          g.beginPath();
+          g.moveTo(Math.cos(a) * r * .06, Math.sin(a) * r * .06);
+          g.quadraticCurveTo(Math.cos(a + .14) * len * .62, Math.sin(a + .14) * len * .62, ex, ey);
+          g.stroke();
+          g.beginPath();
+          g.arc(ex, ey, Math.max(.7, r * .035), 0, TAU);
+          g.fillStyle = 'rgba(10,10,10,.65)';
+          g.fill();
+        }
+      }
+      const cn = 7 + Math.floor(hash(seed + 31.7) * 4); // пыльники в центре
+      for (let i = 0; i < cn; i++) {
+        const a = i * TAU / cn + (hash(seed + i * 11.3) - .5) * .8;
+        const d2 = r * (.08 + hash(seed + i * 17.9) * .3);
+        g.beginPath();
+        g.arc(Math.cos(a) * d2, Math.sin(a) * d2, r * (.05 + hash(seed + i * 23.1) * .05), 0, TAU);
+        g.fillStyle = 'rgba(10,10,10,.85)';
+        g.fill();
+      }
+      g.save();                                        // чашелистик у основания
+      g.translate(0, r * .1);
+      g.scale(.55, 1);
+      g.beginPath();
+      g.arc(0, 0, r * .16, 0, TAU);
+      g.fillStyle = 'rgba(10,10,10,.9)';
+      g.fill();
+      g.restore();
+      g.restore();
+    }
+
+    function paintBud(g, r, seed, open) {
+      const lw = Math.max(.7, r * .1);
+      g.save();
+      g.rotate((hash(seed) - .5) * .6);
+      for (let i = -1; i <= 1; i++) {                  // три сомкнутых лепестка
+        const k = i === 0 ? 1.05 : .8;
+        g.save();
+        g.rotate(i * (.3 + .4 * open));
+        petalPath(g, r * 2 * k * (1 + .08 * open), r * .42 * (i === 0 ? 1 : .88), 0, 1);
+        g.fillStyle = 'rgba(255,255,255,.97)';
+        g.fill();
+        g.lineWidth = lw;
+        g.strokeStyle = 'rgba(10,10,10,.85)';
+        g.stroke();
+        g.restore();
+      }
+      g.beginPath();                                   // чашелистик
+      g.moveTo(-r * .5, 0);
+      g.quadraticCurveTo(0, -r * .32, r * .5, 0);
+      g.quadraticCurveTo(0, r * .18, -r * .5, 0);
+      g.fillStyle = 'rgba(10,10,10,.85)';
+      g.fill();
+      g.restore();
+    }
+
+    function sprite(kind, r, seed, hero, sq) {         // кэш готовых цветов/бутонов
+      const key = [kind, r.toFixed(1), seed.toFixed(1), hero ? 1 : 0, sq.toFixed(2), dpr].join('|');
+      const hit = sprites.get(key);
+      if (hit) return hit;
+      const size = Math.ceil(kind === 'flower' ? r * (hero ? 3.4 : 2.9) : r * 5.4);
+      const c = d.createElement('canvas');
+      c.width = c.height = Math.max(1, Math.ceil(size * dpr));
+      const g = c.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.translate(size / 2, size / 2);
+      if (kind === 'flower') paintFlower(g, r, seed, 1, hero, sq);
+      else paintBud(g, r, seed, 1);
+      const rec = { c, size };
+      sprites.set(key, rec);
+      return rec;
+    }
+
+
+
+    // ============================================================
+    // Размещение цветов и бутонов
+    // ============================================================
+    function stock(g, o) {                 // цветоножка от ветки к цветку/бутону
+      const mx = (o.ax + o.cx) / 2 - (o.cy - o.ay) * .14;
+      const my = (o.ay + o.cy) / 2 + (o.cx - o.ax) * .14;
+      g.beginPath();
+      g.moveTo(o.ax, o.ay);
+      g.quadraticCurveTo(mx, my, o.cx, o.cy);
+      g.lineWidth = Math.max(1.1, o.r * .13);
+      g.lineCap = 'round';
+      g.strokeStyle = '#0a0a0a';
+      g.stroke();
+    }
+
+    const outward = o => Math.atan2(o.oy, o.ox) + Math.PI / 2;
+
+    function drawBloom(g, fl, t) {
+      const open = clamp((t - fl.at) / 1.0, 0, 1);       // распускание
+      if (open <= 0) return;
+      stock(g, fl);
+      g.save();
+      g.translate(fl.cx, fl.cy);
+      g.rotate(outward(fl) + (hash(fl.seed) - .5) * .6);
+      if (open < 1) {                                    // живая отрисовка раскрытия
+        const s = lerp(.34, 1, easeOut(open));
+        g.scale(s, s);
+        paintFlower(g, fl.r, fl.seed, open, fl.hero, fl.sq);
+      } else {                                           // дальше — готовый спрайт
+        const k = reduced ? 1 : 1 + Math.sin(t * 1.05 + fl.seed) * .012;
+        g.scale(k, k);
+        const sp = sprite('flower', fl.r, fl.seed, fl.hero, fl.sq);
+        g.drawImage(sp.c, -sp.size / 2, -sp.size / 2, sp.size, sp.size);
+      }
+      g.restore();
+    }
+
+    function drawBud(g, bd, t) {
+      const age = t - bd.at;
+      if (age <= 0) return;
+      const open = bd.into ? clamp((t - (bd.into.at - .55)) / .55, 0, 1) : 0;
+      if (open >= 1) return;                             // бутон стал цветком
+      const pop = clamp(age / .35, 0, 1);                // появление с лёгким «пыхом»
+      stock(g, bd);
+      g.save();
+      g.translate(bd.cx, bd.cy);
+      g.rotate(outward(bd) + (hash(bd.seed) - .5) * 1.1);
+      const s = easeOut(pop) * (1 + .14 * (1 - pop));
+      g.scale(s, s);
+      if (open > 0) {
+        paintBud(g, bd.r, bd.seed, open);
+      } else {
+        const sp = sprite('bud', bd.r, bd.seed, 0, 1);
+        g.drawImage(sp.c, -sp.size / 2, -sp.size / 2, sp.size, sp.size);
+      }
+      g.restore();
+    }
+
+    // ============================================================
+    // Опадающие лепестки
+    // ============================================================
+    const petals = [];
+
+    const screenPos = o => ({ x: width + par + o.cx * scale, y: parY + o.cy * scale });
+
+    function pickBloom(t) {
+      const open = blooms.filter(f => t > f.at + 1.1);
+      if (!open.length) return null;
+      for (let k = 0; k < 6; k++) {                      // крупные цветы сыплются охотнее
+        const f = open[Math.floor(Math.random() * open.length)];
+        if (Math.random() < f.r / 46 + .22) return f;
+      }
+      return open[Math.floor(Math.random() * open.length)];
+    }
+
+    function placePetal(p, t) {
+      const f = pickBloom(t);
+      if (!f) { p.on = 0; return; }
+      const s = screenPos(f);
+      const k = Math.max(.55, scale);
+      p.x = s.x + (Math.random() - .5) * f.r * scale * 1.2;
+      p.y = s.y + (Math.random() - .5) * f.r * scale * 1.2;
+      p.vx = -(5 + Math.random() * 13) * k;              // лёгкий снос влево
+      p.vy = (7 + Math.random() * 13) * k;
+      p.r = 6 + Math.random() * 6;                       // радиус в дизайн-пикселях
+      p.rot = Math.random() * TAU;
+      p.vr = (Math.random() - .5) * 2.6;
+      p.flip = Math.random() * TAU;                      // «порхание» лепестка
+      p.fs = 1.1 + Math.random() * 1.8;
+      p.ph = Math.random() * TAU;
+      p.a = .55 + Math.random() * .45;
+      p.on = 1;
+    }
+
+    function drawPetal(g, p) {
+      g.save();
+      g.translate(p.x, p.y);
+      g.rotate(p.rot);
+      g.scale(Math.max(.08, Math.abs(Math.cos(p.flip))), 1);
+      const r = p.r * scale;
+      petalPath(g, r * 1.7, r * .9, 1);
+      g.fillStyle = `rgba(255,255,255,${(p.a * .97).toFixed(3)})`;
+      g.fill();
+      g.lineWidth = Math.max(.55, r * .12);
+      g.strokeStyle = `rgba(10,10,10,${(p.a * .8).toFixed(3)})`;
+      g.stroke();
+      g.restore();
+    }
+
+    // ============================================================
+    // Размеры, кадр и жизненный цикл
+    // ============================================================
+    function initPetals() {
+      const n = width < 720 ? 12 : 24;
+      petals.length = 0;
+      for (let i = 0; i < n; i++) {
+        petals.push({ t0: bloomEnd * .55 + i * .34 });   // сыплются по одному, не залпом
+      }
+    }
+
+    function layout() {
       const rect = canvas.getBoundingClientRect();
-      width = rect.width || window.innerWidth;
-      height = rect.height || window.innerHeight;
+      width = Math.max(1, Math.round(rect.width || window.innerWidth));
+      height = Math.max(1, Math.round(rect.height || window.innerHeight));
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
+      canvas.width = Math.ceil(width * dpr);
+      canvas.height = Math.ceil(height * dpr);
+      scale = clamp(Math.min(width / 1440, height / 900) * (width < 720 ? .74 : 1), .34, 1.6);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    window.addEventListener('resize', resize, { passive: true });
-    resize();
-
-    function drawFlower(cx, cy, radius, progress, baseAngle) {
-      if (progress <= 0) return;
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(baseAngle);
-      ctx.scale(progress, progress);
-      const petalNum = 5;
-      for (let i = 0; i < petalNum; i++) {
-        const a = (i * 2 * Math.PI) / petalNum;
-        ctx.save();
-        ctx.rotate(a);
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.bezierCurveTo(-radius * 0.45, -radius * 0.45, -radius * 0.55, -radius * 0.85, -radius * 0.18, -radius);
-        ctx.lineTo(0, -radius * 0.85);
-        ctx.lineTo(radius * 0.18, -radius);
-        ctx.bezierCurveTo(radius * 0.55, -radius * 0.85, radius * 0.45, -radius * 0.45, 0, 0);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-        ctx.shadowBlur = 4;
-        ctx.fill();
-        ctx.shadowColor = 'transparent';
-        ctx.strokeStyle = 'rgba(10, 10, 10, 0.8)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-      }
-      ctx.beginPath();
-      ctx.arc(0, 0, radius * 0.22, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(10, 10, 10, 0.85)';
-      ctx.fill();
-      for (let j = 0; j < 5; j++) {
-        const ta = (j * 2 * Math.PI) / 5 + 0.3;
-        ctx.beginPath();
-        ctx.arc(Math.cos(ta) * radius * 0.4, Math.sin(ta) * radius * 0.4, 1.1, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(10, 10, 10, 0.7)';
-        ctx.fill();
-      }
-      ctx.restore();
+      sprites.clear();
+      baked = false;
+      initPetals();
     }
 
-    function drawFallingPetal(x, y, size, rot, opacity) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(rot);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(-size * 0.4, -size * 0.4, -size * 0.5, -size * 0.85, -size * 0.15, -size);
-      ctx.lineTo(0, -size * 0.82);
-      ctx.lineTo(size * 0.15, -size);
-      ctx.bezierCurveTo(size * 0.5, -size * 0.85, size * 0.4, -size * 0.4, 0, 0);
-      ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.88})`;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-      ctx.shadowBlur = 3;
-      ctx.fill();
-      ctx.shadowColor = 'transparent';
-      ctx.strokeStyle = `rgba(10, 10, 10, ${opacity * 0.65})`;
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    const reduced = ('matchMedia' in window) && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function render(now) {
-      const elapsed = reduced ? 10 : (now - startTime) / 1000;
+    function render(t, dt) {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
 
-      const branchGrowthDuration = 2.6;
-      const branchProgress = reduced ? 1 : Math.min(1, elapsed / branchGrowthDuration);
-      const windSway = reduced ? 0 : Math.sin(elapsed * 0.8) * 0.003;
+      par += (parTX - par) * .05;
+      parY += (parTY - parY) * .05;
+      const sway = reduced ? 0 : Math.sin(t * .48) * .0045 + Math.sin(t * 1.27 + 1.7) * .0016;
 
-      branchSegments.forEach(seg => {
-        if (branchProgress <= seg.t0) return;
-        const segP = Math.min(1, (branchProgress - seg.t0) / (seg.t1 - seg.t0));
-        if (segP <= 0) return;
-        const ease = segP * (2 - segP);
-        const x1 = seg.x1 * width;
-        const y1 = (seg.y1 + windSway * (seg.t0 + 0.2)) * height;
-        const targetX2 = (seg.x1 + (seg.x2 - seg.x1) * ease) * width;
-        const targetY2 = (seg.y1 + (seg.y2 - seg.y1) * ease + windSway * (seg.t1 + 0.2)) * height;
+      ctx.save();
+      ctx.translate(width + par, parY);      // якорь — правый верхний угол hero
+      ctx.rotate(sway);                      // ветка чуть качается на ветру
+      ctx.scale(scale, scale);
 
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(targetX2, targetY2);
-        ctx.strokeStyle = '#0a0a0a';
-        ctx.lineWidth = seg.w1 - (seg.w1 - seg.w2) * ease;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
-      });
-
-      flowers.forEach(fl => {
-        if (!reduced && elapsed < fl.bloomDelay) return;
-        const flowerAge = reduced ? 10 : (elapsed - fl.bloomDelay);
-        const bloomDur = 0.85;
-        let bloomScale = 1;
-        if (!reduced) {
-          if (flowerAge < bloomDur) {
-            const p = flowerAge / bloomDur;
-            bloomScale = Math.sin(p * Math.PI * 0.5) * (1 + 0.15 * (1 - p));
-          } else {
-            const breathe = Math.sin(elapsed * 1.5 + fl.rx * 10) * 0.03;
-            bloomScale = 1 + breathe;
-          }
-        }
-        const fx = fl.rx * width;
-        const fy = (fl.ry + windSway * 1.2) * height;
-        drawFlower(fx, fy, fl.size, bloomScale, fl.angle + windSway * 3);
-      });
-
-      if (!reduced) {
-        petals.forEach(p => {
-          p.y += p.speedY;
-          p.x += p.speedX + Math.sin(elapsed * p.swaySpeed + p.phase) * p.swayAmp;
-          p.rot += p.rotSpeed * 0.02;
-          if (p.y > 1.05 || p.x < 0.25) {
-            p.y = -0.05;
-            p.x = 0.55 + Math.random() * 0.45;
-          }
-          drawFallingPetal(p.x * width, p.y * height, p.size, p.rot, p.opacity);
-        });
+      if (baked && layer) {
+        ctx.drawImage(layer, -(BOX_W + PAD), -PAD, BOX_W + PAD * 2, BOX_H + PAD * 2);
+      } else {
+        limbs.forEach(lb => drawLimb(ctx, lb,
+          clamp((t - lb.t0) / Math.max(.001, lb.t1 - lb.t0), 0, 1)));
+        if (t >= growEnd) bakeLayer();       // выросло — переносим в слой
       }
+      buds.forEach(bd => drawBud(ctx, bd, t));
+      blooms.forEach(fl => drawBloom(ctx, fl, t));
+      ctx.restore();
 
-      if (!reduced) {
-        animId = requestAnimationFrame(render);
-      }
+      if (reduced) return;
+
+      // лепестки летят в экранных пикселях — рисуем уже вне «ветки»
+      petals.forEach(p => {
+        if (t < p.t0) return;
+        if (!p.on) placePetal(p, t);
+        if (!p.on) return;
+        p.vy += 22 * dt;                              // гравитация
+        p.x += (p.vx + Math.sin(t * 1.25 + p.ph) * 16) * dt;
+        p.y += p.vy * dt;
+        p.rot += p.vr * dt;
+        p.flip += p.fs * dt;
+        if (p.y > height + 50 || p.x < -60) placePetal(p, t);
+        drawPetal(ctx, p);
+      });
     }
 
-    animId = requestAnimationFrame(render);
+    function frame(now) {
+      animId = null;
+      if (!last) last = now;
+      const dt = clamp((now - last) / 1000, 0, .05);
+      last = now;
+      elapsed += dt;
+      render(elapsed, dt);
+      if (running) animId = rAF(frame);
+    }
 
-    window.addEventListener('beforeunload', () => {
+    function start() {
+      if (running || reduced) return;
+      running = true;
+      last = 0;
+      animId = rAF(frame);
+    }
+
+    function stop() {
+      running = false;
       if (animId) cancelAnimationFrame(animId);
-    });
+      animId = null;
+    }
+
+    let visible = true;
+
+    function boot() {
+      buildTree();
+      layout();
+
+      const relayout = () => {                     // ресайз и загрузка шрифтов
+        layout();
+        if (reduced) {
+          elapsed = bloomEnd + 2;
+          render(elapsed, 0);
+        } else if (visible && started) {
+          start();
+        }
+      };
+
+      // шрифты могут изменить высоту hero — пересчитываем сцену
+      if (d.fonts && d.fonts.ready && d.fonts.ready.then) {
+        d.fonts.ready.then(() => relayout()).catch(() => {});
+      }
+
+      let rz = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(rz);
+        rz = setTimeout(relayout, 160);
+      }, { passive: true });
+
+      if (reduced) {                               // уважаем «уменьшить анимацию»
+        elapsed = bloomEnd + 2;
+        render(elapsed, 0);                        // одна статичная распустившаяся ветка
+        return;
+      }
+
+      const begin = () => {
+        if (!started) {
+          started = true;
+          // даём прелоадеру уехать, чтобы рост ветки было видно
+          setTimeout(start, Math.max(0, 1750 - performance.now()));
+        } else {
+          start();
+        }
+      };
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(es => {
+          es.forEach(en => {
+            visible = en.isIntersecting;
+            if (visible) begin(); else stop();     // вне экрана — не жжём батарею
+          });
+        }, { threshold: 0 });
+        io.observe(canvas);
+
+        d.addEventListener('visibilitychange', () => {
+          if (d.hidden) stop();
+          else if (visible) start();
+        });
+      } else {
+        begin();
+      }
+
+      if (fine) {                            // лёгкий параллакс от мыши (как у контента hero)
+        window.addEventListener('mousemove', e => {
+          parTX = (e.clientX / window.innerWidth - .5) * -7;
+          parTY = (e.clientY / window.innerHeight - .5) * -5;
+        }, { passive: true });
+      }
+
+      window.addEventListener('beforeunload', stop);
+    }
+
+    boot();
   });
 })();
+
