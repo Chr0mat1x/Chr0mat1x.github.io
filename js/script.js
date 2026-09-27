@@ -503,7 +503,7 @@ form.addEventListener('submit', e => {
     // Пути абсолютные: на /en/ относительные ушли бы в /en/img/
     const ART = '/img/sakura.png';
     const GROW = '/img/sakura-grow.png';
-    const RATIO = 571 / 307;          // пропорции исходного рисунка
+    const RATIO = 483 / 301;          // пропорции исходного рисунка
     const REVEAL = 2500;              // мс на проявление
     const STEPS = 150;                // ступеней фронта проявления
     const EDGE = 6;                   // резкость края проявления
@@ -513,9 +513,9 @@ form.addEventListener('submit', e => {
     const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 
     // Точки на ветке, от которых отрываются падающие лепестки.
-    const SPOTS = [[.04, .57], [.11, .55], [.18, .61], [.25, .64], [.32, .62],
-                   [.39, .60], [.46, .63], [.53, .62], [.60, .57], [.67, .54],
-                   [.75, .52], [.82, .47], [.89, .37], [.96, .31]];
+    const SPOTS = [[.039, .562], [.110, .542], [.180, .578], [.251, .581], [.321, .562],
+                   [.391, .581], [.462, .605], [.534, .555], [.605, .482], [.675, .459],
+                   [.745, .449], [.816, .399], [.886, .339], [.957, .329]];
 
     const calm = window.matchMedia('(prefers-reduced-motion: reduce)');
     const fine = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
