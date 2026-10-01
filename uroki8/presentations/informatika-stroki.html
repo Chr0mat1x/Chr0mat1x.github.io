@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Информатика · 8 класс — Строки в Python</title>
+<style>
+  :root{
+    --paper:#f7f6f2; --ink:#111111; --ink2:#2b2b2b; --mut:#6a6a6a; --faint:#9a9a9a;
+    --rule:#111111; --hair:#d8d5cd; --soft:#eceae4; --codebg:#f0eee7; --inv:#111111; --invink:#f7f6f2;
+    --serif:Georgia,"Times New Roman",'Iowan Old Style',serif;
+    --sans:"Segoe UI",-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    --mono:"JetBrains Mono","Cascadia Mono",Consolas,"Courier New",monospace;
+  }
+  body.dark{
+    --paper:#0d0d0d; --ink:#f4f3ef; --ink2:#dcdbd6; --mut:#a2a09a; --faint:#6f6d68;
+    --rule:#f4f3ef; --hair:#2a2a28; --soft:#191918; --codebg:#141413; --inv:#f4f3ef; --invink:#0d0d0d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #deck{position:fixed;inset:0;overflow:hidden}
+
+  .slide{
+    position:absolute;inset:0;display:none;flex-direction:column;
+    padding:2.6vh 3.6vw 6.4vh;overflow:auto;background:var(--paper);
+  }
+  .slide.active{display:flex;animation:fin .22s ease}
+  @keyframes fin{from{opacity:0}to{opacity:1}}
+
+  /* --- slide head --- */
+  .shead{display:flex;align-items:flex-start;gap:1.1em;border-bottom:2px solid var(--rule);padding-bottom:.45em;margin-bottom:1em}
+  .snum{font-family:var(--serif);font-size:clamp(20px,2.4vw,34px);line-height:1;color:var(--mut);
+        border-right:1px solid var(--hair);padding-right:.5em;min-width:2.2em}
+  .shead h2{font-family:var(--serif);font-weight:600;font-size:clamp(19px,2.5vw,36px);
+        margin:0;line-height:1.12;letter-spacing:-.01em}
+  .shead .sub{display:block;font-family:var(--sans);font-weight:400;font-size:clamp(11px,1.15vw,16px);
+        color:var(--mut);letter-spacing:.14em;text-transform:uppercase;margin-top:.35em}
+
+  h3{font-family:var(--serif);font-weight:600;font-size:clamp(14px,1.6vw,22px);margin:.1em 0 .35em}
+  h3.sans{font-family:var(--sans);font-weight:700;font-size:clamp(12px,1.3vw,17px);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+  p,li{font-size:clamp(12.5px,1.22vw,18px);line-height:1.46;margin:.34em 0}
+  ul,ol{margin:.25em 0 .25em 1.05em;padding:0}
+  li{margin:.18em 0}
+  li::marker{color:var(--faint)}
+  b,strong{font-weight:700}
+  em{font-style:italic}
+  .lead{color:var(--mut);font-size:clamp(12.5px,1.3vw,19px)}
+  .tiny{font-size:clamp(10.5px,1vw,14px);color:var(--mut);line-height:1.4}
+  .cap{font-size:clamp(10px,.95vw,13px);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+
+  code{font-family:var(--mono);background:var(--soft);border:1px solid var(--hair);
+       padding:.02em .3em;border-radius:3px;font-size:.9em;white-space:nowrap}
+  pre{font-family:var(--mono);background:var(--codebg);border:1px solid var(--hair);border-left:3px solid var(--rule);
+      border-radius:2px;padding:.7em .85em;overflow:auto;font-size:clamp(11.5px,1.14vw,16.5px);line-height:1.5;margin:.45em 0}
+  pre .k{font-weight:700}
+  pre .s{font-style:italic;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+  pre .c{color:var(--faint);font-style:italic}
+  pre .out{color:var(--mut)}
+  pre .b{font-weight:700;text-decoration:underline;text-underline-offset:2px}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(11.5px,1.1vw,16px);margin:.4em 0}
+  th,td{border:1px solid var(--hair);padding:.3em .5em;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-weight:700;font-size:clamp(10.5px,1vw,14.5px);
+     letter-spacing:.04em;border-color:var(--rule)}
+  td code{white-space:nowrap;background:transparent;border:0;padding:0}
+  table.tight td,table.tight th{padding:.22em .45em}
+  td.ctr,th.ctr{text-align:center}
+  tr.hl td{background:var(--soft)}
+
+  .grid{display:grid;gap:.9em 1.2em}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g21{grid-template-columns:1.25fr .95fr}
+  .g12{grid-template-columns:.9fr 1.35fr}
+  @media(max-width:900px){.g2,.g3,.g21,.g12{grid-template-columns:1fr}}
+
+  .card{border:1px solid var(--hair);border-top:2px solid var(--rule);padding:.6em .8em;background:transparent}
+  .card.tint{background:var(--soft)}
+  .box{border:1px solid var(--rule);padding:.6em .8em;background:var(--soft)}
+  .note{border-left:3px solid var(--rule);padding:.15em 0 .15em .7em;margin:.5em 0;color:var(--ink2)}
+  .formula{font-family:var(--mono);font-size:clamp(12px,1.25vw,18px);border:1px solid var(--rule);
+           padding:.4em .6em;margin:.3em 0;background:var(--soft);text-align:center}
+  .kv{display:flex;gap:.5em;align-items:baseline}
+  .kv .t{font-family:var(--mono);font-weight:700;min-width:7.5em}
+  .chip{display:inline-block;border:1px solid var(--rule);border-radius:999px;padding:.1em .6em;
+        font-size:clamp(10px,.95vw,13px);letter-spacing:.1em;text-transform:uppercase;margin-right:.4em}
+
+  /* --- title + dividers (inverted) --- */
+  .invert{background:var(--inv);color:var(--invink);justify-content:center}
+  .invert .snum,.invert .lead,.invert .tiny{color:#b9b7b1}
+  .invert h1,.invert h2{color:var(--invink)}
+  .invert .hair{border-color:#4a4a47}
+  .title h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5.6vw,74px);line-height:1.02;
+     margin:.1em 0 .2em;letter-spacing:-.02em}
+  .title .rule{height:2px;background:var(--invink);width:min(320px,40%);margin:1.1em 0}
+  .title .meta{font-size:clamp(12px,1.35vw,19px);letter-spacing:.2em;text-transform:uppercase;color:#b9b7b1}
+  .divider .big{font-family:var(--serif);font-size:clamp(40px,9vw,120px);line-height:1;color:#333331;
+     -webkit-text-stroke:1px #6f6d68;margin:0}
+  .divider h2{font-family:var(--serif);font-size:clamp(22px,3.4vw,48px);margin:.1em 0 .2em}
+  .divider .rule{height:1px;background:#4a4a47;width:100%;margin:.9em 0}
+
+  .cols2{column-count:2;column-gap:1.6em}
+  @media(max-width:900px){.cols2{column-count:1}}
+
+  details{margin:.3em 0}
+  details>summary{cursor:pointer;color:var(--ink);font-weight:700;font-size:clamp(11px,1.1vw,15px);
+     letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--faint);display:inline-block;user-select:none}
+  details>summary::marker{color:var(--faint)}
+  details[open]>summary{margin-bottom:.2em}
+  .task{border:1px solid var(--hair);border-left:3px solid var(--rule);padding:.5em .7em;margin:.5em 0;break-inside:avoid}
+  .task .n{font-family:var(--serif);font-weight:700;margin-right:.4em}
+
+  .hud{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:14px;
+    padding:0 20px;background:var(--paper);border-top:1px solid var(--rule);
+    font-size:12px;color:var(--mut);z-index:30;font-family:var(--sans)}
+  .hud .sec{letter-spacing:.16em;text-transform:uppercase;color:var(--faint);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;max-width:38vw}
+  .hud .sp{flex:1}
+  .hud button{background:none;border:1px solid var(--hair);color:var(--ink);border-radius:2px;
+    padding:3px 9px;cursor:pointer;font-size:12px;font-family:var(--sans)}
+  .hud button:hover{border-color:var(--rule)}
+  .hud .pageno{font-family:var(--mono);min-width:64px;text-align:right;letter-spacing:.05em}
+  .hud a.switch{color:var(--ink);border:1px solid var(--rule);border-radius:2px;padding:3px 10px;
+    text-decoration:none;font-size:12px;white-space:nowrap;background:var(--soft)}
+  .hud a.switch:hover{background:var(--ink);color:var(--paper)}
+  .hud a.menu{color:var(--mut);border:1px solid var(--hair);border-radius:2px;padding:3px 9px;
+    text-decoration:none;font-size:12px;white-space:nowrap}
+  .hud a.menu:hover{border-color:var(--rule);color:var(--ink)}
+  .bar{position:fixed;left:0;right:0;bottom:0;height:2px;background:transparent;z-index:31}
+  .bar>i{display:block;height:100%;width:0;background:var(--ink);transition:width .22s}
+  .hint{position:fixed;top:10px;right:16px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--faint);z-index:30}
+
+  @media print{
+    html,body{height:auto}
+    #deck{position:static;overflow:visible}
+    .slide{position:static;display:flex!important;page-break-after:always;break-after:page;
+      height:auto;min-height:96vh;padding:14mm 14mm 10mm}
+    .hud,.bar,.hint{display:none}
+    details{display:block}
+    details>summary{display:none}
+    details>*{display:block}
+  }
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- 01 · TITLE -->
+<section class="slide invert title active">
+  <div class="meta">Информатика · 8 класс · Урок-замена · 45 минут</div>
+  <h1>Строки в Python</h1>
+  <div class="rule"></div>
+  <p class="lead" style="max-width:60ch">Тип <code style="background:#2a2a28;color:#f4f3ef;border-color:#4a4a47">str</code>: как хранить текст, обращаться к символам, изменять и форматировать данные. Теория + 5 задач с решениями.</p>
+  <div class="grid g3" style="margin-top:2.4em;max-width:1100px">
+    <div><div class="cap" style="color:#b9b7b1">Часть I</div><p style="color:#b9b7b1;margin-top:.2em">Основы: тип, кавычки, индексы, срезы, операции</p></div>
+    <div><div class="cap" style="color:#b9b7b1">Часть II</div><p style="color:#b9b7b1;margin-top:.2em">Методы, форматирование, преобразование типов</p></div>
+    <div><div class="cap" style="color:#b9b7b1">Часть III</div><p style="color:#b9b7b1;margin-top:.2em">Перебор, практика, разбор ошибок, задачи</p></div>
+  </div>
+  <p class="tiny" style="margin-top:2.2em">Управление: ← → или Space · F — полный экран · D — тёмная тема · T — перейти к другому уроку · ответы к задачам открываются кликом</p>
+</section>
+
+<!-- PLAN -->
+<section class="slide" data-sec="План урока · 45 мин">
+  <header class="shead"><span class="snum">45′</span>
+    <h2>План урока<span class="sub">Информатика · 45 минут · ориентир по времени</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <table>
+        <tr><th>Этап</th><th class="ctr">Время</th><th class="ctr">Слайды</th></tr>
+        <tr><td>Организационный момент, введение в тему</td><td class="ctr">2 мин</td><td class="ctr">1</td></tr>
+        <tr><td>Строка как тип: кавычки и длина строки</td><td class="ctr">6 мин</td><td class="ctr">3–4</td></tr>
+        <tr><td>Индексация и срезы</td><td class="ctr">8 мин</td><td class="ctr">5–6</td></tr>
+        <tr><td>Операции над строками</td><td class="ctr">4 мин</td><td class="ctr">7</td></tr>
+        <tr><td>Методы строк</td><td class="ctr">8 мин</td><td class="ctr">9</td></tr>
+        <tr><td>f-строки и преобразование типов</td><td class="ctr">6 мин</td><td class="ctr">10–11</td></tr>
+        <tr><td>Перебор, разбор программы, типичные ошибки</td><td class="ctr">6 мин</td><td class="ctr">12–14</td></tr>
+        <tr><td>Решение задач у доски и в парах</td><td class="ctr">4 мин</td><td class="ctr">15</td></tr>
+        <tr class="hl"><td>Итог и домашнее задание</td><td class="ctr">1 мин</td><td class="ctr">16–17</td></tr>
+        <tr><th>Итого</th><th class="ctr">45 мин</th><th class="ctr">17 слайдов</th></tr>
+      </table>
+    </div>
+    <div>
+      <div class="card tint">
+        <h3 class="sans">Как вести урок</h3>
+        <p class="tiny">Теорию (слайды 3–6) даём быстро, с примерами на доске. На методах (слайд 9) обязательно вызываем учеников к доске — это ключевой навык, на него заложено 8 минут.</p>
+      </div>
+      <div class="card" style="margin-top:.5em">
+        <h3 class="sans">Если не укладываетесь</h3>
+        <p class="tiny">Задачи (слайд 15) можно целиком оставить на дом. Приоритет при нехватке времени: индексы, срезы, методы.</p>
+      </div>
+      <div class="card" style="margin-top:.5em">
+        <h3 class="sans">Заменяем 2 урока</h3>
+        <p class="tiny">Этот блок — на 45 минут. Второй урок (технология) — отдельная презентация, тоже на 45 минут. Итого 90 минут.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="slide" data-sec="1 · Основы">
+  <header class="shead"><span class="snum">01</span>
+    <h2>Строка как тип данных<span class="sub">Что такое str и чем он отличается от числа</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <p><b>Строка</b> — упорядоченная последовательность символов: букв, цифр, пробелов, знаков препинания, эмодзи. В Python это отдельный тип — <code>str</code>.</p>
+      <ul>
+        <li><b>Упорядоченность:</b> у каждого символа есть номер (индекс), порядок фиксирован.</li>
+        <li><b>Неизменяемость:</b> нельзя заменить символ «на месте» — можно собрать новую строку.</li>
+        <li><b>Итерируемость:</b> строку можно перебирать циклом <code>for</code>.</li>
+        <li><b>Имеет длину:</b> <code>len(s)</code> — количество символов.</li>
+      </ul>
+      <div class="note">Строка может быть пустой: <code>""</code>. Её длина — <code>0</code>. Это не ошибка и не «ничего», а вполне нормальное значение.</div>
+    </div>
+    <div>
+      <table class="tight">
+        <tr><th>Тип</th><th>Пример</th><th>Смысл</th></tr>
+        <tr><td><code>int</code></td><td><code>42</code></td><td>целое число</td></tr>
+        <tr><td><code>float</code></td><td><code>3.14</code></td><td>дробное число</td></tr>
+        <tr class="hl"><td><code>str</code></td><td><code>"42"</code></td><td>текст</td></tr>
+        <tr><td><code>bool</code></td><td><code>True</code></td><td>истина / ложь</td></tr>
+      </table>
+      <pre>x = <span class="s">"42"</span>   <span class="c"># строка</span>
+y = <span class="b">42</span>     <span class="c"># число</span>
+
+<span class="k">print</span>(<span class="k">type</span>(x))  <span class="out"># &lt;class 'str'&gt;</span>
+<span class="k">print</span>(x + x)    <span class="out"># 4242  (склейка!)</span>
+<span class="k">print</span>(y + y)    <span class="out"># 84    (сложение)</span>
+<span class="k">print</span>(x * <span class="b">2</span>)    <span class="out"># 4242  (повтор)</span></pre>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:.6em">
+    <div class="card"><h3 class="sans">Зачем строки</h3><p class="tiny">Имена, адреса, тексты, пароли, ответы пользователя — почти любой ввод с клавиатуры приходит строкой.</p></div>
+    <div class="card"><h3 class="sans">Ключевая мысль</h3><p class="tiny">Строка и число с виду похожи (<code>"42"</code> и <code>42</code>), но ведут себя по-разному. Тип определяет поведение.</p></div>
+    <div class="card"><h3 class="sans">Проверка</h3><p class="tiny"><code>type(x)</code> показывает тип. Полезно при отладке, когда «не работает» сложение.</p></div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="slide" data-sec="1 · Основы">
+  <header class="shead"><span class="snum">02</span>
+    <h2>Кавычки и длина строки<span class="sub">Три вида кавычек · многострочный текст · функция len()</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <h3 class="sans">Три вида кавычек</h3>
+      <pre>a = <span class="s">'Python'</span>        <span class="c"># одинарные</span>
+b = <span class="s">"Python"</span>        <span class="c"># двойные — то же самое</span>
+c = <span class="s">"Он сказал: 'ок'"</span> <span class="c"># вложенные</span>
+d = <span class="s">"""Строка
+из нескольких
+строк"""</span></pre>
+      <p class="tiny">Кавычки обязаны быть парными. Одинарные и двойные равнозначны — выбирай те, что удобнее внутри текста. Тройные — для многострочного текста и документации.</p>
+      <div class="note"><b>len(s)</b> считает <em>символы</em>, а не байты: <code>len("кот") == 3</code>.</div>
+    </div>
+    <div>
+      <h3 class="sans">Длина строки: len()</h3>
+      <pre>s = <span class="s">"Python"</span>
+<span class="k">print</span>(<span class="k">len</span>(s))       <span class="out"># 6</span>
+
+empty = <span class="s">""</span>
+<span class="k">print</span>(<span class="k">len</span>(empty))   <span class="out"># 0</span>
+
+word = <span class="s">"кот"</span>
+<span class="k">print</span>(<span class="k">len</span>(word))    <span class="out"># 3</span></pre>
+      <table class="tight">
+        <tr><th>Строка</th><th class="ctr">len()</th></tr>
+        <tr><td><code>"Python"</code></td><td class="ctr">6</td></tr>
+        <tr><td><code>"кот"</code></td><td class="ctr">3</td></tr>
+        <tr><td><code>""</code></td><td class="ctr">0</td></tr>
+        <tr><td><code>" "</code> (пробел)</td><td class="ctr">1</td></tr>
+      </table>
+      <p class="tiny"><code>len()</code> считает <b>символы</b>, а не байты: пробел — это тоже символ. Длина пустой строки равна нулю.</p>
+      <div class="note">Полезно запомнить: последний символ строки имеет индекс <code>len(s) - 1</code> (или просто <code>-1</code>).</div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="slide" data-sec="2 · Индексы и срезы">
+  <header class="shead"><span class="snum">03</span>
+    <h2>Индексация<span class="sub">Нумерация с нуля · отрицательные индексы · IndexError</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <p>Первый символ имеет индекс <b>0</b>. Доступ к символу — квадратные скобки: <code>s[i]</code>.</p>
+      <pre>s = <span class="s">"Python"</span>
+<span class="out">#      P  y  t  h  o  n
+#      0  1  2  3  4  5   ← индексы
+#     -6 -5 -4 -3 -2 -1   ← с конца</span>
+
+<span class="k">print</span>(s[<span class="b">0</span>])    <span class="out"># P</span>
+<span class="k">print</span>(s[<span class="b">4</span>])    <span class="out"># o</span>
+<span class="k">print</span>(s[-<span class="b">1</span>])   <span class="out"># n  (последний)</span>
+<span class="k">print</span>(s[-<span class="b">2</span>])   <span class="out"># o  (предпоследний)</span></pre>
+      <div class="note"><b>IndexError.</b> <code>s[6]</code> — ошибка: индексы идут от <code>0</code> до <code>len(s)-1</code>. Последний символ надёжнее брать как <code>s[-1]</code>.</div>
+    </div>
+    <div>
+      <table class="tight">
+        <tr><th>Выражение</th><th>Результат</th><th>Смысл</th></tr>
+        <tr><td><code>s[0]</code></td><td><code>P</code></td><td>первый</td></tr>
+        <tr><td><code>s[2]</code></td><td><code>t</code></td><td>третий</td></tr>
+        <tr><td><code>s[-1]</code></td><td><code>n</code></td><td>последний</td></tr>
+        <tr><td><code>s[len(s)-1]</code></td><td><code>n</code></td><td>то же, что <code>s[-1]</code></td></tr>
+      </table>
+      <div class="card tint" style="margin-top:.6em">
+        <h3 class="sans">Правило</h3>
+        <p class="tiny">Индекс — это <em>смещение от начала</em>. Символ №0 — первый, значит символ №<code>len(s)</code> уже не существует.</p>
+      </div>
+      <div class="card" style="margin-top:.6em">
+        <h3 class="sans">Проверка на палиндром</h3>
+        <pre style="margin:.2em 0">w = <span class="s">"шалаш"</span>
+<span class="k">if</span> w == w[::-<span class="b">1</span>]:
+    <span class="k">print</span>(<span class="s">"палиндром"</span>)</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="slide" data-sec="2 · Индексы и срезы">
+  <header class="shead"><span class="snum">04</span>
+    <h2>Срезы<span class="sub">s[начало:конец:шаг] · правило «конец не входит»</span></h2>
+  </header>
+  <div class="grid g12">
+    <div>
+      <div class="formula">s[начало : конец : шаг]</div>
+      <ul>
+        <li><b>начало</b> — с какого индекса (включительно), по умолчанию 0</li>
+        <li><b>конец</b> — до какого индекса (<em>не включая</em>), по умолчанию до конца</li>
+        <li><b>шаг</b> — через сколько символов, по умолчанию 1; может быть отрицательным</li>
+      </ul>
+      <div class="note">Срез <b>никогда</b> не выбрасывает ошибку по границам: <code>"abc"[0:99]</code> → <code>"abc"</code>. Срез всегда создаёт <em>новую</em> строку.</div>
+    </div>
+    <div>
+      <pre>s = <span class="s">"Программирование"</span>
+
+s[<span class="b">0</span>:<span class="b">4</span>]     <span class="out"># Прог</span>
+s[<span class="b">4</span>:]      <span class="out"># раммирование</span>
+s[:<span class="b">4</span>]      <span class="out"># Прог</span>
+s[:]       <span class="out"># вся строка (копия)</span>
+s[<span class="b">0</span>:<span class="b">8</span>:<span class="b">2</span>]   <span class="out"># Пorm  — каждый второй</span>
+s[::-<span class="b">1</span>]     <span class="out"># еинавориммаргорП</span>
+s[-<span class="b">4</span>:]     <span class="out"># ние</span>
+s[<span class="b">3</span>:<span class="b">3</span>]     <span class="out"># ""  (пустая)</span></pre>
+      <table class="tight">
+        <tr><th>Шаблон</th><th>Что делает</th></tr>
+        <tr><td><code>s[:n]</code></td><td>первые n символов</td></tr>
+        <tr><td><code>s[-n:]</code></td><td>последние n символов</td></tr>
+        <tr><td><code>s[::2]</code></td><td>каждый второй</td></tr>
+        <tr><td><code>s[::-1]</code></td><td>переворот строки</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="slide" data-sec="1 · Основы">
+  <header class="shead"><span class="snum">05</span>
+    <h2>Операции над строками<span class="sub">Склейка, повтор, длина, поиск, сравнение</span></h2>
+  </header>
+  <table>
+    <tr><th style="width:20%">Операция</th><th style="width:30%">Пример</th><th>Результат и смысл</th></tr>
+    <tr><td>Склейка <code>+</code></td><td><code>"При" + "вет"</code></td><td><code>Привет</code> — соединяет две строки в одну</td></tr>
+    <tr><td>Повтор <code>*</code></td><td><code>"ха" * 3</code></td><td><code>хахаха</code> — повторяет строку n раз</td></tr>
+    <tr><td>Длина <code>len()</code></td><td><code>len("Python")</code></td><td><code>6</code> — число символов</td></tr>
+    <tr><td>Вхождение <code>in</code></td><td><code>"th" in "Python"</code></td><td><code>True</code> — подстрока найдена</td></tr>
+    <tr><td>Отсутствие <code>not in</code></td><td><code>"z" not in "Python"</code></td><td><code>True</code></td></tr>
+    <tr><td>Сравнение <code>==</code></td><td><code>"abc" == "abc"</code></td><td><code>True</code> — посимвольное равенство</td></tr>
+    <tr><td>Порядок <code>&lt;</code> <code>&gt;</code></td><td><code>"abc" &lt; "abd"</code></td><td><code>True</code> — лексикографически (как в словаре)</td></tr>
+  </table>
+  <div class="grid g3" style="margin-top:.7em">
+    <div class="card"><h3 class="sans">Нельзя смешивать</h3><p class="tiny"><code>"5" + 3</code> → <b>TypeError</b>. Нужно привести к одному типу: <code>int("5") + 3</code>.</p></div>
+    <div class="card"><h3 class="sans">Регистр важен</h3><p class="tiny"><code>"Да" == "да"</code> → <b>False</b>. Сравнение учитывает регистр символов.</p></div>
+    <div class="card"><h3 class="sans">Коды символов</h3><p class="tiny"><code>ord("A")</code> → 65, <code>chr(97)</code> → <code>'a'</code>. Заглавные «меньше» строчных.</p></div>
+  </div>
+</section>
+
+<!-- 07 · DIVIDER -->
+<section class="slide invert divider" data-sec="2 · Методы">
+  <p class="big">02</p>
+  <div class="rule"></div>
+  <div class="meta" style="margin-bottom:.6em">≈ 20-я минута урока</div>
+  <h2>Методы, форматирование, типы</h2>
+  <p class="lead" style="max-width:60ch">Как реально работать с текстом: готовые методы строк, вставка значений в шаблон и преобразование типов.</p>
+</section>
+
+<!-- 08 -->
+<section class="slide" data-sec="2 · Методы">
+  <header class="shead"><span class="snum">06</span>
+    <h2>Методы строк<span class="sub">Вызов через точку: строка.метод() — возвращают новую строку</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <h3 class="sans">Изменение регистра и пробелы</h3>
+      <table class="tight">
+        <tr><th>Метод</th><th>Пример → результат</th></tr>
+        <tr><td><code>.upper()</code></td><td><code>"abc".upper()</code> → <code>ABC</code></td></tr>
+        <tr><td><code>.lower()</code></td><td><code>"ABC".lower()</code> → <code>abc</code></td></tr>
+        <tr><td><code>.capitalize()</code></td><td><code>"привет мир"</code> → <code>Привет мир</code></td></tr>
+        <tr><td><code>.title()</code></td><td><code>"привет мир"</code> → <code>Привет Мир</code></td></tr>
+        <tr><td><code>.strip()</code></td><td><code>" hi ".strip()</code> → <code>hi</code></td></tr>
+        <tr><td><code>.lstrip() / .rstrip()</code></td><td>убрать пробелы слева / справа</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 class="sans">Поиск, замена, разбор</h3>
+      <table class="tight">
+        <tr><th>Метод</th><th>Пример → результат</th></tr>
+        <tr><td><code>.find(x)</code></td><td><code>"Python".find("t")</code> → <code>2</code> (<code>-1</code> если нет)</td></tr>
+        <tr><td><code>.index(x)</code></td><td>как find, но при отсутствии — ошибка</td></tr>
+        <tr><td><code>.count(x)</code></td><td><code>"ааба".count("а")</code> → <code>3</code></td></tr>
+        <tr><td><code>.replace(a,b)</code></td><td><code>"кот".replace("к","б")</code> → <code>бот</code></td></tr>
+        <tr><td><code>.startswith(x)</code></td><td><code>"file.py".startswith("file")</code> → <code>True</code></td></tr>
+        <tr><td><code>.endswith(x)</code></td><td><code>"file.py".endswith(".py")</code> → <code>True</code></td></tr>
+        <tr><td><code>.split()</code></td><td><code>"я и ты".split()</code> → <code>['я','и','ты']</code></td></tr>
+        <tr><td><code>sep.join(lst)</code></td><td><code>"-".join(['a','b'])</code> → <code>a-b</code></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="note" style="margin-top:.5em"><b>Важно:</b> строки неизменяемы — <code>s.upper()</code> <em>не меняет</em> <code>s</code>, а возвращает новую строку. Нужно присвоить: <code>s = s.upper()</code>. Также есть проверки <code>.isdigit()</code>, <code>.isalpha()</code>, <code>.isspace()</code> — возвращают <code>True/False</code>.</div>
+</section>
+
+<!-- 09 -->
+<section class="slide" data-sec="3 · Форматирование">
+  <header class="shead"><span class="snum">07</span>
+    <h2>Форматирование строк<span class="sub">f-строки · выравнивание · вывод чисел</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <h3 class="sans">Три способа вставить значение</h3>
+      <pre><span class="c"># 1. склейка (неудобно)</span>
+<span class="k">print</span>(<span class="s">"Имя: "</span> + name + <span class="s">", возраст: "</span> + <span class="k">str</span>(age))
+
+<span class="c"># 2. .format()</span>
+<span class="k">print</span>(<span class="s">"Имя: {}, возраст: {}"</span>.format(name, age))
+
+<span class="c"># 3. f-строка (лучший способ)</span>
+<span class="k">print</span>(<span class="s">f"Имя: {name}, возраст: {age}"</span>)</pre>
+      <p class="tiny">Перед кавычкой ставится <code>f</code>, значения — в <code>{фигурных скобках}</code>. Внутри можно писать выражения: <code>f"{2+3*4}"</code> → <code>14</code>.</p>
+    </div>
+    <div>
+      <h3 class="sans">Полезные приёмы внутри {}</h3>
+      <table class="tight">
+        <tr><th>Запись</th><th>Результат</th></tr>
+        <tr><td><code>f"{x:.2f}"</code></td><td>2 знака после точки: <code>3.14</code></td></tr>
+        <tr><td><code>f"{x:&gt;8}"</code></td><td>выравнивание по правому краю, ширина 8</td></tr>
+        <tr><td><code>f"{x:&lt;8}"</code></td><td>по левому краю</td></tr>
+        <tr><td><code>f"{x:^8}"</code></td><td>по центру</td></tr>
+        <tr><td><code>f"{n:05d}"</code></td><td>число с ведущими нулями: <code>00042</code></td></tr>
+        <tr><td><code>f"{p}%"</code></td><td>процент прямо в тексте</td></tr>
+      </table>
+      <div class="card tint" style="margin-top:.5em">
+        <h3 class="sans">Правило хорошего тона</h3>
+        <p class="tiny">Для сборки текста с данными используй f-строки: код короче, читается как обычное предложение, не нужен <code>str()</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-sec="3 · Форматирование">
+  <header class="shead"><span class="snum">08</span>
+    <h2>Преобразование типов<span class="sub">input() даёт строку · int / float / str · типичные ошибки</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <pre>age = <span class="k">input</span>(<span class="s">"Возраст: "</span>)
+<span class="c"># age — ВСЕГДА строка, даже если ввели 12</span>
+
+age = <span class="k">int</span>(age)       <span class="c"># теперь число</span>
+<span class="k">print</span>(age + <span class="b">1</span>)      <span class="out"># 13</span>
+
+<span class="c"># можно сразу:</span>
+age = <span class="k">int</span>(<span class="k">input</span>(<span class="s">"Возраст: "</span>))</pre>
+      <table class="tight">
+        <tr><th>Функция</th><th>Пример → результат</th></tr>
+        <tr><td><code>int("25")</code></td><td><code>25</code></td></tr>
+        <tr><td><code>int("3.9")</code></td><td><b>ValueError</b> — не целое</td></tr>
+        <tr><td><code>float("3.5")</code></td><td><code>3.5</code></td></tr>
+        <tr><td><code>str(42)</code></td><td><code>"42"</code></td></tr>
+        <tr><td><code>int("abc")</code></td><td><b>ValueError</b> — не число</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 class="sans">Две классические ошибки</h3>
+      <div class="card">
+        <p><b>TypeError</b> — смешали типы:</p>
+        <pre style="margin:.2em 0"><span class="k">print</span>(<span class="s">"5"</span> + <span class="b">3</span>)
+<span class="c"># TypeError: can only concatenate str</span>
+<span class="c"># (not "int") to str</span>
+<span class="c"># лечим:  int("5") + 3</span></pre>
+      </div>
+      <div class="card" style="margin-top:.5em">
+        <p><b>ValueError</b> — не получилось превратить:</p>
+        <pre style="margin:.2em 0"><span class="k">int</span>(<span class="s">"12 лет"</span>)
+<span class="c"># ValueError: invalid literal</span>
+<span class="c"># для int(): "12 лет"</span></pre>
+      </div>
+      <div class="note">Читай текст ошибки до конца — Python сам подсказывает, что именно не так.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-sec="4 · Перебор и практика">
+  <header class="shead"><span class="snum">09</span>
+    <h2>Перебор строки<span class="sub">for по символам · по индексам · enumerate · аккумулятор</span></h2>
+  </header>
+  <div class="grid g3">
+    <div>
+      <h3 class="sans">По символам</h3>
+      <pre>word = <span class="s">"кот"</span>
+<span class="k">for</span> ch <span class="k">in</span> word:
+    <span class="k">print</span>(ch)
+<span class="out"># к
+# о
+# т</span></pre>
+      <p class="tiny">Самый простой способ, когда нужны только символы.</p>
+    </div>
+    <div>
+      <h3 class="sans">По индексам</h3>
+      <pre>word = <span class="s">"кот"</span>
+<span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(<span class="k">len</span>(word)):
+    <span class="k">print</span>(i, word[i])
+<span class="out"># 0 к
+# 1 о
+# 2 т</span></pre>
+      <p class="tiny">Нужен, когда важен номер символа (например, позиция).</p>
+    </div>
+    <div>
+      <h3 class="sans">С номером: enumerate</h3>
+      <pre><span class="k">for</span> i, ch <span class="k">in</span> <span class="k">enumerate</span>(<span class="s">"кот"</span>):
+    <span class="k">print</span>(i, ch)
+<span class="out"># 0 к
+# 1 о
+# 2 т</span></pre>
+      <p class="tiny">Короче, чем <code>range(len(...))</code>.</p>
+    </div>
+  </div>
+  <div class="grid g2" style="margin-top:.5em">
+    <div class="card">
+      <h3 class="sans">Аккумулятор: собираем новую строку</h3>
+      <pre style="margin:.2em 0">word = <span class="k">input</span>(<span class="s">"Слово: "</span>)
+res = <span class="s">""</span>
+<span class="k">for</span> ch <span class="k">in</span> word:
+    <span class="k">if</span> ch.lower() <span class="k">in</span> <span class="s">"аеёиоуыэюя"</span>:
+        res += ch
+<span class="k">print</span>(<span class="s">f"Гласные: {res}"</span>)</pre>
+    </div>
+    <div class="card tint">
+      <h3 class="sans">Идея</h3>
+      <p class="tiny">Строка неизменяема, поэтому мы не «правим» её, а <em>накапливаем результат</em> в новой переменной. Это базовый шаблон обработки текста: <b>пройти по символам → проверить условие → добавить/посчитать</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-sec="4 · Перебор и практика">
+  <header class="shead"><span class="snum">10</span>
+    <h2>Разбор программы<span class="sub">Анализ введённого слова по шагам</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <pre>word = <span class="k">input</span>(<span class="s">"Введите слово: "</span>)
+
+<span class="k">print</span>(<span class="s">f"Длина: {len(word)}"</span>)
+<span class="k">print</span>(<span class="s">f"Первый символ: {word[0]}"</span>)
+<span class="k">print</span>(<span class="s">f"Последний символ: {word[-1]}"</span>)
+<span class="k">print</span>(<span class="s">f"Заглавными: {word.upper()}"</span>)
+<span class="k">print</span>(<span class="s">f"Наоборот: {word[::-1]}"</span>)
+
+<span class="k">if</span> word.lower() == word[::-1].lower():
+    <span class="k">print</span>(<span class="s">"Это палиндром!"</span>)
+<span class="k">else</span>:
+    <span class="k">print</span>(<span class="s">"Обычное слово"</span>)</pre>
+    </div>
+    <div>
+      <h3 class="sans">Что происходит</h3>
+      <ol>
+        <li><code>input()</code> возвращает строку — с ней сразу можно работать.</li>
+        <li><code>len(word)</code> — длина, <code>word[0]</code> / <code>word[-1]</code> — края.</li>
+        <li><code>.upper()</code> не меняет <code>word</code>, а возвращает новую строку для вывода.</li>
+        <li><code>word[::-1]</code> — копия в обратном порядке.</li>
+        <li>Сравнение <code>==</code> проверяет палиндром; <code>.lower()</code> убирает разницу регистра.</li>
+      </ol>
+      <div class="note">Пример: <code>"шалаш"</code> → перевёрнутая тоже <code>"шалаш"</code> → палиндром.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-sec="4 · Перебор и практика">
+  <header class="shead"><span class="snum">11</span>
+    <h2>Типичные ошибки<span class="sub">Пять граблей и как их обойти</span></h2>
+  </header>
+  <table>
+    <tr><th style="width:34%">Ошибка</th><th>Почему</th><th>Как правильно</th></tr>
+    <tr><td><code>"5" + 3</code></td><td>склеивание строки с числом</td><td><code>int("5") + 3</code> или <code>f"{x}{y}"</code></td></tr>
+    <tr><td><code>s[1]</code> вместо первого</td><td>индексация с нуля, а не с единицы</td><td>первый — <code>s[0]</code></td></tr>
+    <tr><td><code>s[3]</code> на слове из 3 букв</td><td>индекс вне диапазона</td><td>максимум <code>s[2]</code>, последний — <code>s[-1]</code></td></tr>
+    <tr><td><code>s.upper()</code> и ждём изменений</td><td>строки неизменяемы</td><td><code>s = s.upper()</code></td></tr>
+    <tr><td><code>int(input())</code> и пустой ввод</td><td>пустая строка не число</td><td>проверить <code>s.isdigit()</code> или обработать ошибку</td></tr>
+  </table>
+  <div class="grid g3" style="margin-top:.7em">
+    <div class="card"><h3 class="sans">Отладка</h3><p class="tiny">Печатай промежуточные значения: <code>print(type(x), repr(x))</code> — сразу видно тип и скрытые пробелы.</p></div>
+    <div class="card"><h3 class="sans">Чтение ошибок</h3><p class="tiny">Последняя строка сообщения — суть. <b>TypeError</b> — про типы, <b>ValueError</b> — про значение.</p></div>
+    <div class="card"><h3 class="sans">Привычка</h3><p class="tiny">Сразу приводи ввод к нужному типу: <code>n = int(input())</code>. Не оставляй строку там, где нужно число.</p></div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-sec="5 · Практика">
+  <header class="shead"><span class="snum">12</span>
+    <h2>Задачи<span class="sub">5 заданий по теме «Строки в Python» · решение открывается кликом</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <div class="task"><span class="n">1.</span> Спросите имя и выведите приветствие вида <code>Привет, Аня!</code>
+        <details><summary>Решение</summary><pre>name = <span class="k">input</span>(<span class="s">"Как тебя зовут? "</span>)
+<span class="k">print</span>(<span class="s">f"Привет, {name}!"</span>)</pre></details>
+      </div>
+      <div class="task"><span class="n">2.</span> Для <code>s = "Программирование"</code> выведите длину, первый и последний символ.
+        <details><summary>Решение</summary><pre>s = <span class="s">"Программирование"</span>
+<span class="k">print</span>(<span class="k">len</span>(s))   <span class="out"># 16</span>
+<span class="k">print</span>(s[<span class="b">0</span>])    <span class="out"># П</span>
+<span class="k">print</span>(s[-<span class="b">1</span>])   <span class="out"># е</span></pre></details>
+      </div>
+      <div class="task"><span class="n">3.</span> Спросите слово и выведите его заглавными буквами и задом наперёд.
+        <details><summary>Решение</summary><pre>w = <span class="k">input</span>(<span class="s">"Слово: "</span>)
+<span class="k">print</span>(w.upper())
+<span class="k">print</span>(w[::-<span class="b">1</span>])</pre></details>
+      </div>
+    </div>
+    <div>
+      <div class="task"><span class="n">4.</span> Для <code>s = "яблоко, банан, груша"</code> замените запятые на точки с запятой и посчитайте число слов.
+        <details><summary>Решение</summary><pre>s = <span class="s">"яблоко, банан, груша"</span>
+<span class="k">print</span>(s.replace(<span class="s">","</span>, <span class="s">";"</span>))
+<span class="k">print</span>(<span class="s">"Слов:"</span>, s.count(<span class="s">","</span>) + <span class="b">1</span>)</pre></details>
+      </div>
+      <div class="task"><span class="n">5.</span> Спросите слово и посчитайте, сколько в нём букв «а» (и строчных, и заглавных).
+        <details><summary>Решение</summary><pre>w = <span class="k">input</span>(<span class="s">"Слово: "</span>).lower()
+<span class="k">print</span>(<span class="s">"Букв а:"</span>, w.count(<span class="s">"а"</span>))</pre></details>
+      </div>
+      <div class="card tint" style="margin-top:.5em">
+        <h3 class="sans">Домашнее задание</h3>
+        <p class="tiny">Решить все 5 задач в тетради или в Python. Дополнительно: посчитать в слове число гласных и согласных.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-sec="6 · Итог">
+  <header class="shead"><span class="snum">13</span>
+    <h2>Итог и шпаргалка<span class="sub">Всё главное на одном слайде</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <h3 class="sans">Понятия</h3>
+      <ul>
+        <li>Строка — тип <code>str</code>, последовательность символов, неизменяема.</li>
+        <li>Индексы с нуля: <code>s[0]</code> … <code>s[-1]</code>.</li>
+        <li>Срез <code>s[нач:кон:шаг]</code>; <code>s[::-1]</code> — переворот.</li>
+        <li>Операции: <code>+</code>, <code>*</code>, <code>len()</code>, <code>in</code>, <code>==</code>.</li>
+        <li><code>input()</code> даёт строку → приводим тип: <code>int()</code>, <code>float()</code>.</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="sans">Методы и формат</h3>
+      <table class="tight">
+        <tr><th>Группа</th><th>Методы</th></tr>
+        <tr><td>регистр</td><td><code>.upper() .lower() .title() .capitalize()</code></td></tr>
+        <tr><td>пробелы</td><td><code>.strip() .lstrip() .rstrip()</code></td></tr>
+        <tr><td>поиск</td><td><code>.find() .index() .count() .startswith() .endswith()</code></td></tr>
+        <tr><td>изменение</td><td><code>.replace()</code></td></tr>
+        <tr><td>разбор</td><td><code>.split()</code>, <code>sep.join()</code></td></tr>
+        <tr><td>проверки</td><td><code>.isdigit() .isalpha() .isspace()</code></td></tr>
+        <tr><td>вывод</td><td><code>f"{значение}"</code>, <code>f"{x:.2f}"</code></td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="formula" style="margin-top:.8em">Строка → индекс/срез → метод → новая строка → вывод через f-строку</div>
+</section>
+
+<!-- 16 · END -->
+<section class="slide invert title" data-sec="6 · Итог">
+  <div class="meta">Информатика · 8 класс</div>
+  <h1>Спасибо!</h1>
+  <div class="rule"></div>
+  <p class="lead" style="max-width:60ch">Вопросы? Разберите дома 5 задач со слайда 12 и попробуйте собрать свой анализатор текста.</p>
+</section>
+
+</div>
+
+<div class="hint">← → Space · F · D · T урок · M меню</div>
+<div class="bar"><i id="fill"></i></div>
+<div class="hud">
+  <span class="sec" id="sec">Информатика · 8 класс</span>
+  <span class="sp"></span>
+  <button id="prev">← Назад</button>
+  <button id="next">Вперёд →</button>
+  <a class="switch" href="tehnologiya-logika.html" title="Открыть презентацию по технологии (T)">Технология: логика →</a>
+  <a class="menu" href="../index.html" title="Все уроки (M)">Меню</a>
+  <button id="theme" title="Тёмная тема (D)">◐ Тема</button>
+  <span class="pageno" id="pageno"></span>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  function show(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
+    document.getElementById('fill').style.width = ((i + 1) / slides.length * 100) + '%';
+    document.getElementById('pageno').textContent = (i + 1) + ' / ' + slides.length;
+    var sec = slides[i].getAttribute('data-sec');
+    document.getElementById('sec').textContent = sec ? ('Информатика · ' + sec) : 'Информатика · 8 класс';
+    history.replaceState(null, '', '#s' + (i + 1));
+  }
+  function next(){ show(i + 1); }
+  function prev(){ show(i - 1); }
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  function toggleTheme(){ document.body.classList.toggle('dark'); }
+  document.getElementById('theme').onclick = toggleTheme;
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if (['ArrowRight','ArrowDown',' ','PageDown','Enter'].indexOf(k) >= 0){ e.preventDefault(); next(); }
+    else if (['ArrowLeft','ArrowUp','PageUp'].indexOf(k) >= 0){ e.preventDefault(); prev(); }
+    else if (k === 'Home'){ e.preventDefault(); show(0); }
+    else if (k === 'End'){ e.preventDefault(); show(slides.length - 1); }
+    else if (k === 'f' || k === 'F' || k === 'а' || k === 'А'){
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen();
+    }
+    else if (k === 'd' || k === 'D' || k === 'в' || k === 'В'){ toggleTheme(); }
+    else if (k === 't' || k === 'T' || k === 'е' || k === 'Е'){
+      window.location.href = 'tehnologiya-logika.html';
+    }
+    else if (k === 'm' || k === 'M' || k === 'ь' || k === 'Ь'){
+      window.location.href = '../index.html';
+    }
+  });
+  document.getElementById('deck').addEventListener('click', function(e){
+    if (e.target.closest('a, button, summary, details, code, pre')) return;
+    next();
+  });
+  var m = location.hash.match(/^#s(\d+)$/);
+  show(m ? parseInt(m[1], 10) - 1 : 0);
+})();
+</script>
+</body>
+</html>

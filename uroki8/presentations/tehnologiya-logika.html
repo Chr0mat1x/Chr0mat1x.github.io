@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Технология · 8 класс — Математическая логика: стрелка Пирса и штрих Шеффера</title>
+<style>
+  :root{
+    --paper:#f7f6f2; --ink:#111111; --ink2:#2b2b2b; --mut:#6a6a6a; --faint:#9a9a9a;
+    --rule:#111111; --hair:#d8d5cd; --soft:#eceae4; --codebg:#f0eee7; --inv:#111111; --invink:#f7f6f2;
+    --serif:Georgia,"Times New Roman",'Iowan Old Style',serif;
+    --sans:"Segoe UI",-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    --mono:"JetBrains Mono","Cascadia Mono",Consolas,"Courier New",monospace;
+  }
+  body.dark{
+    --paper:#0d0d0d; --ink:#f4f3ef; --ink2:#dcdbd6; --mut:#a2a09a; --faint:#6f6d68;
+    --rule:#f4f3ef; --hair:#2a2a28; --soft:#191918; --codebg:#141413; --inv:#f4f3ef; --invink:#0d0d0d;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #deck{position:fixed;inset:0;overflow:hidden}
+
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;
+    padding:2.6vh 3.6vw 6.4vh;overflow:auto;background:var(--paper)}
+  .slide.active{display:flex;animation:fin .22s ease}
+  @keyframes fin{from{opacity:0}to{opacity:1}}
+
+  .shead{display:flex;align-items:flex-start;gap:1.1em;border-bottom:2px solid var(--rule);padding-bottom:.45em;margin-bottom:1em}
+  .snum{font-family:var(--serif);font-size:clamp(20px,2.4vw,34px);line-height:1;color:var(--mut);
+        border-right:1px solid var(--hair);padding-right:.5em;min-width:2.2em}
+  .shead h2{font-family:var(--serif);font-weight:600;font-size:clamp(19px,2.5vw,36px);margin:0;line-height:1.12;letter-spacing:-.01em}
+  .shead .sub{display:block;font-family:var(--sans);font-weight:400;font-size:clamp(11px,1.15vw,16px);
+        color:var(--mut);letter-spacing:.14em;text-transform:uppercase;margin-top:.35em}
+
+  h3{font-family:var(--serif);font-weight:600;font-size:clamp(14px,1.6vw,22px);margin:.1em 0 .35em}
+  h3.sans{font-family:var(--sans);font-weight:700;font-size:clamp(12px,1.3vw,17px);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+  p,li{font-size:clamp(12.5px,1.22vw,18px);line-height:1.46;margin:.34em 0}
+  ul,ol{margin:.25em 0 .25em 1.05em;padding:0}
+  li{margin:.18em 0}
+  li::marker{color:var(--faint)}
+  .lead{color:var(--mut);font-size:clamp(12.5px,1.3vw,19px)}
+  .tiny{font-size:clamp(10.5px,1vw,14px);color:var(--mut);line-height:1.4}
+  .cap{font-size:clamp(10px,.95vw,13px);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+
+  code{font-family:var(--mono);background:var(--soft);border:1px solid var(--hair);
+       padding:.02em .3em;border-radius:3px;font-size:.9em;white-space:nowrap}
+  pre{font-family:var(--mono);background:var(--codebg);border:1px solid var(--hair);border-left:3px solid var(--rule);
+      border-radius:2px;padding:.7em .85em;overflow:auto;font-size:clamp(11.5px,1.14vw,16.5px);line-height:1.5;margin:.45em 0}
+  pre .c{color:var(--faint);font-style:italic}
+  pre .b{font-weight:700}
+
+  table{border-collapse:collapse;width:100%;font-size:clamp(11.5px,1.1vw,16px);margin:.4em 0}
+  th,td{border:1px solid var(--hair);padding:.3em .5em;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-weight:700;font-size:clamp(10.5px,1vw,14.5px);letter-spacing:.04em;border-color:var(--rule)}
+  td code{white-space:nowrap;background:transparent;border:0;padding:0}
+  table.tight td,table.tight th{padding:.22em .45em}
+  td.ctr,th.ctr{text-align:center}
+  tr.hl td{background:var(--soft)}
+  .one{font-weight:700}
+  .zero{font-style:italic;color:var(--mut)}
+
+  .grid{display:grid;gap:.9em 1.2em}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g21{grid-template-columns:1.25fr .95fr}
+  .g12{grid-template-columns:.9fr 1.35fr}
+  @media(max-width:900px){.g2,.g3,.g4,.g21,.g12{grid-template-columns:1fr}}
+
+  .card{border:1px solid var(--hair);border-top:2px solid var(--rule);padding:.6em .8em;background:transparent}
+  .card.tint{background:var(--soft)}
+  .note{border-left:3px solid var(--rule);padding:.15em 0 .15em .7em;margin:.5em 0;color:var(--ink2)}
+  .formula{font-family:var(--mono);font-size:clamp(12px,1.25vw,18px);border:1px solid var(--rule);
+           padding:.4em .6em;margin:.3em 0;background:var(--soft);text-align:center}
+  .chip{display:inline-block;border:1px solid var(--rule);border-radius:999px;padding:.1em .6em;
+        font-size:clamp(10px,.95vw,13px);letter-spacing:.1em;text-transform:uppercase;margin-right:.4em}
+
+  .invert{background:var(--inv);color:var(--invink);justify-content:center}
+  .invert .snum,.invert .lead,.invert .tiny{color:#b9b7b1}
+  .invert h1,.invert h2{color:var(--invink)}
+  .title h1{font-family:var(--serif);font-weight:600;font-size:clamp(28px,5.2vw,68px);line-height:1.02;margin:.1em 0 .2em;letter-spacing:-.02em}
+  .title .rule{height:2px;background:var(--invink);width:min(320px,40%);margin:1.1em 0}
+  .title .meta{font-size:clamp(12px,1.35vw,19px);letter-spacing:.2em;text-transform:uppercase;color:#b9b7b1}
+  .divider .big{font-family:var(--serif);font-size:clamp(40px,9vw,120px);line-height:1;color:#333331;-webkit-text-stroke:1px #6f6d68;margin:0}
+  .divider h2{font-family:var(--serif);font-size:clamp(22px,3.4vw,48px);margin:.1em 0 .2em}
+  .divider .rule{height:1px;background:#4a4a47;width:100%;margin:.9em 0}
+
+  details{margin:.3em 0}
+  details>summary{cursor:pointer;color:var(--ink);font-weight:700;font-size:clamp(11px,1.1vw,15px);
+     letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--faint);display:inline-block;user-select:none}
+  details>summary::marker{color:var(--faint)}
+  .task{border:1px solid var(--hair);border-left:3px solid var(--rule);padding:.5em .7em;margin:.5em 0;break-inside:avoid}
+  .task .n{font-family:var(--serif);font-weight:700;margin-right:.4em}
+
+  .hud{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:14px;
+    padding:0 20px;background:var(--paper);border-top:1px solid var(--rule);font-size:12px;color:var(--mut);z-index:30}
+  .hud .sec{letter-spacing:.16em;text-transform:uppercase;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
+  .hud .sp{flex:1}
+  .hud button{background:none;border:1px solid var(--hair);color:var(--ink);border-radius:2px;padding:3px 9px;cursor:pointer;font-size:12px}
+  .hud button:hover{border-color:var(--rule)}
+  .hud .pageno{font-family:var(--mono);min-width:64px;text-align:right;letter-spacing:.05em}
+  .bar{position:fixed;left:0;right:0;bottom:0;height:2px;z-index:31}
+  .bar>i{display:block;height:100%;width:0;background:var(--ink);transition:width .22s}
+  .hint{position:fixed;top:10px;right:16px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);z-index:30}
+
+  @media print{
+    html,body{height:auto}
+    #deck{position:static;overflow:visible}
+    .slide{position:static;display:flex!important;page-break-after:always;break-after:page;height:auto;min-height:96vh;padding:14mm 14mm 10mm}
+    .hud,.bar,.hint{display:none}
+    details{display:block}
+    details>summary{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- 01 · TITLE -->
+<section class="slide invert title active">
+  <div class="meta">Технология · 8 класс · Урок-замена · 45 минут</div>
+  <h1>Математическая логика</h1>
+  <div class="rule"></div>
+  <p class="lead" style="max-width:62ch">Высказывания, таблицы истинности и две универсальные операции: <b>стрелка Пирса</b> <code style="background:#2a2a28;color:#f4f3ef;border-color:#4a4a47">↓</code> и <b>штрих Шеффера</b> <code style="background:#2a2a28;color:#f4f3ef;border-color:#4a4a47">|</code>. Теория + 5 задач с решениями.</p>
+  <div class="grid g4" style="margin-top:2.2em;max-width:1200px">
+    <div><div class="cap" style="color:#b9b7b1">I</div><p style="color:#b9b7b1;margin-top:.2em">Основы логики и базовые операции</p></div>
+    <div><div class="cap" style="color:#b9b7b1">II</div><p style="color:#b9b7b1;margin-top:.2em">Таблицы истинности и приоритет</p></div>
+    <div><div class="cap" style="color:#b9b7b1">III</div><p style="color:#b9b7b1;margin-top:.2em">Стрелка Пирса и штрих Шеффера</p></div>
+    <div><div class="cap" style="color:#b9b7b1">IV</div><p style="color:#b9b7b1;margin-top:.2em">Полные базисы, практика, задачи</p></div>
+  </div>
+  <p class="tiny" style="margin-top:2em">Управление: ← → или Space · F — полный экран · D — тёмная тема · T — перейти к другому уроку · ответы к задачам открываются кликом</p>
+</section>
+
+<!-- PLAN -->
+<section class="slide" data-sec="План урока · 45 мин">
+  <header class="shead"><span class="snum">45′</span>
+    <h2>План урока<span class="sub">Технология · 45 минут · ориентир по времени</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <table>
+        <tr><th>Этап</th><th class="ctr">Время</th><th class="ctr">Слайды</th></tr>
+        <tr><td>Организационный момент, введение в тему</td><td class="ctr">3 мин</td><td class="ctr">1</td></tr>
+        <tr><td>Высказывания, значения 0 и 1</td><td class="ctr">5 мин</td><td class="ctr">3</td></tr>
+        <tr><td>Базовые операции: НЕ, И, ИЛИ</td><td class="ctr">8 мин</td><td class="ctr">4</td></tr>
+        <tr><td>Производные операции и приоритет</td><td class="ctr">5 мин</td><td class="ctr">5</td></tr>
+        <tr><td>Построение таблиц истинности</td><td class="ctr">6 мин</td><td class="ctr">6</td></tr>
+        <tr class="hl"><td>Стрелка Пирса ↓ и штрих Шеффера |</td><td class="ctr">10 мин</td><td class="ctr">7–11</td></tr>
+        <tr><td>Полные базисы, де Морган, техника</td><td class="ctr">5 мин</td><td class="ctr">12–14</td></tr>
+        <tr><td>Решение задач у доски и в парах</td><td class="ctr">2 мин</td><td class="ctr">15</td></tr>
+        <tr><td>Итог и домашнее задание</td><td class="ctr">1 мин</td><td class="ctr">16–17</td></tr>
+        <tr><th>Итого</th><th class="ctr">45 мин</th><th class="ctr">17 слайдов</th></tr>
+      </table>
+    </div>
+    <div>
+      <div class="card tint">
+        <h3 class="sans">Главное на уроке</h3>
+        <p class="tiny">Ядро темы — стрелка Пирса и штрих Шеффера (слайды 7–11), на них заложено 10 минут. Обязательно стройте таблицы истинности вместе с классом на доске.</p>
+      </div>
+      <div class="card" style="margin-top:.5em">
+        <h3 class="sans">Если не укладываетесь</h3>
+        <p class="tiny">Слайды 13–14 (полные базисы и техника) можно сократить до одного слайда-вывода. Задачи — на дом.</p>
+      </div>
+      <div class="card" style="margin-top:.5em">
+        <h3 class="sans">Заменяем 2 урока</h3>
+        <p class="tiny">Этот блок — на 45 минут. Первый урок (информатика) — отдельная презентация, тоже на 45 минут. Итого 90 минут.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="slide" data-sec="1 · Основы логики">
+  <header class="shead"><span class="snum">01</span>
+    <h2>Высказывания и логические значения<span class="sub">Что такое высказывание · истина и ложь · 1 и 0</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <p><b>Логика</b> — наука о формах и законах правильного мышления. В математической логике мы работаем с <b>высказываниями</b>.</p>
+      <p><b>Высказывание</b> — утверждение, о котором можно однозначно сказать: истинно оно или ложно.</p>
+      <ul>
+        <li>«2 + 2 = 4» — <b>истина</b></li>
+        <li>«Москва — столица Франции» — <b>ложь</b></li>
+        <li>«5 &gt; 3» — <b>истина</b>; «7 — чётное» — <b>ложь</b></li>
+        <li>«Который час?» — <em>не</em> высказывание (вопрос)</li>
+        <li>«x &gt; 5» — <em>не</em> высказывание, пока не задано <code>x</code></li>
+      </ul>
+      <div class="note">Из простых высказываний строят <b>составные</b> с помощью логических операций. Их значения вычисляются по правилам.</div>
+    </div>
+    <div>
+      <table class="tight">
+        <tr><th>Логическое значение</th><th>Обозначение</th><th>Электроника</th></tr>
+        <tr class="hl"><td>Истина</td><td><code>1</code> / <code>True</code></td><td>есть сигнал</td></tr>
+        <tr><td>Ложь</td><td><code>0</code> / <code>False</code></td><td>нет сигнала</td></tr>
+      </table>
+      <div class="card tint" style="margin-top:.6em">
+        <h3 class="sans">Почему именно 0 и 1</h3>
+        <p class="tiny">В технике удобны два состояния: включено / выключено, есть напряжение / нет. Поэтому вся цифровая логика сводится к нулям и единицам.</p>
+      </div>
+      <div class="card" style="margin-top:.5em">
+        <h3 class="sans">Джордж Буль</h3>
+        <p class="tiny">В XIX веке описал логику как алгебру с двумя значениями. Отсюда название — <b>булева алгебра</b>, или булева логика.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="slide" data-sec="2 · Операции и таблицы">
+  <header class="shead"><span class="snum">02</span>
+    <h2>Три базовые операции<span class="sub">НЕ (¬) · И (∧) · ИЛИ (∨) · таблицы истинности</span></h2>
+  </header>
+  <div class="grid g3">
+    <div class="card">
+      <h3 class="sans">НЕ · инверсия</h3>
+      <div class="formula">¬A &nbsp;·&nbsp; not A</div>
+      <table class="tight"><tr><th class="ctr">A</th><th class="ctr">¬A</th></tr>
+        <tr><td class="ctr">0</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr zero">0</td></tr></table>
+      <p class="tiny">Переворачивает значение. «Не A» истинно, когда A ложно.</p>
+    </div>
+    <div class="card">
+      <h3 class="sans">И · конъюнкция</h3>
+      <div class="formula">A ∧ B &nbsp;·&nbsp; A and B</div>
+      <table class="tight"><tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">A∧B</th></tr>
+        <tr><td class="ctr">0</td><td class="ctr">0</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">0</td><td class="ctr">1</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr zero">0</td></tr>
+        <tr class="hl"><td class="ctr">1</td><td class="ctr">1</td><td class="ctr one">1</td></tr></table>
+      <p class="tiny">Истинно <b>только</b> когда истинны оба. «И то, и другое».</p>
+    </div>
+    <div class="card">
+      <h3 class="sans">ИЛИ · дизъюнкция</h3>
+      <div class="formula">A ∨ B &nbsp;·&nbsp; A or B</div>
+      <table class="tight"><tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">A∨B</th></tr>
+        <tr class="hl"><td class="ctr">0</td><td class="ctr">0</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">0</td><td class="ctr">1</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">1</td><td class="ctr one">1</td></tr></table>
+      <p class="tiny">Истинно, когда истинно <b>хотя бы одно</b>. Ложно только при двух нулях.</p>
+    </div>
+  </div>
+  <div class="grid g3" style="margin-top:.6em">
+    <div class="card tint"><h3 class="sans">Мнемоника «И»</h3><p class="tiny">Строгое: нужно <em>всё</em>. Один ноль — и результат ноль.</p></div>
+    <div class="card tint"><h3 class="sans">Мнемоника «ИЛИ»</h3><p class="tiny">Щедрое: достаточно <em>одного</em>. Единица есть — результат единица.</p></div>
+    <div class="card tint"><h3 class="sans">Связь</h3><p class="tiny">Все три операции можно выразить друг через друга — это понадобится дальше.</p></div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="slide" data-sec="2 · Операции и таблицы">
+  <header class="shead"><span class="snum">03</span>
+    <h2>Производные операции<span class="sub">Импликация · эквивалентность · исключающее ИЛИ · приоритет</span></h2>
+  </header>
+  <table>
+    <tr><th style="width:22%">Операция</th><th style="width:20%">Знак</th><th style="width:20%">Читается</th><th>Истинна, когда…</th></tr>
+    <tr><td>Импликация</td><td><code>A → B</code></td><td>«если A, то B»</td><td>A = 0 <em>или</em> B = 1; ложна только при A=1, B=0</td></tr>
+    <tr><td>Эквивалентность</td><td><code>A ↔ B</code></td><td>«A тогда и только тогда B»</td><td>значения совпадают: 00 или 11</td></tr>
+    <tr><td>Исключающее ИЛИ</td><td><code>A ⊕ B</code></td><td>«либо A, либо B»</td><td>значения <b>разные</b>: 01 или 10</td></tr>
+  </table>
+  <div class="grid g2" style="margin-top:.6em">
+    <div>
+      <h3 class="sans">Приоритет операций</h3>
+      <ol>
+        <li>Отрицание <code>¬</code> — самое «сильное»</li>
+        <li>Конъюнкция <code>∧</code></li>
+        <li>Дизъюнкция <code>∨</code></li>
+        <li>Импликация <code>→</code>, эквивалентность <code>↔</code></li>
+        <li>Скобки меняют порядок, как в арифметике</li>
+      </ol>
+      <div class="note"><code>¬A ∧ B ∨ C</code> читается как <code>((¬A) ∧ B) ∨ C</code>.</div>
+    </div>
+    <div>
+      <h3 class="sans">Таблица истинности</h3>
+      <table class="tight">
+        <tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">A→B</th><th class="ctr">A↔B</th><th class="ctr">A⊕B</th></tr>
+        <tr><td class="ctr">0</td><td class="ctr">0</td><td class="ctr one">1</td><td class="ctr one">1</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">0</td><td class="ctr">1</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr zero">0</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">1</td><td class="ctr one">1</td><td class="ctr one">1</td><td class="ctr zero">0</td></tr>
+      </table>
+      <p class="tiny">Импликация ложна только в одном случае: «из истины следует ложь».</p>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="slide" data-sec="2 · Операции и таблицы">
+  <header class="shead"><span class="snum">04</span>
+    <h2>Как строить таблицу истинности<span class="sub">2ⁿ строк · порядок наборов · разбор по шагам</span></h2>
+  </header>
+  <div class="grid g12">
+    <div>
+      <h3 class="sans">Число строк</h3>
+      <div class="formula">строк = 2ⁿ, где n — число переменных</div>
+      <table class="tight">
+        <tr><th class="ctr">Переменных</th><th class="ctr">Строк</th></tr>
+        <tr><td class="ctr">1</td><td class="ctr">2</td></tr>
+        <tr><td class="ctr">2</td><td class="ctr">4</td></tr>
+        <tr><td class="ctr">3</td><td class="ctr">8</td></tr>
+        <tr><td class="ctr">4</td><td class="ctr">16</td></tr>
+      </table>
+      <div class="note">Наборы перебираем как в двоичном счёте: <code>000, 001, 010, 011, 100…</code> — от всех нулей до всех единиц.</div>
+    </div>
+    <div>
+      <h3 class="sans">Пример: строим таблицу для ¬A ∧ (B ∨ A)</h3>
+      <table class="tight">
+        <tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">¬A</th><th class="ctr">B∨A</th><th class="ctr">¬A ∧ (B∨A)</th></tr>
+        <tr><td class="ctr">0</td><td class="ctr">0</td><td class="ctr">1</td><td class="ctr">0</td><td class="ctr zero">0</td></tr>
+        <tr class="hl"><td class="ctr">0</td><td class="ctr">1</td><td class="ctr">1</td><td class="ctr">1</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr">0</td><td class="ctr">1</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">1</td><td class="ctr">0</td><td class="ctr">1</td><td class="ctr zero">0</td></tr>
+      </table>
+      <p class="tiny">Порядок работы: выписываем переменные → считаем промежуточные столбцы (по приоритету) → в последнем столбце — ответ. Последний столбец — это «портрет» функции.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 06 · DIVIDER -->
+<section class="slide invert divider" data-sec="3 · Стрелка Пирса">
+  <p class="big">↓</p>
+  <div class="rule"></div>
+  <div class="meta" style="margin-bottom:.6em">≈ 27-я минута урока</div>
+  <h2>Стрелка Пирса</h2>
+  <p class="lead" style="max-width:62ch">Операция «ИЛИ-НЕ» (NOR): одна из двух операций, через которые выражается вся логика.</p>
+</section>
+
+<!-- 07 -->
+<section class="slide" data-sec="3 · Стрелка Пирса">
+  <header class="shead"><span class="snum">05</span>
+    <h2>Стрелка Пирса: определение<span class="sub">A ↓ B = ¬(A ∨ B) · «ИЛИ-НЕ» · NOR</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <div class="formula">A ↓ B = ¬(A ∨ B)</div>
+      <p>Читается «A стрелка Пирса B» и означает <b>НЕ (A ИЛИ B)</b>. По-английски — <b>NOR</b>, то есть <b>N</b>ot <b>OR</b>.</p>
+      <ul>
+        <li>Сначала считаем <code>A ∨ B</code>, затем результат <b>отрицаем</b>.</li>
+        <li>Истина <b>только</b> когда <b>оба</b> высказывания ложны.</li>
+        <li>Как только хоть одно истинно — результат ложь.</li>
+      </ul>
+      <div class="note">Названа в честь <b>Чарльза Пирса</b> — американского логика, философа и математика. Обозначается также <code>↓</code>, <code>⊥</code> или <code>NOR</code>.</div>
+    </div>
+    <div>
+      <h3 class="sans">Таблица истинности</h3>
+      <table>
+        <tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">A∨B</th><th class="ctr">A ↓ B</th></tr>
+        <tr class="hl"><td class="ctr">0</td><td class="ctr">0</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">0</td><td class="ctr">1</td><td class="ctr one">1</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr one">1</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">1</td><td class="ctr one">1</td><td class="ctr zero">0</td></tr>
+      </table>
+      <div class="card tint" style="margin-top:.5em">
+        <h3 class="sans">Запомнить</h3>
+        <p class="tiny">Единица ровно одна — в самой первой строке (оба нуля). Стрелка Пирса — полная <em>противоположность</em> операции ИЛИ.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section class="slide" data-sec="3 · Стрелка Пирса">
+  <header class="shead"><span class="snum">06</span>
+    <h2>Что можно выразить через ↓<span class="sub">НЕ, И, ИЛИ через одну лишь стрелку Пирса</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <div class="formula">¬A = A ↓ A</div>
+      <div class="formula">A ∨ B = (A ↓ B) ↓ (A ↓ B)</div>
+      <div class="formula">A ∧ B = (A ↓ A) ↓ (B ↓ B)</div>
+      <p class="tiny">Логика вывода: <code>X ↓ X = ¬(X ∨ X) = ¬X</code>. Отсюда получаем отрицание, а через него — И и ИЛИ.</p>
+    </div>
+    <div>
+      <h3 class="sans">Проверка A ∧ B</h3>
+      <table class="tight">
+        <tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">A↓A</th><th class="ctr">B↓B</th><th class="ctr">(A↓A)↓(B↓B)</th><th class="ctr">A∧B</th></tr>
+        <tr><td class="ctr">0</td><td class="ctr">0</td><td class="ctr">1</td><td class="ctr">1</td><td class="ctr zero">0</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">0</td><td class="ctr">1</td><td class="ctr">1</td><td class="ctr">0</td><td class="ctr zero">0</td><td class="ctr zero">0</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr">0</td><td class="ctr">1</td><td class="ctr zero">0</td><td class="ctr zero">0</td></tr>
+        <tr class="hl"><td class="ctr">1</td><td class="ctr">1</td><td class="ctr">0</td><td class="ctr">0</td><td class="ctr one">1</td><td class="ctr one">1</td></tr>
+      </table>
+      <p class="tiny">Последние два столбца совпали — значит, выражения <b>равносильны</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 09 -->
+<section class="slide" data-sec="4 · Штрих Шеффера">
+  <header class="shead"><span class="snum">07</span>
+    <h2>Штрих Шеффера: определение<span class="sub">A | B = ¬(A ∧ B) · «И-НЕ» · NAND</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <div class="formula">A | B = ¬(A ∧ B)</div>
+      <p>Читается «A штрих Шеффера B» и означает <b>НЕ (A И B)</b>. По-английски — <b>NAND</b>, то есть <b>N</b>ot <b>AND</b>.</p>
+      <ul>
+        <li>Сначала считаем <code>A ∧ B</code>, затем результат <b>отрицаем</b>.</li>
+        <li>Ложь <b>только</b> когда <b>оба</b> высказывания истинны.</li>
+        <li>Во всех остальных случаях — истина.</li>
+      </ul>
+      <div class="note">Назван в честь <b>Генри Шеффера</b> — американского логика. Обозначается <code>|</code>, <code>↑</code> или <code>NAND</code>.</div>
+    </div>
+    <div>
+      <h3 class="sans">Таблица истинности</h3>
+      <table>
+        <tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">A∧B</th><th class="ctr">A | B</th></tr>
+        <tr><td class="ctr">0</td><td class="ctr">0</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">0</td><td class="ctr">1</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+        <tr class="hl"><td class="ctr">1</td><td class="ctr">1</td><td class="ctr one">1</td><td class="ctr zero">0</td></tr>
+      </table>
+      <div class="card tint" style="margin-top:.5em">
+        <h3 class="sans">Запомнить</h3>
+        <p class="tiny">Ноль ровно один — в самой последней строке (обе единицы). Штрих Шеффера — полная <em>противоположность</em> операции И.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-sec="4 · Штрих Шеффера">
+  <header class="shead"><span class="snum">08</span>
+    <h2>Что можно выразить через |<span class="sub">НЕ, И, ИЛИ через одну лишь операцию И-НЕ</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <div class="formula">¬A = A | A</div>
+      <div class="formula">A ∧ B = (A | B) | (A | B)</div>
+      <div class="formula">A ∨ B = (A | A) | (B | B)</div>
+      <p class="tiny">Логика вывода: <code>X | X = ¬(X ∧ X) = ¬X</code>. Получив отрицание, собираем остальные операции.</p>
+    </div>
+    <div>
+      <h3 class="sans">Проверка A ∨ B</h3>
+      <table class="tight">
+        <tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">A|A</th><th class="ctr">B|B</th><th class="ctr">(A|A)|(B|B)</th><th class="ctr">A∨B</th></tr>
+        <tr><td class="ctr">0</td><td class="ctr">0</td><td class="ctr">1</td><td class="ctr">1</td><td class="ctr zero">0</td><td class="ctr zero">0</td></tr>
+        <tr class="hl"><td class="ctr">0</td><td class="ctr">1</td><td class="ctr">1</td><td class="ctr">0</td><td class="ctr one">1</td><td class="ctr one">1</td></tr>
+        <tr class="hl"><td class="ctr">1</td><td class="ctr">0</td><td class="ctr">0</td><td class="ctr">1</td><td class="ctr one">1</td><td class="ctr one">1</td></tr>
+        <tr><td class="ctr">1</td><td class="ctr">1</td><td class="ctr">0</td><td class="ctr">0</td><td class="ctr one">1</td><td class="ctr one">1</td></tr>
+      </table>
+      <p class="tiny">Столбцы совпали — формулы равносильны. Аналогично проверяются и остальные.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-sec="4 · Штрих Шеффера">
+  <header class="shead"><span class="snum">09</span>
+    <h2>Сравнение ↓ и |<span class="sub">Все операции в одной таблице</span></h2>
+  </header>
+  <table>
+    <tr><th class="ctr">A</th><th class="ctr">B</th><th class="ctr">¬A</th><th class="ctr">A∧B</th><th class="ctr">A∨B</th><th class="ctr">A→B</th><th class="ctr">A⊕B</th><th class="ctr">A ↓ B</th><th class="ctr">A | B</th></tr>
+    <tr><td class="ctr">0</td><td class="ctr">0</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr zero">0</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr one">1</td><td class="ctr one">1</td></tr>
+    <tr><td class="ctr">0</td><td class="ctr">1</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr one">1</td><td class="ctr one">1</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+    <tr><td class="ctr">1</td><td class="ctr">0</td><td class="ctr zero">0</td><td class="ctr zero">0</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr one">1</td></tr>
+    <tr><td class="ctr">1</td><td class="ctr">1</td><td class="ctr zero">0</td><td class="ctr one">1</td><td class="ctr one">1</td><td class="ctr one">1</td><td class="ctr zero">0</td><td class="ctr zero">0</td><td class="ctr zero">0</td></tr>
+  </table>
+  <div class="grid g2" style="margin-top:.6em">
+    <div class="card"><h3 class="sans">↓ — «зеркало ИЛИ»</h3><p class="tiny">Столбец <code>A ↓ B</code> полностью противоположен <code>A ∨ B</code>: где у ИЛИ единица, у стрелки ноль.</p></div>
+    <div class="card"><h3 class="sans">| — «зеркало И»</h3><p class="tiny">Столбец <code>A | B</code> полностью противоположен <code>A ∧ B</code>: где у И единица, у штриха ноль.</p></div>
+  </div>
+  <div class="note" style="margin-top:.5em">Обе операции — <b>отрицания</b> базовых: <code>A ↓ B = ¬(A ∨ B)</code> и <code>A | B = ¬(A ∧ B)</code>. Это прямое следствие законов де Моргана.</div>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-sec="5 · Полные базисы">
+  <header class="shead"><span class="snum">10</span>
+    <h2>Полные базисы<span class="sub">Почему ↓ и | называют универсальными · законы де Моргана · техника</span></h2>
+  </header>
+  <div class="grid g21">
+    <div>
+      <p><b>Функционально полная система</b> (полный базис) — набор операций, через которые можно выразить <em>любую</em> логическую функцию.</p>
+      <ul>
+        <li>Система <code>{¬, ∧, ∨}</code> — полный базис.</li>
+        <li>Система из <b>одной</b> операции <code>{↓}</code> — тоже полный базис!</li>
+        <li>Система из <b>одной</b> операции <code>{|}</code> — тоже полный базис!</li>
+      </ul>
+      <div class="note">Отсюда важный вывод: любой логический элемент компьютера можно собрать, используя <b>только</b> элементы И-НЕ или <b>только</b> ИЛИ-НЕ.</div>
+    </div>
+    <div>
+      <h3 class="sans">Законы де Моргана</h3>
+      <div class="formula">¬(A ∧ B) = ¬A ∨ ¬B</div>
+      <div class="formula">¬(A ∨ B) = ¬A ∧ ¬B</div>
+      <p class="tiny">Именно они объясняют, почему <code>↓</code> и <code>|</code> устроены так, как устроены: отрицание «переворачивает» операцию.</p>
+      <div class="card tint" style="margin-top:.4em">
+        <h3 class="sans">Проверка «на глаз»</h3>
+        <p class="tiny"><code>¬(A ∧ B)</code> ложно только при A=B=1 — и <code>A | B</code> тоже. Совпадение.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-sec="5 · Полные базисы">
+  <header class="shead"><span class="snum">11</span>
+    <h2>Зачем это в технике<span class="sub">Микросхемы · транзисторы · программирование</span></h2>
+  </header>
+  <div class="grid g3">
+    <div class="card"><h3 class="sans">Микросхемы</h3><p class="tiny">Элементы И-НЕ и ИЛИ-НЕ — базовые «кирпичи» цифровой электроники. Из них собирают сумматоры, регистры, память и процессоры.</p></div>
+    <div class="card"><h3 class="sans">Транзисторы</h3><p class="tiny">В КМОП-схемах И-НЕ и ИЛИ-НЕ реализуются минимальным числом транзисторов — поэтому они технологически выгодны.</p></div>
+    <div class="card"><h3 class="sans">Программирование</h3><p class="tiny">Логические условия, фильтры, проверки в базах данных и поисковых системах — это булева логика в действии.</p></div>
+  </div>
+  <div class="grid g2" style="margin-top:.6em">
+    <div class="card tint">
+      <h3 class="sans">Аналогия</h3>
+      <p class="tiny">Как из деталей «Лего» собирается что угодно, так из одной операции И-НЕ (или ИЛИ-НЕ) собирается вся логика компьютера. Меньше разных деталей — дешевле и надёжнее производство.</p>
+    </div>
+    <div class="card">
+      <h3 class="sans">Историческая справка</h3>
+      <p class="tiny">Идея универсального базиса привела к тому, что уже в 1960-х годах выпускались микросхемы, состоящие из десятков тысяч одинаковых элементов И-НЕ. Это резко упростило проектирование.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-sec="6 · Практика и итог">
+  <header class="shead"><span class="snum">12</span>
+    <h2>Задачи<span class="sub">5 заданий по теме «Стрелка Пирса и штрих Шеффера»</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <div class="task"><span class="n">1.</span> Постройте таблицы истинности для <code>A ↓ B</code> и <code>A | B</code>. Сколько единиц и нулей в каждом столбце?
+        <details><summary>Решение</summary><pre>A B | A↓B | A|B
+0 0 |  <span class="b">1</span>  |  <span class="b">1</span>
+0 1 |  <span class="c">0</span>  |  <span class="b">1</span>
+1 0 |  <span class="c">0</span>  |  <span class="b">1</span>
+1 1 |  <span class="c">0</span>  |  <span class="c">0</span>
+
+↓ : три нуля и одна единица
+| : три единицы и один ноль</pre></details>
+      </div>
+      <div class="task"><span class="n">2.</span> Вычислите <code>(1 ↓ 0) | (1 | 1)</code> по шагам.
+        <details><summary>Решение</summary><pre>1 ↓ 0 = ¬(1 ∨ 0) = ¬1 = <span class="c">0</span>
+1 | 1 = ¬(1 ∧ 1) = ¬1 = <span class="c">0</span>
+0 | 0 = ¬(0 ∧ 0) = ¬0 = <span class="b">1</span>
+
+Ответ: <span class="b">1</span></pre></details>
+      </div>
+      <div class="task"><span class="n">3.</span> Выразите НЕ двумя способами: только через <code>↓</code> и только через <code>|</code>. Проверьте таблицей.
+        <details><summary>Решение</summary><pre>¬A = A ↓ A        ¬A = A | A
+
+A | A↓A | A|A
+0 |  <span class="b">1</span>  |  <span class="b">1</span>
+1 |  <span class="c">0</span>  |  <span class="c">0</span>
+
+Столбцы совпали с ¬A — верно.</pre></details>
+      </div>
+    </div>
+    <div>
+      <div class="task"><span class="n">4.</span> Докажите таблицей истинности, что <code>(A ↓ B) ↓ (A ↓ B) = A ∨ B</code>.
+        <details><summary>Решение</summary><pre>A B | A↓B | (A↓B)↓(A↓B) | A∨B
+0 0 |  <span class="b">1</span>  |      <span class="c">0</span>      |  <span class="c">0</span>
+0 1 |  <span class="c">0</span>  |      <span class="b">1</span>      |  <span class="b">1</span>
+1 0 |  <span class="c">0</span>  |      <span class="b">1</span>      |  <span class="b">1</span>
+1 1 |  <span class="c">0</span>  |      <span class="b">1</span>      |  <span class="b">1</span>
+
+Последние два столбца одинаковы → равносильны.</pre></details>
+      </div>
+      <div class="task"><span class="n">5.</span> Запишите высказывание «Свет включён И дверь открыта» только через штрих Шеффера (A — свет, B — дверь).
+        <details><summary>Решение</summary><pre>A ∧ B = (A | B) | (A | B)
+
+Проверка A=1, B=1:
+1 | 1 = 0
+0 | 0 = 1  → истина, верно</pre></details>
+      </div>
+      <div class="card tint" style="margin-top:.5em">
+        <h3 class="sans">Домашнее задание</h3>
+        <p class="tiny">Решить все 5 задач. Дополнительно: выразить <code>A → B</code> через <code>|</code> и проверить таблицей истинности.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-sec="6 · Практика и итог">
+  <header class="shead"><span class="snum">13</span>
+    <h2>Итог и шпаргалка<span class="sub">Всё главное на одном слайде</span></h2>
+  </header>
+  <div class="grid g2">
+    <div>
+      <h3 class="sans">Понятия</h3>
+      <ul>
+        <li>Высказывание — утверждение, которое истинно или ложно.</li>
+        <li>Значения: <code>1</code> (истина) и <code>0</code> (ложь).</li>
+        <li>Базовые операции: НЕ <code>¬</code>, И <code>∧</code>, ИЛИ <code>∨</code>.</li>
+        <li>Производные: импликация <code>→</code>, эквивалентность <code>↔</code>, XOR <code>⊕</code>.</li>
+        <li>Таблица истинности: <code>2ⁿ</code> строк для n переменных.</li>
+      </ul>
+      <h3 class="sans" style="margin-top:.6em">Полные базисы</h3>
+      <p class="tiny">Через одну только <code>↓</code> или одну только <code>|</code> выражается вся логика. Отсюда — элементная база компьютеров.</p>
+    </div>
+    <div>
+      <h3 class="sans">Ключевые формулы</h3>
+      <table class="tight">
+        <tr><th>Через ↓ (ИЛИ-НЕ)</th><th>Через | (И-НЕ)</th></tr>
+        <tr><td><code>¬A = A ↓ A</code></td><td><code>¬A = A | A</code></td></tr>
+        <tr><td><code>A ∨ B = (A↓B)↓(A↓B)</code></td><td><code>A ∧ B = (A|B)|(A|B)</code></td></tr>
+        <tr><td><code>A ∧ B = (A↓A)↓(B↓B)</code></td><td><code>A ∨ B = (A|A)|(B|B)</code></td></tr>
+      </table>
+      <table class="tight" style="margin-top:.5em">
+        <tr><th>Запомнить</th><th>↓</th><th>|</th></tr>
+        <tr><td>Истина / ложь</td><td>1 при 0,0</td><td>0 при 1,1</td></tr>
+        <tr><td>Отрицает</td><td>ИЛИ</td><td>И</td></tr>
+      </table>
+      <div class="formula" style="margin-top:.5em">Высказывание → операция → таблица истинности → вывод</div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 · END -->
+<section class="slide invert title" data-sec="6 · Практика и итог">
+  <div class="meta">Технология · 8 класс</div>
+  <h1>Спасибо!</h1>
+  <div class="rule"></div>
+  <p class="lead" style="max-width:62ch">Вопросы? Разберите дома 5 задач со слайда 12 и попробуйте выразить импликацию через штрих Шеффера.</p>
+</section>
+
+</div>
+
+<div class="hint">← → Space · F · D · T урок · M меню</div>
+<div class="bar"><i id="fill"></i></div>
+<div class="hud">
+  <span class="sec" id="sec">Технология · 8 класс</span>
+  <span class="sp"></span>
+  <button id="prev">← Назад</button>
+  <button id="next">Вперёд →</button>
+  <a class="switch" href="informatika-stroki.html" title="Открыть презентацию по информатике (T)">Информатика: строки →</a>
+  <a class="menu" href="../index.html" title="Все уроки (M)">Меню</a>
+  <button id="theme" title="Тёмная тема (D)">◐ Тема</button>
+  <span class="pageno" id="pageno"></span>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var i = 0;
+  function show(n){
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === i); });
+    document.getElementById('fill').style.width = ((i + 1) / slides.length * 100) + '%';
+    document.getElementById('pageno').textContent = (i + 1) + ' / ' + slides.length;
+    var sec = slides[i].getAttribute('data-sec');
+    document.getElementById('sec').textContent = sec ? ('Технология · ' + sec) : 'Технология · 8 класс';
+    history.replaceState(null, '', '#s' + (i + 1));
+  }
+  function next(){ show(i + 1); }
+  function prev(){ show(i - 1); }
+  document.getElementById('next').onclick = next;
+  document.getElementById('prev').onclick = prev;
+  function toggleTheme(){ document.body.classList.toggle('dark'); }
+  document.getElementById('theme').onclick = toggleTheme;
+  document.addEventListener('keydown', function(e){
+    var k = e.key;
+    if (['ArrowRight','ArrowDown',' ','PageDown','Enter'].indexOf(k) >= 0){ e.preventDefault(); next(); }
+    else if (['ArrowLeft','ArrowUp','PageUp'].indexOf(k) >= 0){ e.preventDefault(); prev(); }
+    else if (k === 'Home'){ e.preventDefault(); show(0); }
+    else if (k === 'End'){ e.preventDefault(); show(slides.length - 1); }
+    else if (k === 'f' || k === 'F' || k === 'а' || k === 'А'){
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen();
+    }
+    else if (k === 'd' || k === 'D' || k === 'в' || k === 'В'){ toggleTheme(); }
+    else if (k === 't' || k === 'T' || k === 'е' || k === 'Е'){
+      window.location.href = 'informatika-stroki.html';
+    }
+    else if (k === 'm' || k === 'M' || k === 'ь' || k === 'Ь'){
+      window.location.href = '../index.html';
+    }
+  });
+  document.getElementById('deck').addEventListener('click', function(e){
+    if (e.target.closest('a, button, summary, details, code, pre')) return;
+    next();
+  });
+  var m = location.hash.match(/^#s(\d+)$/);
+  show(m ? parseInt(m[1], 10) - 1 : 0);
+})();
+</script>
+</body>
+</html>
