@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Печатный текст · Информатика 8 класс · Строки в Python</title>
+<title>Что говорить · Информатика 8 класс · Строки в Python</title>
 <style>
   :root{--ink:#000;--mut:#555;--hair:#bbb;--soft:#f2f2f2}
   *{box-sizing:border-box}
   body{margin:0;background:#e9e9e6;color:var(--ink);
-    font-family:Georgia,"Times New Roman",serif;font-size:11.5pt;line-height:1.5}
+    font-family:Georgia,"Times New Roman",serif;font-size:12.5pt;line-height:1.62}
   .page{background:#fff;width:210mm;min-height:297mm;margin:12px auto;padding:16mm 18mm;
     box-shadow:0 2px 14px #0003}
   .toolbar{position:fixed;top:0;left:0;right:0;background:#111;color:#fff;font-family:Arial,sans-serif;
@@ -17,47 +17,34 @@
     font-size:13px;cursor:pointer;text-decoration:none;font-family:Arial,sans-serif}
   .toolbar a{background:#333;color:#fff}
   .spacer{height:34px}
-  h1{font-size:20pt;margin:0 0 .1em;letter-spacing:-.01em}
-  h2{font-size:14pt;margin:1.3em 0 .35em;border-bottom:2px solid var(--ink);padding-bottom:.15em;
-     page-break-after:avoid}
-  h3{font-size:12pt;margin:.9em 0 .25em;page-break-after:avoid}
+  h1{font-size:21pt;margin:0 0 .1em;letter-spacing:-.01em}
   .meta{font-family:Arial,sans-serif;font-size:9.5pt;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
-  .lead{color:var(--mut);font-style:italic;margin:.2em 0 1em}
-  p,li{margin:.28em 0}
-  ul,ol{margin:.25em 0 .4em 1.2em;padding:0}
-  li{margin:.15em 0}
+  .lead{color:var(--mut);font-style:italic;margin:.35em 0 1.1em}
+  .slide-block{margin:0 0 1.25em;page-break-inside:avoid}
+  .slide-head{font-family:Arial,sans-serif;font-size:10pt;letter-spacing:.14em;text-transform:uppercase;
+    color:#fff;background:var(--ink);display:inline-block;padding:.22em .7em;border-radius:2px;margin-bottom:.5em}
+  .slide-title{font-size:12.5pt;font-weight:700;margin:.1em 0 .35em}
+  .say{margin:.28em 0}
+  .say b{font-weight:700}
   code{font-family:"Courier New",monospace;background:var(--soft);padding:0 .25em;border-radius:2px;font-size:.94em}
-  pre{font-family:"Courier New",monospace;background:var(--soft);border:1px solid var(--hair);
-    padding:.5em .7em;font-size:10pt;line-height:1.4;margin:.4em 0;white-space:pre-wrap;page-break-inside:avoid}
-  table{border-collapse:collapse;width:100%;font-size:10.5pt;margin:.4em 0;page-break-inside:avoid}
-  th,td{border:1px solid var(--hair);padding:.28em .5em;text-align:left;vertical-align:top}
-  th{background:var(--soft);font-weight:700}
-  td.c,th.c{text-align:center}
-  .note{border-left:3px solid var(--ink);padding:.2em 0 .2em .7em;margin:.5em 0;color:#222}
-  .formula{font-family:"Courier New",monospace;border:1px solid var(--ink);background:var(--soft);
-    padding:.35em .6em;margin:.3em 0;text-align:center;font-size:11pt}
-  .twocol{column-count:2;column-gap:1.4em}
-  .task{margin:.5em 0;page-break-inside:avoid}
-  .task b{font-family:Arial,sans-serif}
-  .lines{margin:.4em 0 .2em}
-  .lines i{display:block;border-bottom:1px solid var(--hair);height:1.1em}
-  .lines i+i{margin-top:.5em}
-  .ans{color:#333;font-size:10.5pt;background:#f7f7f7;border-left:3px solid #999;padding:.3em .6em;margin:.25em 0}
-  .pb{page-break-before:always}
-  hr{border:0;border-top:1px solid var(--hair);margin:1.1em 0}
-  .sign{border-top:1px solid var(--ink);margin-top:1em;padding-top:.4em;font-size:10pt;color:var(--mut)}
+  .cue{font-family:Arial,sans-serif;font-size:9.5pt;color:var(--mut);border-left:3px solid var(--hair);
+    padding:.15em 0 .15em .6em;margin:.4em 0}
+  .board{border:1px solid var(--ink);background:var(--soft);padding:.4em .7em;margin:.45em 0;
+    font-family:"Courier New",monospace;font-size:10.5pt;white-space:pre-wrap;page-break-inside:avoid}
+  .note{border-left:3px solid var(--ink);padding:.25em 0 .25em .7em;margin:.6em 0}
+  hr{border:0;border-top:1px solid var(--hair);margin:1.2em 0}
   @media print{
     body{background:#fff}
     .toolbar,.spacer{display:none}
     .page{width:auto;min-height:auto;margin:0;padding:0;box-shadow:none}
-    @page{size:A4;margin:16mm}
+    @page{size:A4;margin:15mm}
   }
 </style>
 </head>
 <body>
 <div class="toolbar">
   <button onclick="window.print()">🖨 Печать / Сохранить в PDF</button>
-  <span>Информатика · 8 класс · Строки в Python — печатный текст</span>
+  <span>Информатика · 8 класс · Строки в Python — текст речи учителя</span>
   <a href="../index.html">← В меню</a>
   <a href="informatika-stroki.html">Презентация →</a>
 </div>
@@ -65,284 +52,169 @@
 
 <div class="page">
 
-<h1>Строки в Python</h1>
+<h1>Строки в Python — что говорить</h1>
 <div class="meta">Информатика · 8 класс · Урок-замена · 45 минут</div>
-<p class="lead">Печатный текст урока: теория, примеры, задачи с решениями и самостоятельная работа.</p>
+<p class="lead">Дословный текст речи учителя по слайдам. Жирным выделены слова, на которых стоит сделать паузу или повысить голос. Курсивом — что делать у доски.</p>
 
-<h2>1. Строка как тип данных</h2>
-<p><b>Строка</b> — упорядоченная последовательность символов: букв, цифр, пробелов, знаков. В Python это отдельный тип <code>str</code>.</p>
-<ul>
-  <li><b>Упорядоченность:</b> у каждого символа есть номер (индекс), порядок фиксирован.</li>
-  <li><b>Неизменяемость:</b> нельзя заменить символ «на месте» — можно собрать новую строку.</li>
-  <li><b>Итерируемость:</b> строку можно перебирать циклом <code>for</code>.</li>
-  <li><b>Длина:</b> <code>len(s)</code> — количество символов.</li>
-</ul>
-<p>Строка может быть пустой: <code>""</code>, её длина <code>0</code> — это нормальное значение.</p>
-<table>
-  <tr><th>Тип</th><th>Пример</th><th>Смысл</th></tr>
-  <tr><td><code>int</code></td><td><code>42</code></td><td>целое число</td></tr>
-  <tr><td><code>float</code></td><td><code>3.14</code></td><td>дробное число</td></tr>
-  <tr><td><code>str</code></td><td><code>"42"</code></td><td>текст</td></tr>
-  <tr><td><code>bool</code></td><td><code>True</code></td><td>истина / ложь</td></tr>
-</table>
-<pre>x = "42"   # строка
-y = 42     # число
-
-print(type(x))  # &lt;class 'str'&gt;
-print(x + x)    # 4242  (склейка!)
-print(y + y)    # 84    (сложение)
-print(x * 2)    # 4242  (повтор)</pre>
-
-<h2>2. Кавычки и длина строки</h2>
-<h3>Три вида кавычек</h3>
-<pre>a = 'Python'        # одинарные
-b = "Python"        # двойные — то же самое
-c = "Он сказал: 'ок'" # вложенные
-d = """Строка
-из нескольких
-строк"""</pre>
-<p>Кавычки обязаны быть парными. Одинарные и двойные равнозначны. Тройные — для многострочного текста и документации.</p>
-<h3>Длина строки: len()</h3>
-<pre>s = "Python"
-print(len(s))       # 6
-
-empty = ""
-print(len(empty))   # 0
-
-word = "кот"
-print(len(word))    # 3</pre>
-<table>
-  <tr><th>Строка</th><th class="c">len()</th></tr>
-  <tr><td><code>"Python"</code></td><td class="c">6</td></tr>
-  <tr><td><code>"кот"</code></td><td class="c">3</td></tr>
-  <tr><td><code>""</code></td><td class="c">0</td></tr>
-  <tr><td><code>" "</code> (пробел)</td><td class="c">1</td></tr>
-</table>
-<p><code>len()</code> считает <b>символы</b>, а не байты: пробел — тоже символ. Последний символ имеет индекс <code>len(s) - 1</code> (или просто <code>-1</code>).</p>
-
-<h2>3. Индексация</h2>
-<p>Первый символ имеет индекс <b>0</b>. Доступ к символу — квадратные скобки: <code>s[i]</code>.</p>
-<pre>s = "Python"
-#      P  y  t  h  o  n
-#      0  1  2  3  4  5   ← индексы
-#     -6 -5 -4 -3 -2 -1   ← с конца
-
-print(s[0])    # P
-print(s[4])    # o
-print(s[-1])   # n  (последний)
-print(s[-2])   # o  (предпоследний)</pre>
-<table>
-  <tr><th>Выражение</th><th>Результат</th><th>Смысл</th></tr>
-  <tr><td><code>s[0]</code></td><td><code>P</code></td><td>первый</td></tr>
-  <tr><td><code>s[2]</code></td><td><code>t</code></td><td>третий</td></tr>
-  <tr><td><code>s[-1]</code></td><td><code>n</code></td><td>последний</td></tr>
-  <tr><td><code>s[len(s)-1]</code></td><td><code>n</code></td><td>то же, что <code>s[-1]</code></td></tr>
-</table>
-<div class="note"><b>IndexError.</b> <code>s[6]</code> — ошибка: индексы идут от <code>0</code> до <code>len(s)-1</code>.</div>
-
-<h2>4. Срезы</h2>
-<div class="formula">s[начало : конец : шаг]</div>
-<ul>
-  <li><b>начало</b> — с какого индекса (включительно), по умолчанию 0;</li>
-  <li><b>конец</b> — до какого индекса (<em>не включая</em>), по умолчанию до конца;</li>
-  <li><b>шаг</b> — через сколько символов, по умолчанию 1; может быть отрицательным.</li>
-</ul>
-<pre>s = "Программирование"
-
-s[0:4]     # Прог
-s[4:]      # раммирование
-s[:4]      # Прог
-s[:]       # вся строка (копия)
-s[0:8:2]   # Пorm  — каждый второй
-s[::-1]    # еинавориммаргорП
-s[-4:]     # ние
-s[3:3]     # ""  (пустая)</pre>
-<table>
-  <tr><th>Шаблон</th><th>Что делает</th></tr>
-  <tr><td><code>s[:n]</code></td><td>первые n символов</td></tr>
-  <tr><td><code>s[-n:]</code></td><td>последние n символов</td></tr>
-  <tr><td><code>s[::2]</code></td><td>каждый второй</td></tr>
-  <tr><td><code>s[::-1]</code></td><td>переворот строки</td></tr>
-</table>
-<div class="note">Срез никогда не выбрасывает ошибку по границам: <code>"abc"[0:99]</code> → <code>"abc"</code>. Срез всегда создаёт <em>новую</em> строку.</div>
-
-<h2>5. Операции над строками</h2>
-<table>
-  <tr><th>Операция</th><th>Пример</th><th>Результат и смысл</th></tr>
-  <tr><td>Склейка <code>+</code></td><td><code>"При" + "вет"</code></td><td><code>Привет</code></td></tr>
-  <tr><td>Повтор <code>*</code></td><td><code>"ха" * 3</code></td><td><code>хахаха</code></td></tr>
-  <tr><td>Длина <code>len()</code></td><td><code>len("Python")</code></td><td><code>6</code></td></tr>
-  <tr><td>Вхождение <code>in</code></td><td><code>"th" in "Python"</code></td><td><code>True</code></td></tr>
-  <tr><td>Отсутствие <code>not in</code></td><td><code>"z" not in "Python"</code></td><td><code>True</code></td></tr>
-  <tr><td>Сравнение <code>==</code></td><td><code>"abc" == "abc"</code></td><td><code>True</code></td></tr>
-  <tr><td>Порядок <code>&lt;</code> <code>&gt;</code></td><td><code>"abc" &lt; "abd"</code></td><td><code>True</code> (как в словаре)</td></tr>
-</table>
-<p>Нельзя смешивать типы: <code>"5" + 3</code> → <b>TypeError</b>. Нужно <code>int("5") + 3</code>. Регистр важен: <code>"Да" == "да"</code> → <b>False</b>. Коды символов: <code>ord("A")</code> → 65, <code>chr(97)</code> → <code>'a'</code>.</p>
-
-<h2>6. Методы строк</h2>
-<p>Вызов через точку: <code>строка.метод()</code>. Все методы возвращают <b>новую</b> строку.</p>
-<table>
-  <tr><th>Метод</th><th>Пример → результат</th></tr>
-  <tr><td><code>.upper()</code></td><td><code>"abc".upper()</code> → <code>ABC</code></td></tr>
-  <tr><td><code>.lower()</code></td><td><code>"ABC".lower()</code> → <code>abc</code></td></tr>
-  <tr><td><code>.capitalize()</code></td><td><code>"привет мир"</code> → <code>Привет мир</code></td></tr>
-  <tr><td><code>.title()</code></td><td><code>"привет мир"</code> → <code>Привет Мир</code></td></tr>
-  <tr><td><code>.strip()</code></td><td><code>" hi ".strip()</code> → <code>hi</code></td></tr>
-  <tr><td><code>.lstrip() / .rstrip()</code></td><td>убрать пробелы слева / справа</td></tr>
-  <tr><td><code>.find(x)</code></td><td><code>"Python".find("t")</code> → <code>2</code> (<code>-1</code> если нет)</td></tr>
-  <tr><td><code>.index(x)</code></td><td>как find, но при отсутствии — ошибка</td></tr>
-  <tr><td><code>.count(x)</code></td><td><code>"ааба".count("а")</code> → <code>3</code></td></tr>
-  <tr><td><code>.replace(a,b)</code></td><td><code>"кот".replace("к","б")</code> → <code>бот</code></td></tr>
-  <tr><td><code>.startswith(x)</code></td><td><code>"file.py".startswith("file")</code> → <code>True</code></td></tr>
-  <tr><td><code>.endswith(x)</code></td><td><code>"file.py".endswith(".py")</code> → <code>True</code></td></tr>
-  <tr><td><code>.split()</code></td><td><code>"я и ты".split()</code> → <code>['я','и','ты']</code></td></tr>
-  <tr><td><code>sep.join(lst)</code></td><td><code>"-".join(['a','b'])</code> → <code>a-b</code></td></tr>
-</table>
-<div class="note"><b>Важно:</b> строки неизменяемы — <code>s.upper()</code> <em>не меняет</em> <code>s</code>, а возвращает новую строку. Нужно присвоить: <code>s = s.upper()</code>. Проверки <code>.isdigit()</code>, <code>.isalpha()</code>, <code>.isspace()</code> возвращают <code>True/False</code>.</div>
-
-<h2>7. Форматирование строк</h2>
-<pre># 1. склейка (неудобно)
-print("Имя: " + name + ", возраст: " + str(age))
-
-# 2. .format()
-print("Имя: {}, возраст: {}".format(name, age))
-
-# 3. f-строка (лучший способ)
-print(f"Имя: {name}, возраст: {age}")</pre>
-<table>
-  <tr><th>Запись</th><th>Результат</th></tr>
-  <tr><td><code>f"{x:.2f}"</code></td><td>2 знака после точки: <code>3.14</code></td></tr>
-  <tr><td><code>f"{x:&gt;8}"</code></td><td>по правому краю, ширина 8</td></tr>
-  <tr><td><code>f"{x:&lt;8}"</code></td><td>по левому краю</td></tr>
-  <tr><td><code>f"{x:^8}"</code></td><td>по центру</td></tr>
-  <tr><td><code>f"{n:05d}"</code></td><td>число с ведущими нулями: <code>00042</code></td></tr>
-</table>
-<p>Внутри <code>{}</code> можно писать выражения: <code>f"{2+3*4}"</code> → <code>14</code>.</p>
-
-<h2>8. Преобразование типов</h2>
-<pre>age = input("Возраст: ")
-# age — ВСЕГДА строка, даже если ввели 12
-
-age = int(age)       # теперь число
-print(age + 1)       # 13
-
-# можно сразу:
-age = int(input("Возраст: "))</pre>
-<table>
-  <tr><th>Функция</th><th>Пример → результат</th></tr>
-  <tr><td><code>int("25")</code></td><td><code>25</code></td></tr>
-  <tr><td><code>int("3.9")</code></td><td><b>ValueError</b> — не целое</td></tr>
-  <tr><td><code>float("3.5")</code></td><td><code>3.5</code></td></tr>
-  <tr><td><code>str(42)</code></td><td><code>"42"</code></td></tr>
-  <tr><td><code>int("abc")</code></td><td><b>ValueError</b> — не число</td></tr>
-</table>
-<p><b>TypeError</b> — смешали типы (<code>"5" + 3</code>). <b>ValueError</b> — не получилось превратить (<code>int("12 лет")</code>).</p>
-
-<h2>9. Перебор строки</h2>
-<div class="twocol">
-<h3>По символам</h3>
-<pre>word = "кот"
-for ch in word:
-    print(ch)
-# к
-# о
-# т</pre>
-<h3>По индексам</h3>
-<pre>word = "кот"
-for i in range(len(word)):
-    print(i, word[i])
-# 0 к
-# 1 о
-# 2 т</pre>
-</div>
-<h3>С номером: enumerate</h3>
-<pre>for i, ch in enumerate("кот"):
-    print(i, ch)</pre>
-<h3>Аккумулятор: собираем новую строку</h3>
-<pre>word = input("Слово: ")
-res = ""
-for ch in word:
-    if ch.lower() in "аеёиоуыэюя":
-        res += ch
-print(f"Гласные: {res}")</pre>
-
-<h2>10. Разбор программы</h2>
-<pre>word = input("Введите слово: ")
-
-print(f"Длина: {len(word)}")
-print(f"Первый символ: {word[0]}")
-print(f"Последний символ: {word[-1]}")
-print(f"Заглавными: {word.upper()}")
-print(f"Наоборот: {word[::-1]}")
-
-if word.lower() == word[::-1].lower():
-    print("Это палиндром!")
-else:
-    print("Обычное слово")</pre>
-
-<h2>11. Типичные ошибки</h2>
-<table>
-  <tr><th>Ошибка</th><th>Почему</th><th>Как правильно</th></tr>
-  <tr><td><code>"5" + 3</code></td><td>склеивание строки с числом</td><td><code>int("5") + 3</code> или <code>f"{x}{y}"</code></td></tr>
-  <tr><td><code>s[1]</code> вместо первого</td><td>индексация с нуля, а не с единицы</td><td>первый — <code>s[0]</code></td></tr>
-  <tr><td><code>s[3]</code> на слове из 3 букв</td><td>индекс вне диапазона</td><td>максимум <code>s[2]</code>, последний — <code>s[-1]</code></td></tr>
-  <tr><td><code>s.upper()</code> и ждём изменений</td><td>строки неизменяемы</td><td><code>s = s.upper()</code></td></tr>
-  <tr><td><code>int(input())</code> и пустой ввод</td><td>пустая строка не число</td><td>проверить <code>s.isdigit()</code></td></tr>
-</table>
-
-<div class="pb"></div>
-<h2>Задачи для тренировки (5 задач, с решениями)</h2>
-<div class="task"><b>1.</b> Спросите имя и выведите приветствие вида <code>Привет, Аня!</code>
-  <div class="ans">name = input("Как тебя зовут? ")<br>print(f"Привет, {name}!")</div>
-</div>
-<div class="task"><b>2.</b> Для <code>s = "Программирование"</code> выведите длину, первый и последний символ.
-  <div class="ans">s = "Программирование"<br>print(len(s))&nbsp;&nbsp;# 16<br>print(s[0])&nbsp;&nbsp;&nbsp;# П<br>print(s[-1])&nbsp;&nbsp;# е</div>
-</div>
-<div class="task"><b>3.</b> Спросите слово и выведите его заглавными буквами и задом наперёд.
-  <div class="ans">w = input("Слово: ")<br>print(w.upper())<br>print(w[::-1])</div>
-</div>
-<div class="task"><b>4.</b> Для <code>s = "яблоко, банан, груша"</code> замените запятые на точки с запятой и посчитайте число слов.
-  <div class="ans">s = "яблоко, банан, груша"<br>print(s.replace(",", ";"))<br>print("Слов:", s.count(",") + 1)</div>
-</div>
-<div class="task"><b>5.</b> Спросите слово и посчитайте, сколько в нём букв «а» (и строчных, и заглавных).
-  <div class="ans">w = input("Слово: ").lower()<br>print("Букв а:", w.count("а"))</div>
-</div>
-
-<h2>Самостоятельная работа</h2>
-<p>Фамилия, имя: ______________________________ &nbsp; Класс: ______ &nbsp; Дата: ____________</p>
-<div class="task"><b>1.</b> Дана строка <code>s = "Информатика"</code>. Выведите её длину и символ с индексом 3.
-  <div class="lines"><i></i><i></i></div>
-</div>
-<div class="task"><b>2.</b> Спросите у пользователя слово и выведите его первый и последний символ.
-  <div class="lines"><i></i><i></i></div>
-</div>
-<div class="task"><b>3.</b> Спросите слово и выведите его задом наперёд.
-  <div class="lines"><i></i><i></i></div>
-</div>
-<div class="task"><b>4.</b> Дана строка <code>"Я учу Python"</code>. Выведите её заглавными буквами.
-  <div class="lines"><i></i><i></i></div>
-</div>
-<div class="task"><b>5.</b> Дана строка <code>"кот, пёс, лиса"</code>. Замените запятые на точки с запятой.
-  <div class="lines"><i></i><i></i></div>
-</div>
-<div class="task"><b>6.</b> Спросите слово и посчитайте, сколько раз в нём встречается буква «о».
-  <div class="lines"><i></i><i></i></div>
-</div>
-<div class="task"><b>7.</b> Спросите имя и возраст. С помощью f-строки выведите фразу: <code>Меня зовут Аня, мне 13 лет</code>.
-  <div class="lines"><i></i><i></i></div>
-</div>
-<div class="sign">Оценка: ____________ &nbsp;&nbsp; Проверил: ______________________</div>
+<div class="note">Обозначения: <b>СЛАЙД N</b> — какой слайд открыт; <b>ГОВОРЮ:</b> — произносить вслух; <i>Ремарка:</i> — действие у доски или в классе.</div>
 
 <hr>
-<h3>Итог и шпаргалка</h3>
-<ul>
-  <li>Строка — тип <code>str</code>, последовательность символов, неизменяема.</li>
-  <li>Индексы с нуля: <code>s[0]</code> … <code>s[-1]</code>. Срез <code>s[нач:кон:шаг]</code>; <code>s[::-1]</code> — переворот.</li>
-  <li>Операции: <code>+</code>, <code>*</code>, <code>len()</code>, <code>in</code>, <code>==</code>.</li>
-  <li><code>input()</code> даёт строку → приводим тип: <code>int()</code>, <code>float()</code>.</li>
-  <li>Методы: регистр <code>.upper() .lower() .title() .capitalize()</code>; пробелы <code>.strip() .lstrip() .rstrip()</code>; поиск <code>.find() .index() .count() .startswith() .endswith()</code>; изменение <code>.replace()</code>; разбор <code>.split()</code>, <code>sep.join()</code>; проверки <code>.isdigit() .isalpha() .isspace()</code>; вывод <code>f"{значение}"</code>, <code>f"{x:.2f}"</code>.</li>
-</ul>
-<div class="formula">Строка → индекс/срез → метод → новая строка → вывод через f-строку</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 1 · титульный</span>
+  <div class="slide-title">Вступление</div>
+  <p class="say"><b>Говорю:</b> Здравствуйте, ребята. Сегодня у нас информатика, и мы начинаем новую большую тему — <b>строки в Python</b>.</p>
+  <p class="say">Скажите, где вы вообще встречаете текст в жизни? Кто-то скажет «в сообщениях», кто-то «в играх», кто-то «в браузере». Всё верно. В программировании текст — это тоже данные, только особые. И сегодня мы научимся с ними работать: хранить, доставать из них отдельные буквы, менять их и красиво выводить.</p>
+  <p class="say">План такой: сначала разберём, что такое строка и как к ней обращаться. Потом — как искать и изменять текст. В конце — пять задач, которые разберём вместе. Работаем в тетрадях, пишем за мной.</p>
+  <p class="cue"><i>Ремарка:</i> проверьте, что у всех открыты тетради. Не тратьте на это больше десяти секунд.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 2</span>
+  <div class="slide-title">Строка как тип данных</div>
+  <p class="say"><b>Говорю:</b> Итак, <b>строка</b> — это упорядоченная последовательность символов. Простыми словами — это текст в кавычках. Буквы, цифры, пробелы, знаки препинания — всё это символы.</p>
+  <p class="say">У строки в Python есть свой тип, он называется <code>str</code> — от английского string, «строка». Запомните это слово.</p>
+  <p class="say">Теперь четыре свойства, которые нужно понять. <b>Первое — упорядоченность.</b> У каждого символа есть свой номер, он называется индекс. Порядок фиксирован, и мы им пользуемся. <b>Второе — неизменяемость.</b> Вот это важно: нельзя взять и заменить букву прямо внутри строки. Строку можно только собрать заново. <b>Третье — итерируемость.</b> По строке можно пройти циклом <code>for</code>, как по списку. <b>Четвёртое — у строки есть длина</b>, её мы получаем функцией <code>len</code>.</p>
+  <p class="say">И ещё: строка может быть пустой — просто две кавычки. Её длина — ноль. Это не ошибка, это нормальное значение.</p>
+  <p class="say">Посмотрите на таблицу: число <code>42</code> — это <code>int</code>, дробное <code>3.14</code> — <code>float</code>, а <code>"42"</code> в кавычках — это уже <code>str</code>, текст.</p>
+  <p class="cue"><i>Ремарка:</i> на доске напишите рядом: <code>42</code> и <code>"42"</code>. Спросите класс: «Это одно и то же?» — и объясните, что нет.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 3</span>
+  <div class="slide-title">Кавычки и длина строки</div>
+  <p class="say"><b>Говорю:</b> Как мы записываем строку? В кавычках. И кавычки бывают трёх видов.</p>
+  <p class="say">Одинарные — <code>'Python'</code>. Двойные — <code>"Python"</code>. Для компьютера это одно и то же, разницы нет. Выбирайте те, что удобнее внутри текста: если внутри есть одинарная кавычка, оборачивайте в двойные. И тройные кавычки — ими удобно писать текст в несколько строк.</p>
+  <p class="say">Главное правило: кавычки обязаны быть парными. Открыли — закрыли.</p>
+  <p class="say">Теперь функция <code>len</code>. Она считает количество символов. Смотрите: <code>len("Python")</code> — шесть. <code>len("кот")</code> — три. Пустая строка — ноль. И даже пробел — это один символ, потому что пробел тоже символ.</p>
+  <p class="cue"><i>Ремарка:</i> напишите на доске <code>len("кот")</code> и спросите: «Сколько будет?» Дождитесь ответа «три».</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 4</span>
+  <div class="slide-title">Индексация</div>
+  <p class="say"><b>Говорю:</b> Теперь самое интересное — как достать из строки одну букву. Для этого нужен <b>индекс</b>.</p>
+  <p class="say">И вот главное правило, которое надо запомнить навсегда: <b>счёт начинается с нуля</b>. Первый символ — это нулевой, а не первый. Звучит странно, но так устроены все языки программирования.</p>
+  <p class="say">Берём слово <code>Python</code>. <code>s[0]</code> — это <code>P</code>, первый символ. <code>s[4]</code> — это <code>o</code>. А как достать последний? Можно написать <code>s[5]</code>, потому что длина шесть, значит последний индекс — пять. А можно хитрее — <code>s[-1]</code>. Минус один означает «с конца». <code>s[-2]</code> — предпоследний.</p>
+  <p class="say">И сразу предупреждаю про ошибку. Если попросить <code>s[6]</code> — программа упадёт с ошибкой <code>IndexError</code>, потому что индекса шесть не существует. Индексы идут от нуля до «длина минус один».</p>
+  <p class="cue"><i>Ремарка:</i> напишите на доске слово <code>Python</code> и под каждой буквой — индекс: 0 1 2 3 4 5, и снизу −6 −5 −4 −3 −2 −1.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 5</span>
+  <div class="slide-title">Срезы</div>
+  <p class="say"><b>Говорю:</b> Достать один символ мы умеем. А как достать сразу кусок строки? Это называется <b>срез</b>.</p>
+  <p class="say">Записывается так: в квадратных скобках начало, двоеточие, конец. И вот ловушка, на которой спотыкаются все: <b>конец не входит</b> в результат. То есть <code>s[0:4]</code> — это символы с нулевого по третий, а четвёртый уже не берём.</p>
+  <p class="say">Если начало не писать — берём с самого начала. Если не писать конец — до самого конца. А ещё есть третий параметр — шаг. И тут фокус: <code>s[::-1]</code> переворачивает строку задом наперёд. Запомните этот трюк, он часто выручает.</p>
+  <p class="say">И хорошая новость: срез никогда не падает с ошибкой. Даже если попросить больше, чем есть, — просто вернётся то, что поместилось.</p>
+  <p class="cue"><i>Ремарка:</i> на доске разберите <code>"Программирование"[0:4]</code> → <code>Прог</code>. Дайте классу прокричать ответ вместе.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 6</span>
+  <div class="slide-title">Операции над строками</div>
+  <p class="say"><b>Говорю:</b> Со строками, как и с числами, можно делать операции. Только другие.</p>
+  <p class="say">Плюс — это не сложение, а <b>склейка</b>. <code>"При" + "вет"</code> даёт <code>Привет</code>. Умножение на число — это <b>повтор</b>: <code>"ха" * 3</code> даёт <code>хахаха</code>.</p>
+  <p class="say">Ещё можно спросить: есть ли кусочек текста внутри? Для этого оператор <code>in</code>. <code>"th" in "Python"</code> — истина, потому что эти буквы там есть.</p>
+  <p class="say">И самое частое место ошибок: <b>нельзя склеивать строку с числом</b>. Вот так <code>"5" + 3</code> — программа упадёт. Потому что слева текст, справа число, а это разные типы. Нужно сначала превратить число в текст или текст в число.</p>
+  <p class="cue"><i>Ремарка:</i> покажите на доске <code>"5" + 3</code> и рядом <code>int("5") + 3</code> → <code>8</code>.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 7 · разделитель</span>
+  <div class="slide-title">Методы, форматирование, типы</div>
+  <p class="say"><b>Говорю:</b> Первую половину урока мы разобрали. Теперь вторая — самое полезное на практике: методы строк, красивое форматирование и превращение типов. Смотрим внимательно, это то, что вы будете использовать каждый день.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 8</span>
+  <div class="slide-title">Методы строк</div>
+  <p class="say"><b>Говорю:</b> У строки есть встроенные «умения» — методы. Вызываются они через точку: <code>строка.метод()</code>.</p>
+  <p class="say">Группа первая — регистр. <code>upper</code> делает всё заглавным, <code>lower</code> — строчным, <code>title</code> — каждое слово с большой буквы.</p>
+  <p class="say">Вторая группа — пробелы. <code>strip</code> убирает лишние пробелы по краям. Это спасение, когда данные вводит человек.</p>
+  <p class="say">Третья — поиск. <code>find</code> ищет кусочек и говорит его номер, а <code>count</code> считает, сколько раз он встречается.</p>
+  <p class="say">Четвёртая — замена. <code>replace</code> меняет один кусочек на другой.</p>
+  <p class="say">И пятая — разбор. <code>split</code> разрезает строку на части, а <code>join</code> склеивает.</p>
+  <p class="say">И <b>главное</b>, что надо запомнить про методы: строки неизменяемы, поэтому метод не меняет исходную строку, а <b>возвращает новую</b>. То есть надо написать <code>s = s.upper()</code>. Вот здесь половина класса ошибается — будьте внимательны.</p>
+  <p class="cue"><i>Ремарка:</i> обязательно вызовите одного ученика к доске показать разницу между <code>s.upper()</code> и <code>s = s.upper()</code>.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 9</span>
+  <div class="slide-title">Форматирование строк</div>
+  <p class="say"><b>Говорю:</b> Как красиво вывести текст вместе с данными? Раньше склеивали через плюс — неудобно. Потом придумали <code>format</code>. Но сегодня лучший способ — <b>f-строки</b>.</p>
+  <p class="say">Перед кавычками ставим букву <code>f</code>, а внутри фигурных скобок пишем, что подставить. Вот так: <code>f"Имя: {name}, возраст: {age}"</code>. Читается как обычный текст, но всё автоматически подставляется.</p>
+  <p class="say">Внутри скобок можно даже считать: <code>f"{2+3*4}"</code> выдаст четырнадцать. И можно управлять видом числа — например, оставить два знака после точки для цены.</p>
+  <p class="cue"><i>Ремарка:</i> напишите на доске пример f-строки и подчеркните фигурные скобки. Скажите: «Кто запомнит — будет писать код в два раза быстрее».</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 10</span>
+  <div class="slide-title">Преобразование типов</div>
+  <p class="say"><b>Говорю:</b> А теперь ловушка, на которой ошибаются все новички. Функция <code>input</code> всегда возвращает <b>строку</b>. Даже если человек ввёл число — это всё равно текст!</p>
+  <p class="say">Поэтому если мы спросили возраст и хотим что-то с ним посчитать, надо превратить текст в число. Для этого есть <code>int</code> для целых и <code>float</code> для дробных.</p>
+  <p class="say">И запомните две ошибки: <code>TypeError</code> — когда мы смешали типы, например текст с числом. И <code>ValueError</code> — когда превращение не получилось, например пытаемся превратить в число слово «привет».</p>
+  <p class="cue"><i>Ремарка:</i> спросите класс: «Почему <code>input</code> возвращает строку?» Дайте подумать пять секунд, потом объясните.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 11</span>
+  <div class="slide-title">Перебор строки</div>
+  <p class="say"><b>Говорю:</b> Как пройти по всем буквам строки? Двумя способами.</p>
+  <p class="say">Первый — просто циклом <code>for</code> по символам: «для каждой буквы в слове — сделай что-то». Второй — по индексам, если нам важен номер буквы. А ещё есть удобная функция <code>enumerate</code>, которая сразу даёт и номер, и символ.</p>
+  <p class="say">И классический приём — <b>аккумулятор</b>. Мы заводим пустую строку и по одной добавляем туда буквы. Так, например, можно собрать все гласные из слова. Посмотрите на пример: берём слово, пробегаем по буквам, если буква гласная — приклеиваем её к результату.</p>
+  <p class="cue"><i>Ремарка:</i> предложите классу вслух назвать гласные в слове «информатика». Покажите, как это выглядит в коде.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 12</span>
+  <div class="slide-title">Разбор программы</div>
+  <p class="say"><b>Говорю:</b> Давайте соберём всё вместе и посмотрим на настоящую программу. Она просит слово и показывает его длину, первую и последнюю букву, вариант заглавными и перевёрнутый вариант.</p>
+  <p class="say">А в конце — проверка: если слово одинаково читается в обе стороны, это палиндром. Помните такие слова? «шалаш», «казак». Вот здесь мы как раз используем переворот строки, который учили.</p>
+  <p class="cue"><i>Ремарка:</i> разберите программу построчно, спрашивая «что выведет эта строка?» перед каждой.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 13</span>
+  <div class="slide-title">Типичные ошибки</div>
+  <p class="say"><b>Говорю:</b> Собрал для вас пять главных граблей, на которые наступают почти все.</p>
+  <p class="say">Первое — склейка текста с числом, мы это уже разобрали. Второе — путаница с нумерацией: помните, счёт с нуля. Третье — выход за границы строки. Четвёртое — забыли, что методы возвращают новую строку. И пятое — превращение пустого ввода в число.</p>
+  <p class="say">Если запомните эти пять пунктов — половину ошибок в своих программах вы больше не сделаете.</p>
+  <p class="cue"><i>Ремарка:</i> не спешите. Спросите после каждого пункта: «Понятно? Кто уже так ошибался?»</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 14</span>
+  <div class="slide-title">Задачи</div>
+  <p class="say"><b>Говорю:</b> А теперь практика. Вот пять задач по сегодняшней теме. Первую разберём вместе у доски, остальные — по парам, кто решит — поднимает руку, я проверю.</p>
+  <p class="say">Решения можно открыть кликом на слайде — но сначала честно попробуйте сами. Ошибка, которую вы нашли сами, запоминается в десять раз лучше готового ответа.</p>
+  <p class="cue"><i>Ремарка:</i> первую задачу решите у доски с классом. Дайте на остальные минут пять-шесть.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 15</span>
+  <div class="slide-title">Итог и шпаргалка</div>
+  <p class="say"><b>Говорю:</b> Подведём итог. Сегодня мы узнали: что такое строка и тип <code>str</code>; как обращаться к символам по индексу; как брать срезы и переворачивать строку; какие есть операции и методы; как красиво выводить данные через f-строки; и как превращать типы.</p>
+  <p class="say">Вот эта шпаргалка — самый главный слайд. Сфотографируйте её или перепишите, она пригодится вам ещё не раз.</p>
+  <p class="cue"><i>Ремарка:</i> дайте 20–30 секунд, чтобы все успели сфотографировать слайд.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 16</span>
+  <div class="slide-title">Самостоятельная работа</div>
+  <p class="say"><b>Говорю:</b> А теперь самостоятельная работа. Семь заданий, все по сегодняшней теме. Подпишите листочки — фамилия, класс и дата. Работаем тихо, каждый сам. На работу — до конца урока. Кто закончит раньше — проверьте себя, особенно задачу с переворотом строки.</p>
+  <p class="cue"><i>Ремарка:</i> раздайте листочки или дайте списать задания с экрана — слайд 16.</p>
+</div>
+
+<div class="slide-block">
+  <span class="slide-head">Слайд 17 · финал</span>
+  <div class="slide-title">Спасибо</div>
+  <p class="say"><b>Говорю:</b> На этом всё. Сегодня вы сделали первый шаг в работу с текстом — а текст в программировании повсюду. Спасибо за урок, все свободны. На дом — пять задач со слайда 14, кто не успел.</p>
+  <p class="cue"><i>Ремарка:</i> соберите листочки с самостоятельной работой. Если осталась минута — задайте вопрос: «Что было самым непонятным?»</p>
+</div>
+
+<hr>
+<div class="note"><b>Общие ремарки на весь урок:</b> темп держите бодрый, но на индексах, срезах и методах останавливайтесь и проверяйте понимание. Каждый новый термин сначала произносите, потом показываете в коде, потом спрашиваете класс. Никогда не пишите код молча — проговаривайте каждую строку вслух.</div>
 
 </div>
 </body>
