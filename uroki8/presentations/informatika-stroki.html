@@ -114,6 +114,24 @@
   .lines i{display:block;border-bottom:1px solid var(--hair);height:1.15em}
   .lines i+i{margin-top:.55em}
 
+  /* --- bottom filler strip --- */
+  .slide>.filler{margin-top:auto;display:flex;gap:1.4em;align-items:flex-start;
+    border-top:2px solid var(--rule);padding-top:.55em}
+  .filler .fc{flex:1;min-width:0}
+  .filler .fc+.fc{border-left:1px solid var(--hair);padding-left:1.4em}
+  .filler .fcap{display:block;font-family:var(--sans);font-size:clamp(9.5px,.92vw,12px);
+    letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:.28em}
+  .filler p,.filler li{font-size:clamp(11.5px,1.06vw,15px);line-height:1.42;margin:.16em 0}
+  .filler ul{margin:.1em 0;padding-left:1.05em}
+  .filler code{font-size:.92em}
+  .filler details{margin:.1em 0}
+  .filler details>summary{font-size:clamp(10.5px,.98vw,13px);border-bottom:1px solid var(--hair)}
+  .filler pre{font-size:clamp(10.5px,.98vw,13px);margin:.2em 0}
+  @media print{.slide>.filler{margin-top:1em;page-break-inside:avoid}}
+  .invert>.filler .fcap{color:#b9b7b1}
+  .invert>.filler{border-top-color:#4a4a47}
+  .invert>.filler .fc+.fc{border-left-color:#4a4a47}
+
   .hud{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:14px;
     padding:0 20px;background:var(--paper);border-top:1px solid var(--rule);
     font-size:12px;color:var(--mut);z-index:30;font-family:var(--sans)}
@@ -202,6 +220,20 @@ y = <span class="b">42</span>     <span class="c"># число</span>
     <div class="card"><h3 class="sans">Ключевая мысль</h3><p class="tiny">Строка и число с виду похожи (<code>"42"</code> и <code>42</code>), но ведут себя по-разному. Тип определяет поведение.</p></div>
     <div class="card"><h3 class="sans">Проверка</h3><p class="tiny"><code>type(x)</code> показывает тип. Полезно при отладке, когда «не работает» сложение.</p></div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Строка — тип <code>str</code>, порядок символов фиксирован.</li>
+      <li>Строка <b>неизменяема</b>: меняем только сборкой новой.</li>
+      <li><code>len(s)</code> — длина; <code>""</code> — пустая строка, длина 0.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Почему <code>42</code> и <code>"42"</code> — разное?</summary>
+      <p>Первое — число <code>int</code>, с ним можно считать. Второе — текст <code>str</code>. Складывать их без преобразования нельзя.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 03 -->
@@ -242,6 +274,20 @@ word = <span class="s">"кот"</span>
       <div class="note">Полезно запомнить: последний символ строки имеет индекс <code>len(s) - 1</code> (или просто <code>-1</code>).</div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Одинарные и двойные кавычки равнозначны.</li>
+      <li>Тройные — для текста в несколько строк.</li>
+      <li><code>len()</code> считает <b>символы</b>; пробел — тоже символ.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Сколько символов в <code>len("Привет, мир!")</code>?</summary>
+      <p>12 — буквы, запятая, пробел и восклицательный знак.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 04 -->
@@ -283,6 +329,20 @@ word = <span class="s">"кот"</span>
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Счёт с нуля: первый символ — <code>s[0]</code>.</li>
+      <li><code>s[-1]</code> — последний, <code>s[-2]</code> — предпоследний.</li>
+      <li>Выход за границы → <code>IndexError</code>.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Что такое <code>"Python"[2]</code>?</summary>
+      <p><code>t</code> — индексы: P=0, y=1, t=2.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 05 -->
@@ -320,6 +380,20 @@ s[<span class="b">3</span>:<span class="b">3</span>]     <span class="out"># "" 
       </table>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>s[нач:кон:шаг]</code>; <b>конец не входит</b>.</li>
+      <li>Пропуск начала/конца = от начала / до конца.</li>
+      <li><code>s[::-1]</code> — переворот строки.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Чему равно <code>"Python"[1:4]</code>?</summary>
+      <p><code>yth</code> — берём индексы 1, 2, 3 (четвёртый не входит).</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 06 -->
@@ -342,6 +416,20 @@ s[<span class="b">3</span>:<span class="b">3</span>]     <span class="out"># "" 
     <div class="card"><h3 class="sans">Регистр важен</h3><p class="tiny"><code>"Да" == "да"</code> → <b>False</b>. Сравнение учитывает регистр символов.</p></div>
     <div class="card"><h3 class="sans">Коды символов</h3><p class="tiny"><code>ord("A")</code> → 65, <code>chr(97)</code> → <code>'a'</code>. Заглавные «меньше» строчных.</p></div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>+</code> — склейка, <code>*</code> — повтор.</li>
+      <li><code>in</code> — проверка «есть ли внутри».</li>
+      <li>Строку и число <b>нельзя</b> складывать без приведения типа.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Чему равно <code>"ab" * 2 + "c"</code>?</summary>
+      <p><code>ababc</code> — сначала повтор, потом склейка.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 07 · DIVIDER -->
@@ -351,6 +439,17 @@ s[<span class="b">3</span>:<span class="b">3</span>]     <span class="out"># "" 
   <div class="meta" style="margin-bottom:.6em">≈ 20-я минута урока</div>
   <h2>Методы, форматирование, типы</h2>
   <p class="lead" style="max-width:60ch">Как реально работать с текстом: готовые методы строк, вставка значений в шаблон и преобразование типов.</p>
+<div class="filler">
+  <div class="fc"><span class="fcap">01 · Методы</span>
+    <p>Готовые действия над строкой: регистр, пробелы, поиск, замена, разбор.</p>
+  </div>
+  <div class="fc"><span class="fcap">02 · Формат</span>
+    <p>Вставка значений в шаблон через f-строки.</p>
+  </div>
+  <div class="fc"><span class="fcap">03 · Типы</span>
+    <p>Преобразование <code>int</code> / <code>float</code> / <code>str</code> и типичные ошибки.</p>
+  </div>
+</div>
 </section>
 
 <!-- 08 -->
@@ -387,6 +486,20 @@ s[<span class="b">3</span>:<span class="b">3</span>]     <span class="out"># "" 
     </div>
   </div>
   <div class="note" style="margin-top:.5em"><b>Важно:</b> строки неизменяемы — <code>s.upper()</code> <em>не меняет</em> <code>s</code>, а возвращает новую строку. Нужно присвоить: <code>s = s.upper()</code>. Также есть проверки <code>.isdigit()</code>, <code>.isalpha()</code>, <code>.isspace()</code> — возвращают <code>True/False</code>.</div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Метод вызывается через точку: <code>s.upper()</code>.</li>
+      <li>Метод <b>не меняет</b> исходную строку — возвращает новую.</li>
+      <li>Нужно присваивать: <code>s = s.upper()</code>.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Что выведет <code>s = "кот"; s.upper(); print(s)</code>?</summary>
+      <p><code>кот</code> — результат <code>upper()</code> не сохранён в переменную.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 09 -->
@@ -424,6 +537,20 @@ s[<span class="b">3</span>:<span class="b">3</span>]     <span class="out"># "" 
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>f-строка: буква <code>f</code> перед кавычками.</li>
+      <li>Подстановка — в фигурных скобках <code>{ }</code>.</li>
+      <li>Формат числа: <code>f"{x:.2f}"</code> — два знака после точки.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Что выведет <code>f"{2+3*4}"</code>?</summary>
+      <p><code>14</code> — сначала умножение, потом сложение.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 10 -->
@@ -468,6 +595,20 @@ age = <span class="k">int</span>(<span class="k">input</span>(<span class="s">"�
       <div class="note">Читай текст ошибки до конца — Python сам подсказывает, что именно не так.</div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>input()</code> всегда возвращает <b>строку</b>.</li>
+      <li>Приводим тип: <code>int()</code>, <code>float()</code>, <code>str()</code>.</li>
+      <li><code>TypeError</code> — смешали типы; <code>ValueError</code> — не удалось превратить.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Почему <code>int("3.9")</code> даёт ошибку?</summary>
+      <p><code>int()</code> ждёт целое. Для дробного — <code>float("3.9")</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 11 -->
@@ -521,6 +662,20 @@ res = <span class="s">""</span>
       <p class="tiny">Строка неизменяема, поэтому мы не «правим» её, а <em>накапливаем результат</em> в новой переменной. Это базовый шаблон обработки текста: <b>пройти по символам → проверить условие → добавить/посчитать</b>.</p>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>for ch in s</code> — по символам.</li>
+      <li><code>for i in range(len(s))</code> — по индексам.</li>
+      <li><code>enumerate(s)</code> — сразу индекс и символ.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Как собрать все гласные из слова?</summary>
+      <p>Аккумулятор: <code>res = ""</code>, в цикле <code>if ch in "аеёиоуыэюя": res += ch</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 12 -->
@@ -555,6 +710,20 @@ res = <span class="s">""</span>
       <div class="note">Пример: <code>"шалаш"</code> → перевёрнутая тоже <code>"шалаш"</code> → палиндром.</div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Палиндром — читается одинаково в обе стороны.</li>
+      <li>Проверка: <code>word == word[::-1]</code>.</li>
+      <li>Переворот строки — срез <code>[::-1]</code>.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Является ли «казак» палиндромом?</summary>
+      <p>Да: <code>"казак" == "казак"[::-1]</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 13 -->
@@ -575,6 +744,20 @@ res = <span class="s">""</span>
     <div class="card"><h3 class="sans">Чтение ошибок</h3><p class="tiny">Последняя строка сообщения — суть. <b>TypeError</b> — про типы, <b>ValueError</b> — про значение.</p></div>
     <div class="card"><h3 class="sans">Привычка</h3><p class="tiny">Сразу приводи ввод к нужному типу: <code>n = int(input())</code>. Не оставляй строку там, где нужно число.</p></div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Пять граблей</span>
+    <ul>
+      <li>склейка строки с числом;</li>
+      <li>путаница «первый = индекс 1»;</li>
+      <li>выход за границы строки.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Что не так в <code>s.upper()</code> без присваивания?</summary>
+      <p>Результат потерян — нужно <code>s = s.upper()</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 14 -->
@@ -616,6 +799,16 @@ res = <span class="s">""</span>
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Быстрая проверка: чему равно <code>"Программирование"[::-1]</code>?</summary>
+      <pre>"еинавориммаргорП"</pre>
+    </details>
+  </div>
+  <div class="fc"><span class="fcap">Полезно</span>
+    <p>Перед решением проговорите план: что на входе, что на выходе, какие методы нужны.</p>
+  </div>
+</div>
 </section>
 
 <!-- 15 -->
@@ -649,6 +842,20 @@ res = <span class="s">""</span>
     </div>
   </div>
   <div class="formula" style="margin-top:.8em">Строка → индекс/срез → метод → новая строка → вывод через f-строку</div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Индекс с нуля, <code>s[-1]</code> — последний.</li>
+      <li><code>s[::-1]</code> — переворот; <code>len()</code> — длина.</li>
+      <li>Методы возвращают новую строку.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Как вывести «Привет, Аня!» через f-строку?</summary>
+      <p><code>print(f"Привет, {name}!")</code></p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 16 · SELF WORK -->
@@ -685,6 +892,14 @@ res = <span class="s">""</span>
       <div class="note">Оценка: ________ &nbsp;&nbsp; Проверил: ____________</div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Памятка</span>
+    <p><code>len(s)</code> · <code>s[i]</code> · <code>s[::-1]</code> · <code>.upper()</code> · <code>.replace()</code> · <code>.count()</code> · <code>f"{x}"</code></p>
+  </div>
+  <div class="fc"><span class="fcap">Время</span>
+    <p>7 заданий · до конца урока · работаем индивидуально.</p>
+  </div>
+</div>
 </section>
 
 <!-- 17 · END -->
@@ -693,6 +908,17 @@ res = <span class="s">""</span>
   <h1>Спасибо!</h1>
   <div class="rule"></div>
   <p class="lead" style="max-width:60ch">Вопросы? Разберите дома 5 задач со слайда 14, а самостоятельную работу (слайд 16) сдайте в конце урока.</p>
+<div class="filler">
+  <div class="fc"><span class="fcap">Сегодня разобрали</span>
+    <p>Тип <code>str</code> · кавычки и длина · индексы и срезы · операции · методы · f-строки · преобразование типов · перебор.</p>
+  </div>
+  <div class="fc"><span class="fcap">Дома</span>
+    <p>5 задач со слайда 14 — в тетради или в Python.</p>
+  </div>
+  <div class="fc"><span class="fcap">Дальше</span>
+    <p>Самостоятельная работа (слайд 16) — сдаём в конце урока.</p>
+  </div>
+</div>
 </section>
 
 </div>

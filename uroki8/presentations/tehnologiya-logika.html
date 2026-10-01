@@ -96,6 +96,24 @@
   .lines i{display:block;border-bottom:1px solid var(--hair);height:1.15em}
   .lines i+i{margin-top:.55em}
 
+  /* --- bottom filler strip --- */
+  .slide>.filler{margin-top:auto;display:flex;gap:1.4em;align-items:flex-start;
+    border-top:2px solid var(--rule);padding-top:.55em}
+  .filler .fc{flex:1;min-width:0}
+  .filler .fc+.fc{border-left:1px solid var(--hair);padding-left:1.4em}
+  .filler .fcap{display:block;font-family:var(--sans);font-size:clamp(9.5px,.92vw,12px);
+    letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:.28em}
+  .filler p,.filler li{font-size:clamp(11.5px,1.06vw,15px);line-height:1.42;margin:.16em 0}
+  .filler ul{margin:.1em 0;padding-left:1.05em}
+  .filler code{font-size:.92em}
+  .filler details{margin:.1em 0}
+  .filler details>summary{font-size:clamp(10.5px,.98vw,13px);border-bottom:1px solid var(--hair)}
+  .filler pre{font-size:clamp(10.5px,.98vw,13px);margin:.2em 0}
+  @media print{.slide>.filler{margin-top:1em;page-break-inside:avoid}}
+  .invert>.filler .fcap{color:#b9b7b1}
+  .invert>.filler{border-top-color:#4a4a47}
+  .invert>.filler .fc+.fc{border-left-color:#4a4a47}
+
   .hud{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:14px;
     padding:0 20px;background:var(--paper);border-top:1px solid var(--rule);font-size:12px;color:var(--mut);z-index:30}
   .hud .sec{letter-spacing:.16em;text-transform:uppercase;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
@@ -169,6 +187,20 @@
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Высказывание — то, что можно назвать истинным или ложным.</li>
+      <li>Вопрос и выражение с переменной — не высказывания.</li>
+      <li>1 = истина, 0 = ложь.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>«x &gt; 5» — это высказывание?</summary>
+      <p>Нет, пока не задано значение <code>x</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 03 -->
@@ -211,6 +243,20 @@
     <div class="card tint"><h3 class="sans">Мнемоника «ИЛИ»</h3><p class="tiny">Щедрое: достаточно <em>одного</em>. Единица есть — результат единица.</p></div>
     <div class="card tint"><h3 class="sans">Связь</h3><p class="tiny">Все три операции можно выразить друг через друга — это понадобится дальше.</p></div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>НЕ — переворачивает значение.</li>
+      <li>И — истинно, только если истинны <b>оба</b>.</li>
+      <li>ИЛИ — истинно, если истинно <b>хотя бы одно</b>.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Чему равно <code>1 И 0</code>?</summary>
+      <p><code>0</code> — для И нужны обе единицы.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 04 -->
@@ -248,6 +294,20 @@
       <p class="tiny">Импликация ложна только в одном случае: «из истины следует ложь».</p>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Импликация <code>A→B</code> ложна только при <code>1→0</code>.</li>
+      <li>Эквивалентность истинна, когда значения совпадают.</li>
+      <li>Приоритет: НЕ → И → ИЛИ; скобки меняют порядок.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Когда <code>A → B</code> ложно?</summary>
+      <p>Только когда A истинно, а B ложно (1→0).</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 05 -->
@@ -280,6 +340,20 @@
       <p class="tiny">Порядок работы: выписываем переменные → считаем промежуточные столбцы (по приоритету) → в последнем столбце — ответ. Последний столбец — это «портрет» функции.</p>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Строк в таблице — <code>2ⁿ</code> (n — число переменных).</li>
+      <li>Наборы перебираем как в двоичном счёте, без пропусков.</li>
+      <li>Считаем по столбикам с учётом приоритета.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Сколько строк для трёх переменных?</summary>
+      <p>Восемь: <code>2³ = 8</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 06 · DIVIDER -->
@@ -289,6 +363,17 @@
   <div class="meta" style="margin-bottom:.6em">≈ 27-я минута урока</div>
   <h2>Стрелка Пирса</h2>
   <p class="lead" style="max-width:62ch">Операция «ИЛИ-НЕ» (NOR): одна из двух операций, через которые выражается вся логика.</p>
+<div class="filler">
+  <div class="fc"><span class="fcap">Стрелка Пирса</span>
+    <p><code>A ↓ B = ¬(A ∨ B)</code> — «ИЛИ-НЕ», по-английски NOR.</p>
+  </div>
+  <div class="fc"><span class="fcap">Штрих Шеффера</span>
+    <p><code>A | B = ¬(A ∧ B)</code> — «И-НЕ», по-английски NAND.</p>
+  </div>
+  <div class="fc"><span class="fcap">Зачем</span>
+    <p>Каждая операция по отдельности выражает все остальные — полный базис.</p>
+  </div>
+</div>
 </section>
 
 <!-- 07 -->
@@ -322,6 +407,20 @@
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>A ↓ B = ¬(A ∨ B)</code> — «ИЛИ-НЕ», по-английски NOR.</li>
+      <li>Истина только при <code>0 ↓ 0</code>.</li>
+      <li><code>A ↓ A = ¬A</code>.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Чему равно <code>1 ↓ 1</code>?</summary>
+      <p><code>0</code> — ИЛИ даёт 1, отрицание даёт 0.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 08 -->
@@ -348,6 +447,20 @@
       <p class="tiny">Последние два столбца совпали — значит, выражения <b>равносильны</b>.</p>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>¬A = A ↓ A</code></li>
+      <li><code>A ∨ B = (A ↓ B) ↓ (A ↓ B)</code></li>
+      <li><code>A ∧ B = (A ↓ A) ↓ (B ↓ B)</code></li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Как получить НЕ из стрелки Пирса?</summary>
+      <p>Повторить операнд дважды: <code>A ↓ A</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 09 -->
@@ -381,6 +494,20 @@
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>A | B = ¬(A ∧ B)</code> — «И-НЕ», по-английски NAND.</li>
+      <li>Ложь только при <code>1 | 1</code>.</li>
+      <li><code>A | A = ¬A</code>.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Чему равно <code>0 | 0</code>?</summary>
+      <p><code>1</code> — И даёт 0, отрицание даёт 1.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 10 -->
@@ -407,6 +534,20 @@
       <p class="tiny">Столбцы совпали — формулы равносильны. Аналогично проверяются и остальные.</p>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>¬A = A | A</code></li>
+      <li><code>A ∧ B = (A | B) | (A | B)</code></li>
+      <li><code>A ∨ B = (A | A) | (B | B)</code></li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Как получить И из штриха Шеффера?</summary>
+      <p>Дважды применить штрих: <code>(A | B) | (A | B)</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 11 -->
@@ -426,6 +567,20 @@
     <div class="card"><h3 class="sans">| — «зеркало И»</h3><p class="tiny">Столбец <code>A | B</code> полностью противоположен <code>A ∧ B</code>: где у И единица, у штриха ноль.</p></div>
   </div>
   <div class="note" style="margin-top:.5em">Обе операции — <b>отрицания</b> базовых: <code>A ↓ B = ¬(A ∨ B)</code> и <code>A | B = ¬(A ∧ B)</code>. Это прямое следствие законов де Моргана.</div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>↓</code> — зеркало ИЛИ (NOR); <code>|</code> — зеркало И (NAND).</li>
+      <li>Обе — универсальные (полные базисы).</li>
+      <li>Каждая выражает НЕ, И и ИЛИ.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Где <code>↓</code> и <code>|</code> дают одинаковый результат?</summary>
+      <p>На наборе <code>0, 0</code>: обе дают <code>1</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 12 -->
@@ -454,6 +609,20 @@
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>Полный базис — набор операций, выражающий <b>любую</b> функцию.</li>
+      <li><code>{↓}</code> и <code>{|}</code> — полные базисы из одной операции.</li>
+      <li>Законы де Моргана связывают И и ИЛИ через отрицание.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Почему <code>↓</code> называют универсальной?</summary>
+      <p>Через одну <code>↓</code> выражаются все остальные операции.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 13 -->
@@ -476,6 +645,20 @@
       <p class="tiny">Идея универсального базиса привела к тому, что уже в 1960-х годах выпускались микросхемы, состоящие из десятков тысяч одинаковых элементов И-НЕ. Это резко упростило проектирование.</p>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li>NAND и NOR — базовые элементы цифровых микросхем.</li>
+      <li>Из них строят сумматоры, память, процессоры.</li>
+      <li>Булева логика лежит в основе программирования.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Почему инженеры любят NAND и NOR?</summary>
+      <p>Их схемы делаются минимальным числом транзисторов.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 14 -->
@@ -535,6 +718,16 @@ A | A↓A | A|A
       </div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Чему равно <code>(1 ↓ 0) | (0 | 0)</code>?</summary>
+      <p><code>1 ↓ 0 = 0</code>; <code>0 | 0 = 1</code>; <code>0 | 1 = 1</code>. Ответ: <code>1</code>.</p>
+    </details>
+  </div>
+  <div class="fc"><span class="fcap">Полезно</span>
+    <p>Сначала выпишите все переменные, потом столбики подвыражений, и лишь в конце — итог.</p>
+  </div>
+</div>
 </section>
 
 <!-- 15 -->
@@ -571,6 +764,20 @@ A | A↓A | A|A
       <div class="formula" style="margin-top:.5em">Высказывание → операция → таблица истинности → вывод</div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Запомни</span>
+    <ul>
+      <li><code>A ↓ B = ¬(A ∨ B)</code>; <code>A | B = ¬(A ∧ B)</code>.</li>
+      <li><code>A ↓ A = ¬A</code>; <code>A | A = ¬A</code>.</li>
+      <li>Обе операции — полные базисы.</li>
+    </ul>
+  </div>
+  <div class="fc"><span class="fcap">Проверь себя</span>
+    <details><summary>Сколько строк в таблице для 2 переменных?</summary>
+      <p>Четыре: <code>2² = 4</code>.</p>
+    </details>
+  </div>
+</div>
 </section>
 
 <!-- 16 · SELF WORK -->
@@ -607,6 +814,14 @@ A | A↓A | A|A
       <div class="note">Оценка: ________ &nbsp;&nbsp; Проверил: ____________</div>
     </div>
   </div>
+<div class="filler">
+  <div class="fc"><span class="fcap">Памятка</span>
+    <p><code>¬A = A↓A</code> · <code>¬A = A|A</code> · <code>A∨B = (A↓B)↓(A↓B)</code> · <code>A∧B = (A|B)|(A|B)</code></p>
+  </div>
+  <div class="fc"><span class="fcap">Время</span>
+    <p>7 заданий · до конца урока · работаем индивидуально.</p>
+  </div>
+</div>
 </section>
 
 <!-- 17 · END -->
@@ -615,6 +830,17 @@ A | A↓A | A|A
   <h1>Спасибо!</h1>
   <div class="rule"></div>
   <p class="lead" style="max-width:62ch">Вопросы? Разберите дома 5 задач со слайда 14, а самостоятельную работу (слайд 16) сдайте в конце урока.</p>
+<div class="filler">
+  <div class="fc"><span class="fcap">Сегодня разобрали</span>
+    <p>Высказывания · НЕ, И, ИЛИ · таблицы истинности · стрелка Пирса <code>↓</code> · штрих Шеффера <code>|</code> · полные базисы.</p>
+  </div>
+  <div class="fc"><span class="fcap">Дома</span>
+    <p>5 задач со слайда 14 — с таблицами истинности.</p>
+  </div>
+  <div class="fc"><span class="fcap">Дальше</span>
+    <p>Самостоятельная работа (слайд 16) — сдаём в конце урока.</p>
+  </div>
+</div>
 </section>
 
 </div>
