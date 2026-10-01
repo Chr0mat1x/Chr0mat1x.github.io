@@ -110,6 +110,9 @@
   details[open]>summary{margin-bottom:.2em}
   .task{border:1px solid var(--hair);border-left:3px solid var(--rule);padding:.5em .7em;margin:.5em 0;break-inside:avoid}
   .task .n{font-family:var(--serif);font-weight:700;margin-right:.4em}
+  .lines{margin:.45em 0 .2em}
+  .lines i{display:block;border-bottom:1px solid var(--hair);height:1.15em}
+  .lines i+i{margin-top:.55em}
 
   .hud{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:14px;
     padding:0 20px;background:var(--paper);border-top:1px solid var(--rule);
@@ -177,9 +180,9 @@
         <tr><td>Методы строк</td><td class="ctr">8 мин</td><td class="ctr">9</td></tr>
         <tr><td>f-строки и преобразование типов</td><td class="ctr">6 мин</td><td class="ctr">10–11</td></tr>
         <tr><td>Перебор, разбор программы, типичные ошибки</td><td class="ctr">6 мин</td><td class="ctr">12–14</td></tr>
-        <tr><td>Решение задач у доски и в парах</td><td class="ctr">4 мин</td><td class="ctr">15</td></tr>
-        <tr class="hl"><td>Итог и домашнее задание</td><td class="ctr">1 мин</td><td class="ctr">16–17</td></tr>
-        <tr><th>Итого</th><th class="ctr">45 мин</th><th class="ctr">17 слайдов</th></tr>
+        <tr><td>Решение задач и самостоятельная работа (раздать распечатку)</td><td class="ctr">4 мин</td><td class="ctr">15, 17</td></tr>
+        <tr class="hl"><td>Итог и домашнее задание</td><td class="ctr">1 мин</td><td class="ctr">16, 18</td></tr>
+        <tr><th>Итого</th><th class="ctr">45 мин</th><th class="ctr">18 слайдов</th></tr>
       </table>
     </div>
     <div>
@@ -686,12 +689,49 @@ res = <span class="s">""</span>
   <div class="formula" style="margin-top:.8em">Строка → индекс/срез → метод → новая строка → вывод через f-строку</div>
 </section>
 
-<!-- 16 · END -->
+<!-- 16 · SELF WORK -->
+<section class="slide" data-sec="7 · Самостоятельная работа">
+  <header class="shead"><span class="snum">СР</span>
+    <h2>Самостоятельная работа<span class="sub">Информатика · 8 класс · строки в Python · 7 заданий</span></h2>
+  </header>
+  <p class="tiny" style="border-bottom:1px solid var(--rule);padding-bottom:.5em">Фамилия, имя: ______________________________________ &nbsp;&nbsp; Класс: ______ &nbsp;&nbsp; Дата: ____________</p>
+  <div class="grid g2">
+    <div>
+      <div class="task"><span class="n">1.</span> Дана строка <code>s = "Информатика"</code>. Выведите её длину и символ с индексом 3.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">2.</span> Спросите у пользователя слово и выведите его первый и последний символ.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">3.</span> Спросите слово и выведите его задом наперёд.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">4.</span> Дана строка <code>"Я учу Python"</code>. Выведите её заглавными буквами.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+    </div>
+    <div>
+      <div class="task"><span class="n">5.</span> Дана строка <code>"кот, пёс, лиса"</code>. Замените запятые на точки с запятой.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">6.</span> Спросите слово и посчитайте, сколько раз в нём встречается буква «о».
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">7.</span> Спросите имя и возраст. С помощью f-строки выведите фразу: <code>Меня зовут Аня, мне 13 лет</code>.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="note">Оценка: ________ &nbsp;&nbsp; Проверил: ____________</div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 · END -->
 <section class="slide invert title" data-sec="6 · Итог">
   <div class="meta">Информатика · 8 класс</div>
   <h1>Спасибо!</h1>
   <div class="rule"></div>
-  <p class="lead" style="max-width:60ch">Вопросы? Разберите дома 5 задач со слайда 12 и попробуйте собрать свой анализатор текста.</p>
+  <p class="lead" style="max-width:60ch">Вопросы? Разберите дома 5 задач со слайда 15, а самостоятельную работу (слайд 17) сдайте в конце урока.</p>
+  <p class="tiny" style="margin-top:1.4em"><a href="informatika-stroki-print.html" style="color:#b9b7b1;text-decoration:underline">🖨 Печатный текст урока (для распечатки) →</a></p>
 </section>
 
 </div>

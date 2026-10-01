@@ -92,6 +92,9 @@
   details>summary::marker{color:var(--faint)}
   .task{border:1px solid var(--hair);border-left:3px solid var(--rule);padding:.5em .7em;margin:.5em 0;break-inside:avoid}
   .task .n{font-family:var(--serif);font-weight:700;margin-right:.4em}
+  .lines{margin:.45em 0 .2em}
+  .lines i{display:block;border-bottom:1px solid var(--hair);height:1.15em}
+  .lines i+i{margin-top:.55em}
 
   .hud{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:14px;
     padding:0 20px;background:var(--paper);border-top:1px solid var(--rule);font-size:12px;color:var(--mut);z-index:30}
@@ -148,9 +151,9 @@
         <tr><td>Построение таблиц истинности</td><td class="ctr">6 мин</td><td class="ctr">6</td></tr>
         <tr class="hl"><td>Стрелка Пирса ↓ и штрих Шеффера |</td><td class="ctr">10 мин</td><td class="ctr">7–11</td></tr>
         <tr><td>Полные базисы, де Морган, техника</td><td class="ctr">5 мин</td><td class="ctr">12–14</td></tr>
-        <tr><td>Решение задач у доски и в парах</td><td class="ctr">2 мин</td><td class="ctr">15</td></tr>
-        <tr><td>Итог и домашнее задание</td><td class="ctr">1 мин</td><td class="ctr">16–17</td></tr>
-        <tr><th>Итого</th><th class="ctr">45 мин</th><th class="ctr">17 слайдов</th></tr>
+        <tr><td>Решение задач и самостоятельная работа (раздать распечатку)</td><td class="ctr">2 мин</td><td class="ctr">15, 17</td></tr>
+        <tr><td>Итог и домашнее задание</td><td class="ctr">1 мин</td><td class="ctr">16, 18</td></tr>
+        <tr><th>Итого</th><th class="ctr">45 мин</th><th class="ctr">18 слайдов</th></tr>
       </table>
     </div>
     <div>
@@ -608,12 +611,49 @@ A | A↓A | A|A
   </div>
 </section>
 
-<!-- 16 · END -->
+<!-- 16 · SELF WORK -->
+<section class="slide" data-sec="7 · Самостоятельная работа">
+  <header class="shead"><span class="snum">СР</span>
+    <h2>Самостоятельная работа<span class="sub">Технология · 8 класс · логика · 7 заданий</span></h2>
+  </header>
+  <p class="tiny" style="border-bottom:1px solid var(--rule);padding-bottom:.5em">Фамилия, имя: ______________________________________ &nbsp;&nbsp; Класс: ______ &nbsp;&nbsp; Дата: ____________</p>
+  <div class="grid g2">
+    <div>
+      <div class="task"><span class="n">1.</span> Постройте таблицу истинности для <code>A | B</code> (4 строки).
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">2.</span> Постройте таблицу истинности для <code>A ↓ B</code> (4 строки).
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">3.</span> Вычислите: <code>(1 | 0) ↓ (0 ↓ 0)</code>.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">4.</span> Запишите <code>¬A</code> двумя способами: через <code>|</code> и через <code>↓</code>.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+    </div>
+    <div>
+      <div class="task"><span class="n">5.</span> Постройте таблицу истинности для <code>A ∨ B</code> и для <code>A ∧ B</code>.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">6.</span> Выразите <code>A ∧ B</code> только через штрих Шеффера.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="task"><span class="n">7.</span> Запишите высказывание «Идёт дождь ИЛИ светит солнце» (A — дождь, B — солнце) через стрелку Пирса.
+        <div class="lines"><i></i><i></i></div>
+      </div>
+      <div class="note">Оценка: ________ &nbsp;&nbsp; Проверил: ____________</div>
+    </div>
+  </div>
+</section>
+
+<!-- 17 · END -->
 <section class="slide invert title" data-sec="6 · Практика и итог">
   <div class="meta">Технология · 8 класс</div>
   <h1>Спасибо!</h1>
   <div class="rule"></div>
-  <p class="lead" style="max-width:62ch">Вопросы? Разберите дома 5 задач со слайда 12 и попробуйте выразить импликацию через штрих Шеффера.</p>
+  <p class="lead" style="max-width:62ch">Вопросы? Разберите дома 5 задач со слайда 15, а самостоятельную работу (слайд 17) сдайте в конце урока.</p>
+  <p class="tiny" style="margin-top:1.4em"><a href="tehnologiya-logika-print.html" style="color:#b9b7b1;text-decoration:underline">🖨 Печатный текст урока (для распечатки) →</a></p>
 </section>
 
 </div>

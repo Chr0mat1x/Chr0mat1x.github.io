@@ -49,6 +49,16 @@
   .gap{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);
     margin:.5em 0 .5em calc(78px + 1em + 3px);padding-left:1em;border-left:1px dashed var(--hair)}
   .sched-note{color:var(--mut);font-size:clamp(12px,1.25vw,15.5px);line-height:1.5;margin:1.6em 0 0}
+
+  .print-bar{width:100%;max-width:1060px;margin-top:1.8em;border:1px solid var(--hair);
+    border-left:3px solid var(--rule);padding:1em 1.3em}
+  .print-bar .cap{display:block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:.7em}
+  .print-links{display:flex;gap:.8em;flex-wrap:wrap}
+  .print-links a{display:inline-block;text-decoration:none;color:var(--ink);border:1px solid var(--rule);
+    border-radius:2px;padding:.45em .9em;font-size:clamp(12px,1.25vw,16px);background:var(--soft)}
+  .print-links a:hover{background:var(--ink);color:var(--paper)}
+  .print-note{color:var(--mut);font-size:clamp(11.5px,1.2vw,15px);line-height:1.5;margin:.9em 0 0}
 </style>
 </head>
 <body>
@@ -70,7 +80,7 @@
         <li>f-строки, преобразование типов, типичные ошибки</li>
         <li>5 задач с решениями</li>
       </ul>
-      <div class="go">Открыть →</div>
+      <div class="go">Открыть презентацию →</div>
     </a>
     <a class="card" href="presentations/tehnologiya-logika.html">
       <span class="chip">Технология · 8 класс</span>
@@ -83,8 +93,17 @@
         <li>Выражение всех операций через одну, де Морган</li>
         <li>5 задач с решениями</li>
       </ul>
-      <div class="go">Открыть →</div>
+      <div class="go">Открыть презентацию →</div>
     </a>
+  </div>
+
+  <div class="print-bar">
+    <span class="cap">Печатные тексты урока · для распечатки</span>
+    <div class="print-links">
+      <a href="presentations/informatika-stroki-print.html">🖨 Информатика — Строки в Python</a>
+      <a href="presentations/tehnologiya-logika-print.html">🖨 Технология — Математическая логика</a>
+    </div>
+    <p class="print-note">Открывается в браузере — нажми кнопку «Печать» или Ctrl+P. Внутри: план урока, вся теория, задачи с решениями и бланк самостоятельной работы с полями для ответов.</p>
   </div>
   <footer>Переключение между уроками прямо в презентации: кнопка «Технология/Информатика →» или клавиша <b>T</b> · возврат в меню — <b>M</b><br>Управление: ← → или Space · F — полный экран · D — тёмная тема · ответы к задачам открываются кликом · Ctrl+P — печать/PDF</footer>
 
