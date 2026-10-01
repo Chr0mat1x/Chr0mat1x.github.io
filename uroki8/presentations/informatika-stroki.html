@@ -124,6 +124,25 @@
   .filler p,.filler li{font-size:clamp(11.5px,1.06vw,15px);line-height:1.42;margin:.16em 0}
   .filler ul{margin:.1em 0;padding-left:1.05em}
   .filler code{font-size:.92em}
+  table.wide{font-size:clamp(12px,1.18vw,17.5px)}
+  /* --- operation / signs helpers --- */
+  .opgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7em;margin-top:.6em}
+  .opcell{border:1px solid var(--hair);border-top:2px solid var(--rule);padding:.5em .7em;background:var(--soft)}
+  .opcap{font-size:clamp(9.5px,.9vw,12px);letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:.2em}
+  .opmn{font-family:var(--serif);font-weight:600;font-size:clamp(15px,1.7vw,23px);margin-bottom:.2em;display:flex;align-items:center;gap:.45em}
+  .opcircle{font-size:.72em;color:var(--ink2);border:1.5px solid var(--rule);border-radius:50%;
+    width:1.5em;height:1.5em;display:inline-flex;align-items:center;justify-content:center}
+  .opcell p{margin:.16em 0}
+  .opwide{grid-column:1/-1}
+  .oplink{display:flex;align-items:center;justify-content:center;gap:1em;flex-wrap:wrap;margin:.35em 0}
+  .opformula{font-family:var(--mono);font-size:clamp(12px,1.25vw,17px);font-weight:700;
+    border:1px solid var(--rule);border-radius:3px;padding:.25em .6em;background:var(--paper)}
+  .oparrow{font-size:clamp(14px,1.6vw,22px);color:var(--mut)}
+  .tight-list{margin:.15em 0 .15em 1em}
+  .tight-list li{margin:.08em 0}
+  .signs td.sign{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);font-weight:700;white-space:nowrap}
+  table.wide td,table.wide th{padding:.45em .6em}
+  table.wide{font-size:clamp(12px,1.18vw,17.5px)}
   .filler details{margin:.1em 0}
   .filler details>summary{font-size:clamp(10.5px,.98vw,13px);border-bottom:1px solid var(--hair)}
   .filler pre{font-size:clamp(10.5px,.98vw,13px);margin:.2em 0}
@@ -908,6 +927,7 @@ res = <span class="s">""</span>
   <h1>Спасибо!</h1>
   <div class="rule"></div>
   <p class="lead" style="max-width:60ch">Вопросы? Разберите дома 5 задач со слайда 14, а самостоятельную работу (слайд 16) сдайте в конце урока.</p>
+  <p class="tiny" style="margin-top:1.1em;color:var(--faint)">Артем бездарь</p>
 <div class="filler">
   <div class="fc"><span class="fcap">Сегодня разобрали</span>
     <p>Тип <code>str</code> · кавычки и длина · индексы и срезы · операции · методы · f-строки · преобразование типов · перебор.</p>

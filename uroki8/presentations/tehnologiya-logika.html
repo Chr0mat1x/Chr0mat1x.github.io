@@ -106,6 +106,24 @@
   .filler p,.filler li{font-size:clamp(11.5px,1.06vw,15px);line-height:1.42;margin:.16em 0}
   .filler ul{margin:.1em 0;padding-left:1.05em}
   .filler code{font-size:.92em}
+  /* --- operation / signs helpers --- */
+  .opgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7em;margin-top:.6em}
+  .opcell{border:1px solid var(--hair);border-top:2px solid var(--rule);padding:.34em .6em;background:var(--soft)}
+  .opcap{font-size:clamp(9.5px,.9vw,12px);letter-spacing:.2em;text-transform:uppercase;color:var(--faint);margin-bottom:.2em}
+  .opmn{font-family:var(--serif);font-weight:600;font-size:clamp(14px,1.55vw,21px);margin-bottom:.15em;display:flex;align-items:center;gap:.45em}
+  .opcircle{font-size:.72em;color:var(--ink2);border:1.5px solid var(--rule);border-radius:50%;
+    width:1.5em;height:1.5em;display:inline-flex;align-items:center;justify-content:center}
+  .opcell p{margin:.16em 0}
+  .opwide{grid-column:1/-1}
+  .oplink{display:flex;align-items:center;justify-content:center;gap:1em;flex-wrap:wrap;margin:.22em 0}
+  .opformula{font-family:var(--mono);font-size:clamp(12px,1.25vw,17px);font-weight:700;
+    border:1px solid var(--rule);border-radius:3px;padding:.25em .6em;background:var(--paper)}
+  .oparrow{font-size:clamp(14px,1.6vw,22px);color:var(--mut)}
+  .tight-list{margin:.15em 0 .15em 1em}
+  .tight-list li{margin:.08em 0}
+  .signs td.sign{font-family:var(--mono);font-size:clamp(14px,1.5vw,21px);font-weight:700;white-space:nowrap}
+  table.wide td,table.wide th{padding:.45em .6em}
+  table.wide{font-size:clamp(12px,1.18vw,17.5px)}
   .filler details{margin:.1em 0}
   .filler details>summary{font-size:clamp(10.5px,.98vw,13px);border-bottom:1px solid var(--hair)}
   .filler pre{font-size:clamp(10.5px,.98vw,13px);margin:.2em 0}
@@ -238,10 +256,27 @@
       <p class="tiny">Истинно, когда истинно <b>хотя бы одно</b>. Ложно только при двух нулях.</p>
     </div>
   </div>
-  <div class="grid g3" style="margin-top:.6em">
-    <div class="card tint"><h3 class="sans">Мнемоника «И»</h3><p class="tiny">Строгое: нужно <em>всё</em>. Один ноль — и результат ноль.</p></div>
-    <div class="card tint"><h3 class="sans">Мнемоника «ИЛИ»</h3><p class="tiny">Щедрое: достаточно <em>одного</em>. Единица есть — результат единица.</p></div>
-    <div class="card tint"><h3 class="sans">Связь</h3><p class="tiny">Все три операции можно выразить друг через друга — это понадобится дальше.</p></div>
+  <div class="grid g3" style="margin-top:.4em">
+    <div class="opcell">
+      <div class="opmn"><span class="opcircle">◯</span>Инверсия</div>
+      <p class="tiny">Одна «кнопка»: нажал — сигнал перевернулся. <code>¬0 = 1</code>, <code>¬1 = 0</code>.</p>
+      <p class="tiny">Двойное отрицание возвращает исходное: <code>¬(¬A) = A</code>.</p>
+          </div>
+    <div class="opcell">
+      <div class="opmn"><span class="opcircle">●</span>Конъюнкция</div>
+      <p class="tiny">Строгое: нужно <em>всё</em>. Один ноль — и результат ноль. «И то, и другое».</p>
+      <p class="tiny">В жизни: возьму зонт, если дождь <b>И</b> ветер — нужны оба условия.</p>
+          </div>
+    <div class="opcell">
+      <div class="opmn"><span class="opcircle">◯</span>Дизъюнкция</div>
+      <p class="tiny">Щедрое: достаточно <em>одного</em>. Единица есть — результат единица. «Или то, или другое».</p>
+      <p class="tiny">В жизни: останусь дома, если дождь <b>ИЛИ</b> ветер — хватит одного.</p>
+          </div>
+  </div>
+  <div class="opcell" style="margin-top:.4em">
+    <div class="opcap">Связь по центру</div>
+    <p class="tiny">«И» и «ИЛИ» — <b>двойственные</b> операции: замени <code>∧</code> на <code>∨</code>, <code>∨</code> на <code>∧</code>, а <code>0</code> на <code>1</code> — получится верное равенство. Это законы <b>де Моргана</b>:</p>
+    <div class="oplink"><span class="opformula">¬(A ∧ B) = ¬A ∨ ¬B</span><span class="oparrow">⟷</span><span class="opformula">¬(A ∨ B) = ¬A ∧ ¬B</span></div>
   </div>
 <div class="filler">
   <div class="fc"><span class="fcap">Запомни</span>
@@ -264,7 +299,7 @@
   <header class="shead"><span class="snum">03</span>
     <h2>Производные операции<span class="sub">Импликация · эквивалентность · исключающее ИЛИ · приоритет</span></h2>
   </header>
-  <table>
+  <table class="wide">
     <tr><th style="width:22%">Операция</th><th style="width:20%">Знак</th><th style="width:20%">Читается</th><th>Истинна, когда…</th></tr>
     <tr><td>Импликация</td><td><code>A → B</code></td><td>«если A, то B»</td><td>A = 0 <em>или</em> B = 1; ложна только при A=1, B=0</td></tr>
     <tr><td>Эквивалентность</td><td><code>A ↔ B</code></td><td>«A тогда и только тогда B»</td><td>значения совпадают: 00 или 11</td></tr>
@@ -360,7 +395,6 @@
 <section class="slide invert divider" data-sec="3 · Стрелка Пирса">
   <p class="big">↓</p>
   <div class="rule"></div>
-  <div class="meta" style="margin-bottom:.6em">≈ 27-я минута урока</div>
   <h2>Стрелка Пирса</h2>
   <p class="lead" style="max-width:62ch">Операция «ИЛИ-НЕ» (NOR): одна из двух операций, через которые выражается вся логика.</p>
 <div class="filler">
@@ -534,6 +568,23 @@
       <p class="tiny">Столбцы совпали — формулы равносильны. Аналогично проверяются и остальные.</p>
     </div>
   </div>
+  <div class="grid g2" style="margin-top:.5em">
+    <div class="card tint">
+      <h3 class="sans">Всё из одной операции</h3>
+      <ul class="tight-list">
+        <li><code>¬A = A | A</code></li>
+        <li><code>A ∧ B = (A | B) | (A | B)</code></li>
+        <li><code>A ∨ B = (A | A) | (B | B)</code></li>
+        <li><code>A → B = A | (B | B)</code></li>
+      </ul>
+      <p class="tiny">Каждая строка — та же операция <code>|</code>, применённая несколько раз.</p>
+    </div>
+    <div class="card">
+      <h3 class="sans">Как это читать</h3>
+      <p class="tiny"><code>X | X = ¬(X ∧ X) = ¬X</code>. Получив отрицание, собираем из него «И», «ИЛИ» и «если… то».</p>
+      <p class="tiny">Поэтому штрих Шеффера называют <b>универсальной</b> операцией: одной её достаточно, чтобы записать любую логическую функцию.</p>
+    </div>
+  </div>
 <div class="filler">
   <div class="fc"><span class="fcap">Запомни</span>
     <ul>
@@ -631,9 +682,9 @@
     <h2>Зачем это в технике<span class="sub">Микросхемы · транзисторы · программирование</span></h2>
   </header>
   <div class="grid g3">
-    <div class="card"><h3 class="sans">Микросхемы</h3><p class="tiny">Элементы И-НЕ и ИЛИ-НЕ — базовые «кирпичи» цифровой электроники. Из них собирают сумматоры, регистры, память и процессоры.</p></div>
-    <div class="card"><h3 class="sans">Транзисторы</h3><p class="tiny">В КМОП-схемах И-НЕ и ИЛИ-НЕ реализуются минимальным числом транзисторов — поэтому они технологически выгодны.</p></div>
-    <div class="card"><h3 class="sans">Программирование</h3><p class="tiny">Логические условия, фильтры, проверки в базах данных и поисковых системах — это булева логика в действии.</p></div>
+    <div class="card"><h3 class="sans">Микросхемы</h3><p class="tiny">Элементы И-НЕ и ИЛИ-НЕ — базовые «кирпичи» цифровой электроники. Из одинаковых элементов И-НЕ собирают сумматоры (сложение чисел), регистры и память (хранение битов), а из них — целые процессоры.</p><p class="tiny"><b>Пример:</b> 4-разрядный сумматор — это десятки элементов И-НЕ.</p></div>
+    <div class="card"><h3 class="sans">Транзисторы</h3><p class="tiny">В КМОП-технологии — основе всех современных чипов — И-НЕ и ИЛИ-НЕ собираются минимальным числом транзисторов, поэтому они дешевле и быстрее прочих элементов.</p><p class="tiny"><b>Пример:</b> одна И-НЕ ≈ 4 транзистора, один И ≈ 6.</p></div>
+    <div class="card"><h3 class="sans">Программирование</h3><p class="tiny">Логические условия <code>if</code>, фильтры поиска, проверки в базах данных — это булева логика. Операторы <code>and</code>, <code>or</code>, <code>not</code> работают точно так же, как <code>∧</code>, <code>∨</code>, <code>¬</code>.</p><p class="tiny"><b>Пример:</b> <code>if age &gt;= 14 and grade == 8</code>.</p></div>
   </div>
   <div class="grid g2" style="margin-top:.6em">
     <div class="card tint">
@@ -825,11 +876,39 @@ A | A↓A | A|A
 </section>
 
 <!-- 17 · END -->
+<section class="slide" data-sec="6 · Справочник">
+  <header class="shead"><span class="snum">↔</span>
+    <h2>Все знаки логики<span class="sub">Как читается · что означает · как записать в Python</span></h2>
+  </header>
+  <table class="signs">
+    <tr><th style="width:14%">Знак</th><th style="width:20%">Как читается</th><th style="width:38%">Что означает</th><th style="width:28%">В Python</th></tr>
+    <tr><td class="ctr sign">¬A</td><td>«не A»</td><td>Отрицание, инверсия. Переворачивает значение: 0 → 1, 1 → 0.</td><td><code>not A</code></td></tr>
+    <tr><td class="ctr sign">A ∧ B</td><td>«A и B»</td><td>Конъюнкция. Истинно, только если истинны оба.</td><td><code>A and B</code></td></tr>
+    <tr><td class="ctr sign">A ∨ B</td><td>«A или B»</td><td>Дизъюнкция. Истинно, если истинно хотя бы одно.</td><td><code>A or B</code></td></tr>
+    <tr><td class="ctr sign">A → B</td><td>«если A, то B»</td><td>Импликация. Ложна только при A = 1, B = 0.</td><td><code>not A or B</code></td></tr>
+    <tr><td class="ctr sign">A ↔ B</td><td>«A тогда и только тогда B»</td><td>Эквивалентность. Истинна, когда значения совпадают.</td><td><code>A == B</code></td></tr>
+    <tr><td class="ctr sign">A ⊕ B</td><td>«либо A, либо B»</td><td>Исключающее ИЛИ (XOR). Истинно, когда значения разные.</td><td><code>A != B</code></td></tr>
+    <tr><td class="ctr sign">A ↓ B</td><td>«A стрелка Пирса B»</td><td>«ИЛИ-НЕ» (NOR). Истинно только при A = 0, B = 0.</td><td><code>not (A or B)</code></td></tr>
+    <tr><td class="ctr sign">A | B</td><td>«A штрих Шеффера B»</td><td>«И-НЕ» (NAND). Ложно только при A = 1, B = 1.</td><td><code>not (A and B)</code></td></tr>
+    <tr><td class="ctr sign">1 / 0</td><td>«истина / ложь»</td><td>Логические значения: 1 — истина, 0 — ложь.</td><td><code>True / False</code></td></tr>
+    <tr><td class="ctr sign">2ⁿ</td><td>«два в степени n»</td><td>Число строк в таблице истинности для n переменных.</td><td><code>2 ** n</code></td></tr>
+  </table>
+  <div class="filler">
+    <div class="fc"><span class="fcap">Как пользоваться</span>
+      <p>Один и тот же смысл можно записать по-разному: <code>A ∧ B</code>, «A и B», <code>A and B</code> — это одно и то же.</p>
+    </div>
+    <div class="fc"><span class="fcap">Две главные</span>
+      <p><code>↓</code> и <code>|</code> — универсальные: каждая по отдельности заменяет все остальные операции.</p>
+    </div>
+  </div>
+</section>
+
 <section class="slide invert title" data-sec="6 · Практика и итог">
   <div class="meta">Технология · 8 класс</div>
   <h1>Спасибо!</h1>
   <div class="rule"></div>
   <p class="lead" style="max-width:62ch">Вопросы? Разберите дома 5 задач со слайда 14, а самостоятельную работу (слайд 16) сдайте в конце урока.</p>
+  <p class="tiny" style="margin-top:1.1em;color:var(--faint)">Артем бездарь</p>
 <div class="filler">
   <div class="fc"><span class="fcap">Сегодня разобрали</span>
     <p>Высказывания · НЕ, И, ИЛИ · таблицы истинности · стрелка Пирса <code>↓</code> · штрих Шеффера <code>|</code> · полные базисы.</p>
