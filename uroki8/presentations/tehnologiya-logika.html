@@ -132,6 +132,15 @@
   .invert>.filler{border-top-color:#4a4a47}
   .invert>.filler .fc+.fc{border-left-color:#4a4a47}
 
+  /* --- canvas animations --- */
+  canvas.viz{display:block;width:100%;background:transparent;margin:.15em 0 .55em;
+    border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+  .slide.vizbg>*{position:relative;z-index:1}
+  .slide.vizbg>canvas.viz{position:absolute;inset:0;width:100%;height:100%;
+    margin:0;border:0;z-index:0;opacity:.42}
+  .slide.vizbg.invert>canvas.viz{opacity:.55}
+  @media print{canvas.viz{display:none}}
+
   .hud{position:fixed;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;gap:14px;
     padding:0 20px;background:var(--paper);border-top:1px solid var(--rule);font-size:12px;color:var(--mut);z-index:30}
   .hud .sec{letter-spacing:.16em;text-transform:uppercase;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:38vw}
@@ -157,7 +166,7 @@
 <div id="deck">
 
 <!-- 01 · TITLE -->
-<section class="slide invert title active">
+<section class="slide vizbg invert title active">
   <div class="meta">Технология · 8 класс · Урок-замена · 45 минут</div>
   <h1>Математическая логика</h1>
   <div class="rule"></div>
@@ -169,6 +178,8 @@
     <div><div class="cap" style="color:#b9b7b1">IV</div><p style="color:#b9b7b1;margin-top:.2em">Полные базисы, практика, задачи</p></div>
   </div>
   <p class="tiny" style="margin-top:2em">Управление: ← → или Space · F — полный экран · D — тёмная тема · T — перейти к другому уроку · ответы к задачам открываются кликом</p>
+
+<canvas class="viz" data-viz="truthgrid"></canvas>
 </section>
 
 <!-- 02 -->
@@ -176,6 +187,8 @@
   <header class="shead"><span class="snum">01</span>
     <h2>Высказывания и логические значения<span class="sub">Что такое высказывание · истина и ложь · 1 и 0</span></h2>
   </header>
+  <canvas class="viz" data-viz="bits" style="height:clamp(100px,23vh,300px);"></canvas>
+
   <div class="grid g21">
     <div>
       <p><b>Логика</b> — наука о формах и законах правильного мышления. В математической логике мы работаем с <b>высказываниями</b>.</p>
@@ -350,6 +363,8 @@
   <header class="shead"><span class="snum">04</span>
     <h2>Как строить таблицу истинности<span class="sub">2ⁿ строк · порядок наборов · разбор по шагам</span></h2>
   </header>
+  <canvas class="viz" data-viz="truthfill" style="height:clamp(110px,26vh,320px);"></canvas>
+
   <div class="grid g12">
     <div>
       <h3 class="sans">Число строк</h3>
@@ -397,6 +412,8 @@
   <div class="rule"></div>
   <h2>Стрелка Пирса</h2>
   <p class="lead" style="max-width:62ch">Операция «ИЛИ-НЕ» (NOR): одна из двух операций, через которые выражается вся логика.</p>
+
+  <canvas class="viz" data-viz="nor" style="height:clamp(110px,26vh,320px);"></canvas>
 <div class="filler">
   <div class="fc"><span class="fcap">Стрелка Пирса</span>
     <p><code>A ↓ B = ¬(A ∨ B)</code> — «ИЛИ-НЕ», по-английски NOR.</p>
@@ -502,6 +519,8 @@
   <header class="shead"><span class="snum">07</span>
     <h2>Штрих Шеффера: определение<span class="sub">A | B = ¬(A ∧ B) · «И-НЕ» · NAND</span></h2>
   </header>
+  <canvas class="viz" data-viz="nand" style="height:clamp(100px,26vh,320px);"></canvas>
+
   <div class="grid g21">
     <div>
       <div class="formula">A | B = ¬(A ∧ B)</div>
@@ -681,6 +700,8 @@
   <header class="shead"><span class="snum">11</span>
     <h2>Зачем это в технике<span class="sub">Микросхемы · транзисторы · программирование</span></h2>
   </header>
+  <canvas class="viz" data-viz="gates" style="height:clamp(90px,22vh,290px);"></canvas>
+
   <div class="grid g3">
     <div class="card"><h3 class="sans">Микросхемы</h3><p class="tiny">Элементы И-НЕ и ИЛИ-НЕ — базовые «кирпичи» цифровой электроники. Из одинаковых элементов И-НЕ собирают сумматоры (сложение чисел), регистры и память (хранение битов), а из них — целые процессоры.</p><p class="tiny"><b>Пример:</b> 4-разрядный сумматор — это десятки элементов И-НЕ.</p></div>
     <div class="card"><h3 class="sans">Транзисторы</h3><p class="tiny">В КМОП-технологии — основе всех современных чипов — И-НЕ и ИЛИ-НЕ собираются минимальным числом транзисторов, поэтому они дешевле и быстрее прочих элементов.</p><p class="tiny"><b>Пример:</b> одна И-НЕ ≈ 4 транзистора, один И ≈ 6.</p></div>
@@ -903,7 +924,7 @@ A | A↓A | A|A
   </div>
 </section>
 
-<section class="slide invert title" data-sec="6 · Практика и итог">
+<section class="slide vizbg invert title" data-sec="6 · Практика и итог">
   <div class="meta">Технология · 8 класс</div>
   <h1>Спасибо!</h1>
   <div class="rule"></div>
@@ -920,6 +941,8 @@ A | A↓A | A|A
     <p>Самостоятельная работа (слайд 16) — сдаём в конце урока.</p>
   </div>
 </div>
+
+<canvas class="viz" data-viz="codefall"></canvas>
 </section>
 
 </div>
@@ -974,12 +997,13 @@ A | A↓A | A|A
     }
   });
   document.getElementById('deck').addEventListener('click', function(e){
-    if (e.target.closest('a, button, summary, details, code, pre')) return;
+    if (e.target.closest('a, button, summary, details, code, pre, canvas')) return;
     next();
   });
   var m = location.hash.match(/^#s(\d+)$/);
   show(m ? parseInt(m[1], 10) - 1 : 0);
 })();
 </script>
+<script src="viz.js"></script>
 </body>
 </html>
