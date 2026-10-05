@@ -1,6 +1,6 @@
 # ORBIT
 
-Static demo of ORBIT, deployed here so the link outlives any preview host.
-Source: https://github.com/Chr0mat1x/newmysite
+Live ORBIT, backed by a Supabase project (accounts + email confirmation).
 
-Built with: VITE_BASE=/orbit/ npm run build:pages
+Source: https://github.com/Chr0mat1x/newmysite
+Built with: VITE_BASE=/orbit/ npm run build:online
