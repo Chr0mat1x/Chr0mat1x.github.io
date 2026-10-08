@@ -202,29 +202,18 @@ section[id] { scroll-margin-top: 90px; }
   z-index: 2;
 }
 
-.hero__sakura {
+/* Интерактивная сеть частиц в hero (библиотека tsParticles) */
+.hero__particles {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  width: min(92vw, 1080px);
-  height: auto;
-  aspect-ratio: 1000 / 430;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 1;
   opacity: 0;
-  animation: sakuraIn 1.6s ease .15s forwards;
+  transition: opacity 1.2s ease .2s;
 }
-@keyframes sakuraIn { to { opacity: 1; } }
-/* Мягкая засветка под текстом, чтобы ветка не мешала читать заголовок */
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(120% 90% at 18% 45%, rgba(245,245,245,.92) 30%, rgba(245,245,245,0) 68%);
-}
-
+html.js .hero__particles { opacity: 1; }
 /* ============ SECTIONS ============ */
 .section { padding: 110px 0; }
 .section--dark { background: var(--black); color: var(--white); }
@@ -450,12 +439,8 @@ html.js.reveal-fallback .reveal { opacity: 1; transform: none; }
   .faq__item summary { font-size: .95rem; padding: 18px 0; }
   .footer__inner { flex-direction: column; text-align: center; justify-content: center; }
   .hero__grid { display: none; }
-  /* Ветку на телефоне держим ниже и приглушённой, чтобы не мешала тексту */
-  .hero__sakura { width: 132vw; right: -16vw; bottom: -2%; opacity: 0; animation: sakuraInMobile 1.6s ease .15s forwards; }
-  @keyframes sakuraInMobile { to { opacity: .58; } }
-  .hero::after {
-    background: radial-gradient(120% 80% at 50% 38%, rgba(245,245,245,.95) 34%, rgba(245,245,245,0) 72%);
-  }
+  /* На телефоне частиц меньше — библиотека учитывает ширину сама */
+  .hero__particles { opacity: 1; }
 }
 
 @media (max-width: 480px) {
@@ -753,5 +738,5 @@ html:not(.js) .hero__title .hl { opacity: 1; transform: none; }
   .spotlight { display: none; }
   html.js .hero__title .hl { opacity: 1; transform: none; transition: none; }
   .nav__link, .contact__link, .logo, .lang-switch { transform: none; transition: none; }
-  .hero__sakura { animation: none; opacity: 1; }
+  .hero__particles { display: none; }
 }
