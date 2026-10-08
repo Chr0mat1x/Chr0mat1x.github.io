@@ -204,11 +204,25 @@ section[id] { scroll-margin-top: 90px; }
 
 .hero__sakura {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
+  width: min(92vw, 1080px);
+  height: auto;
+  aspect-ratio: 1000 / 430;
   pointer-events: none;
   z-index: 1;
+  opacity: 0;
+  animation: sakuraIn 1.6s ease .15s forwards;
+}
+@keyframes sakuraIn { to { opacity: 1; } }
+/* Мягкая засветка под текстом, чтобы ветка не мешала читать заголовок */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 18% 45%, rgba(245,245,245,.92) 30%, rgba(245,245,245,0) 68%);
 }
 
 /* ============ SECTIONS ============ */
@@ -436,6 +450,12 @@ html.js.reveal-fallback .reveal { opacity: 1; transform: none; }
   .faq__item summary { font-size: .95rem; padding: 18px 0; }
   .footer__inner { flex-direction: column; text-align: center; justify-content: center; }
   .hero__grid { display: none; }
+  /* Ветку на телефоне держим ниже и приглушённой, чтобы не мешала тексту */
+  .hero__sakura { width: 132vw; right: -16vw; bottom: -2%; opacity: 0; animation: sakuraInMobile 1.6s ease .15s forwards; }
+  @keyframes sakuraInMobile { to { opacity: .58; } }
+  .hero::after {
+    background: radial-gradient(120% 80% at 50% 38%, rgba(245,245,245,.95) 34%, rgba(245,245,245,0) 72%);
+  }
 }
 
 @media (max-width: 480px) {
@@ -688,4 +708,50 @@ html.js .section__title.title--in .l {
   }
   html.js .section__title .l { opacity: 1; transform: none; transition: none; }
   .marquee, .price--featured, .form { transform: none; }
+}
+
+/* ================================================================
+   ART v4 — прожектор за курсором, вход hero-заголовка, магнитные ссылки
+   ================================================================ */
+
+/* Мягкий прожектор, следующий за курсором (создаётся JS'ом) */
+.spotlight {
+  position: fixed; inset: 0; z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    420px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(10,10,10,.05), transparent 62%);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+html.js .spotlight { opacity: 1; }
+
+/* Hero-заголовок: буквы «выныривают» с 3D-разворотом после прелоадера */
+html.js .hero__title .hl {
+  display: inline-block; white-space: pre;
+  opacity: 0;
+  transform: translateY(.7em) rotateX(-70deg);
+  transform-origin: 50% 100%;
+  transition:
+    opacity .5s ease calc(var(--i) * 42ms),
+    transform .75s cubic-bezier(.2,.8,.25,1) calc(var(--i) * 42ms);
+}
+html.js .hero__title.hero__title--lit .hl {
+  opacity: 1; transform: translateY(0) rotateX(0deg);
+}
+html:not(.js) .hero__title .hl { opacity: 1; transform: none; }
+
+/* Магнитные ссылки — плавный возврат после сдвига за курсором */
+.nav__link, .contact__link, .logo, .lang-switch {
+  transition: transform .25s cubic-bezier(.2,.7,.3,1);
+  will-change: transform;
+}
+.nav__link::after { transition: width .3s, transform .25s cubic-bezier(.2,.7,.3,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight { display: none; }
+  html.js .hero__title .hl { opacity: 1; transform: none; transition: none; }
+  .nav__link, .contact__link, .logo, .lang-switch { transform: none; transition: none; }
+  .hero__sakura { animation: none; opacity: 1; }
 }
