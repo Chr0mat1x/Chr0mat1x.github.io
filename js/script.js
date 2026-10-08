@@ -687,3 +687,12 @@ form.addEventListener('submit', e => {
     setTimeout(go, 2900); // страховка
   });
 })();
+
+// ---- FAQ: индекс для каскадного вылета пунктов ----
+(function () {
+  try {
+    document.querySelectorAll('.faq .faq__item').forEach(function (it, i) {
+      it.style.setProperty('--i', i);
+    });
+  } catch (e) {}
+})();

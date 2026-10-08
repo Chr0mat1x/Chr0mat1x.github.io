@@ -599,12 +599,24 @@ html:not(.js) .section__title::after { content: none; }
 .faq__item > * { min-height: 0; overflow: hidden; }
 
 /* FAQ-пункты имеют класс .reveal, чей transition перекрывал раскрытие.
-   Возвращаем плавность аккордеона, не теряя вход появления. */
+   Возвращаем плавность аккордеона и делаем вылеты пунктов мягче:
+   меньше сдвиг/размытие, длиннее кривая, лёгкий каскад по порядку. */
 @media (prefers-reduced-motion: no-preference) {
   html.js .faq__item.reveal {
-    transition: opacity .85s ease, transform .85s cubic-bezier(.2,.7,.3,1),
-                filter .85s ease, grid-template-rows .55s cubic-bezier(.4,.05,.7,.5);
+    transform: translateY(16px);
+    filter: blur(5px);
+    transition:
+      opacity .95s cubic-bezier(.16,.84,.44,1),
+      transform 1.05s cubic-bezier(.16,.84,.44,1),
+      filter .95s cubic-bezier(.16,.84,.44,1),
+      grid-template-rows .55s cubic-bezier(.4,.05,.7,.5);
+    /* каскад только для вылета; раскрытие аккордеона — без задержки */
+    transition-delay: calc(var(--i, 0) * 90ms), calc(var(--i, 0) * 90ms), calc(var(--i, 0) * 90ms), 0s;
   }
+  html.js .faq__item.reveal.reveal--visible { transform: translateY(0); filter: blur(0); }
+  /* Страховка: без IntersectionObserver показываем сразу, без «залипания» */
+  html.js.reveal-fallback .faq__item.reveal,
+  html.js.reveal-fallback .faq__item.reveal.reveal--visible { transform: none; filter: none; }
 }
 
 /* ----- СЧЁТЧИКИ ----- */
