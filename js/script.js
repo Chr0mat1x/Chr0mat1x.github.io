@@ -607,3 +607,83 @@ form.addEventListener('submit', e => {
   }
 })();
 
+
+// ================================================================
+// ART v6 — «вау»-слой: декод hero-подписи, каскадные индикаторы
+// статистики, 3D-разворот номеров секций, каскад шагов процесса.
+// Изолировано, уважает «уменьшить анимации».
+// ================================================================
+(function () {
+  const d = document;
+  const mm = q => ('matchMedia' in window) ? window.matchMedia(q).matches : false;
+  const reduced = mm('(prefers-reduced-motion: reduce)');
+  const guard = fn => { try { fn(); } catch (e) {} };
+
+  // ---- HERO-ПОДПИСЬ: декод из «шума» после прелоадера ----
+  guard(() => {
+    const tag = d.querySelector('.hero__tag');
+    if (!tag || reduced) return;
+    const real = tag.textContent;
+    const glyphs = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЭЮЯ/▮▯#*';
+    const start = () => {
+      const t0 = performance.now();
+      const dur = Math.min(1100, real.length * 55);
+      const tick = () => {
+        const p = Math.min(1, (performance.now() - t0) / dur);
+        const settled = Math.floor(p * real.length);
+        let out = '';
+        for (let i = 0; i < real.length; i++) {
+          const ch = real[i];
+          if (ch === ' ') { out += ' '; continue; }
+          out += (p >= 1 || i < settled) ? ch : glyphs[(Math.random() * glyphs.length) | 0];
+        }
+        tag.textContent = out;
+        if (p < 1) requestAnimationFrame(tick); else tag.textContent = real;
+      };
+      tick();
+    };
+    if (d.readyState === 'complete') setTimeout(start, 1800);
+    else window.addEventListener('load', () => setTimeout(start, 1800));
+    setTimeout(start, 2800); // страховка
+  });
+
+  // ---- ПРОЦЕСС: индексы + каскадный вход шагов ----
+  guard(() => {
+    const proc = d.querySelector('.process');
+    if (!proc) return;
+    const steps = proc.querySelectorAll('.process__step');
+    steps.forEach((s, i) => s.style.setProperty('--i', i));
+    if (reduced || !('IntersectionObserver' in window)) { proc.classList.add('proc--in'); return; }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { proc.classList.add('proc--in'); io.unobserve(proc); }
+      });
+    }, { threshold: 0.15 });
+    io.observe(proc);
+  });
+
+  // ---- НОМЕРА СЕКЦИЙ: 3D-разворот при появлении ----
+  guard(() => {
+    const heads = Array.from(d.querySelectorAll('.section__head'));
+    if (!heads.length) return;
+    if (reduced || !('IntersectionObserver' in window)) { heads.forEach(h => h.classList.add('num--in')); return; }
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('num--in'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    heads.forEach(h => io.observe(h));
+  });
+
+  // ---- СТАТИСТИКА: каскад «прорастающих» индикаторов ----
+  guard(() => {
+    const stats = d.querySelector('.hero__stats');
+    if (!stats) return;
+    stats.querySelectorAll('.stat').forEach((s, i) => s.style.setProperty('--i', i));
+    const go = () => stats.classList.add('stats--in');
+    if (reduced) { go(); return; }
+    if (d.readyState === 'complete') setTimeout(go, 1900);
+    else window.addEventListener('load', () => setTimeout(go, 1900));
+    setTimeout(go, 2900); // страховка
+  });
+})();

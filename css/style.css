@@ -740,3 +740,70 @@ html:not(.js) .hero__title .hl { opacity: 1; transform: none; }
   .nav__link, .contact__link, .logo, .lang-switch { transform: none; transition: none; }
   .hero__particles { display: none; }
 }
+
+
+/* ================================================================
+   ART v6 — «вау»-слой: декод hero-подписи, каскадные индикаторы
+   статистики, 3D-разворот номеров секций, каскад шагов процесса,
+   «дыхание» фоновой сетки, диагональный блик на кнопках.
+   Всё отключается при «уменьшить анимации».
+   ================================================================ */
+
+/* Статистика: подчёркивание «прорастает» каскадом + лёгкий отклик */
+.stat { position: relative; }
+.stat::after {
+  content: ''; position: absolute; left: 0; bottom: -10px;
+  width: 100%; height: 2px; background: var(--black);
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform .6s cubic-bezier(.2,.8,.25,1) calc(var(--i, 0) * 120ms);
+}
+.hero__stats.stats--in .stat::after { transform: scaleX(1); }
+.stat__num { display: inline-block; transition: transform .3s cubic-bezier(.2,.7,.3,1); }
+.stat:hover .stat__num { transform: translateY(-3px); }
+
+/* Hero-сетка: медленное «дыхание» и лёгкий дрейф */
+.hero__grid { animation: gridBreathe 14s ease-in-out infinite; }
+@keyframes gridBreathe {
+  0%, 100% { background-position: 0 0, 0 0; opacity: .85; }
+  50%      { background-position: 28px 28px, 28px 28px; opacity: 1; }
+}
+
+/* Номера секций: 3D-разворот при появлении */
+html.js .section__num {
+  display: inline-block;
+  transform: perspective(400px) rotateX(-90deg);
+  transform-origin: 50% 100%;
+  opacity: 0;
+  transition: transform .7s cubic-bezier(.2,.8,.25,1), opacity .6s ease;
+}
+html.js .section__head.num--in .section__num { transform: perspective(400px) rotateX(0); opacity: 1; }
+
+/* Шаги процесса: каскадный вход с 3D-подъёмом */
+html.js .process__step {
+  opacity: 0;
+  transform: perspective(700px) translateY(34px) rotateX(8deg);
+  transition: opacity .7s ease, transform .8s cubic-bezier(.2,.8,.25,1);
+}
+html.js .process.proc--in .process__step {
+  opacity: 1;
+  transform: perspective(700px) translateY(0) rotateX(0);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+
+/* Кнопки: диагональный блик при наведении */
+.btn::after {
+  content: ''; position: absolute; top: 0; left: -140%;
+  width: 70%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent);
+  transform: skewX(-18deg); pointer-events: none;
+  transition: left .6s cubic-bezier(.3,.7,.3,1);
+}
+.btn:hover::after { left: 140%; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__grid { animation: none; }
+  html.js .section__num,
+  html.js .process__step { opacity: 1; transform: none; transition: none; }
+  .stat::after { transform: scaleX(1); transition: none; }
+  .btn::after { display: none; }
+}
