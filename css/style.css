@@ -855,11 +855,11 @@ html.js .process.proc--in .process__step {
 .hero__kumo {
   position: absolute;
   top: 50%; right: 4%;
-  width: clamp(200px, 24vw, 380px);
+  width: clamp(220px, 26vw, 420px);
   aspect-ratio: 1 / 1;
   transform: translateY(-50%);
   background: url(../kumo.png) center / contain no-repeat;
-  opacity: .5;
+  opacity: 1;
   z-index: 0;
   pointer-events: none;
 }
