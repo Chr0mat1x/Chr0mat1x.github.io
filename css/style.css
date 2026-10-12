@@ -39,7 +39,7 @@ section[id] { scroll-margin-top: 90px; }
 .preloader {
   position: fixed; inset: 0; z-index: 1000;
   background: var(--black);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
   transition: opacity .6s ease, visibility .6s;
   /* Страховка: если JS не сработает, прелоадер исчезнет сам */
   animation: preloaderAutoHide 0s linear 2.5s forwards;
@@ -840,11 +840,10 @@ html.js .process.proc--in .process__step {
 /* --- Кумо в прелоадере --- */
 .preloader__kumo {
   position: relative;
-  display: inline-block;
+  display: block;
   width: clamp(80px, 14vw, 130px);
   aspect-ratio: 1 / 1;
-  margin-left: 18px;
-  vertical-align: middle;
+  margin: 0 0 24px;
   background: url(../kumo.png) center / contain no-repeat;
   filter: invert(1);
   opacity: .85;
@@ -860,7 +859,7 @@ html.js .process.proc--in .process__step {
   aspect-ratio: 1 / 1;
   transform: translateY(-50%);
   background: url(../kumo.png) center / contain no-repeat;
-  opacity: .16;
+  opacity: .3;
   z-index: 0;
   pointer-events: none;
 }
