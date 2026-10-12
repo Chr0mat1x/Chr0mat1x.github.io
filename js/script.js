@@ -688,6 +688,96 @@ form.addEventListener('submit', e => {
   });
 })();
 
+
+// ============ KUMO — MASCOT ============
+(function () {
+  const figure = document.getElementById('kumoFigure');
+  const bubble = document.getElementById('kumoBubble');
+  const text = document.getElementById('kumoText');
+  if (!figure || !bubble || !text) return;
+
+  const isEn = document.documentElement.lang === 'en';
+  const art = figure.querySelector('.kumo__art');
+
+  // Кумо слегка наклоняется вслед за курсором
+  if (art) {
+    let raf = 0;
+    document.addEventListener('mousemove', e => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const r = figure.getBoundingClientRect();
+        if (!r.width) return;
+        const dx = (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2);
+        const dy = (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2);
+        const rx = Math.max(-8, Math.min(8, dy * 8));
+        const ry = Math.max(-8, Math.min(8, dx * 8));
+        art.style.transform = `perspective(300px) rotateX(${-rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+      });
+    });
+  }
+
+  // Прячем компаньона, пока открыт прелоадер
+  figure.style.opacity = '0';
+  bubble.style.transitionDelay = '0s';
+
+  const lines = isEn ? [
+    'Meow. I am Kumo, the studio snow leopard. I keep an eye on things here.',
+    'We build websites, web apps and Telegram bots. A landing page from 5 days.',
+    'Not sure what you need? Tap again and I will take you to the form.'
+  ] : [
+    'Мяу. Я Кумо, снежный барс студии. Слежу тут за порядком.',
+    'Делаем сайты, веб-приложения и Telegram-ботов. Лендинг — от 5 дней.',
+    'Не знаешь, что выбрать? Жми ещё раз — отведу к форме.'
+  ];
+  let step = 0;
+
+  const show = () => bubble.classList.add('kumo__bubble--visible');
+  const hide = () => bubble.classList.remove('kumo__bubble--visible');
+
+  const speak = () => {
+    if (step < lines.length) { text.textContent = lines[step]; step += 1; }
+    else {
+      const c = document.getElementById('contact');
+      if (c) c.scrollIntoView({ behavior: 'smooth' });
+      text.textContent = isEn
+        ? 'Here is the form. Describe the task and we will reply within a day.'
+        : 'Вот форма. Опиши задачу — ответим в течение дня.';
+    }
+    show();
+  };
+
+  // Кумо чёрный на светлом и белый на тёмном — по секции под ним
+  const darkSections = document.querySelectorAll('.section--dark, .footer');
+  const syncInvert = () => {
+    const r = figure.getBoundingClientRect();
+    const px = r.left + r.width / 2, py = r.top + r.height / 2;
+    let inv = false;
+    darkSections.forEach(sec => {
+      const s = sec.getBoundingClientRect();
+      if (py >= s.top && py <= s.bottom && px >= s.left && px <= s.right) inv = true;
+    });
+    figure.classList.toggle('kumo--invert', inv);
+  };
+
+  const appear = () => {
+    figure.style.transition = 'opacity .6s ease';
+    figure.style.opacity = '1';
+    setTimeout(show, 900);
+    setTimeout(hide, 10000);
+    syncInvert();
+  };
+
+  figure.addEventListener('click', speak);
+  bubble.addEventListener('click', speak);
+  figure.addEventListener('mouseenter', show);
+  window.addEventListener('scroll', syncInvert, { passive: true });
+  window.addEventListener('resize', syncInvert);
+
+  if (document.readyState === 'complete') setTimeout(appear, 1750);
+  else window.addEventListener('load', () => setTimeout(appear, 1750));
+})();
+
 // ---- FAQ: индекс для каскадного вылета пунктов ----
 (function () {
   try {

@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=17">
+  <link rel="stylesheet" href="/css/style.css?v=18">
   <link rel="icon" href="/favicon.ico" sizes="32x32">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -33,7 +33,7 @@
 </head>
 <body>
 
-  <div class="preloader" id="preloader"><span class="preloader__text">CHR0MAT1X</span></div>
+  <div class="preloader" id="preloader"><span class="preloader__text">CHR0MAT1X</span><span class="preloader__kumo" aria-hidden="true"></span></div>
   <div class="cursor" id="cursor"></div>
 
   <header class="header" id="header">
@@ -71,6 +71,7 @@
       </div>
     </div>
     <div class="hero__grid" aria-hidden="true"></div>
+    <span class="hero__kumo" aria-hidden="true"></span>
     <div class="hero__particles" id="heroParticles" aria-hidden="true"></div>
   </section>
 
@@ -249,7 +250,17 @@
     </div>
   </footer>
 
+  <!-- Kumo companion: sits in the corner and talks (art: /kumo.png) -->
+  <div class="kumo kumo--img" id="kumoCompanion">
+    <button type="button" class="kumo__bubble" id="kumoBubble" aria-label="Ask Kumo">
+      <span id="kumoText">Meow. I'm Kumo, the studio mascot. Tap me and I'll help pick a plan.</span>
+    </button>
+    <button type="button" class="kumo__figure" id="kumoFigure" aria-label="Kumo, the studio mascot">
+      <span class="kumo__float"><span class="kumo__art" aria-hidden="true"></span></span>
+    </button>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@3.9.1/tsparticles.bundle.min.js" integrity="sha384-k5y1MdALoG8qJ5FfC4SfwHtiC9/IZ8rQXlTxDRDIFriSZwBqIdOa2M8mcmQLs2pS" crossorigin="anonymous"></script>
-  <script src="/js/script.js?v=22"></script>
+  <script src="/js/script.js?v=23"></script>
 </body>
 </html>

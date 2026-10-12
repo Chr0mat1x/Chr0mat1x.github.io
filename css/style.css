@@ -831,3 +831,115 @@ html.js .process.proc--in .process__step {
   .stat::after { transform: scaleX(1); transition: none; }
   .btn::after { display: none; }
 }
+
+
+/* ============ KUMO — MASCOT (снежный барс) ============ */
+/* Арт — /kumo.png (прозрачный фон, чёрные линии). Рисуется фоном, а не <img>,
+   чтобы Chrome не навешивал визуальный поиск. На тёмных секциях инвертируется. */
+
+/* --- Кумо в прелоадере --- */
+.preloader__kumo {
+  position: relative;
+  display: inline-block;
+  width: clamp(80px, 14vw, 130px);
+  aspect-ratio: 1 / 1;
+  margin-left: 18px;
+  vertical-align: middle;
+  background: url(../kumo.png) center / contain no-repeat;
+  filter: invert(1);
+  opacity: .85;
+  animation: kumoBlink 1s steps(2) infinite;
+}
+@keyframes kumoBlink { 50% { opacity: .25; } }
+
+/* --- Кумо-водяной знак в hero --- */
+.hero__kumo {
+  position: absolute;
+  top: 50%; right: 4%;
+  width: clamp(200px, 24vw, 380px);
+  aspect-ratio: 1 / 1;
+  transform: translateY(-50%);
+  background: url(../kumo.png) center / contain no-repeat;
+  opacity: .16;
+  z-index: 0;
+  pointer-events: none;
+}
+.hero .container { position: relative; z-index: 2; }
+
+/* --- Кумо-компаньон в углу --- */
+.kumo {
+  position: fixed;
+  right: 24px; bottom: 24px;
+  z-index: 200;
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+.kumo__figure {
+  pointer-events: auto;
+  width: 108px; height: 108px;
+  padding: 0; border: 0;
+  background: transparent;
+  display: grid; place-items: center;
+  transition: transform .25s ease;
+}
+.kumo__figure:hover { transform: translateY(-4px) scale(1.05); }
+.kumo__figure:active { transform: scale(.97); }
+/* float — «дыхание», art — наклон к курсору: не конфликтуют */
+.kumo__float {
+  display: block; width: 100%; height: 100%;
+  animation: kumoFloat 3.6s ease-in-out infinite;
+}
+.kumo__art {
+  display: block; width: 100%; height: 100%;
+  background: url(../kumo.png) center / contain no-repeat;
+  transition: transform .15s ease-out, filter .3s ease;
+}
+@keyframes kumoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+/* --- Реплика Кумо --- */
+.kumo__bubble {
+  pointer-events: auto;
+  position: relative;
+  max-width: 250px;
+  text-align: left;
+  font: inherit; font-size: .82rem; line-height: 1.45;
+  color: var(--black);
+  background: var(--white);
+  border: 1px solid var(--black);
+  border-radius: 14px 14px 4px 14px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+  opacity: 0; visibility: hidden;
+  transform: translateY(8px) scale(.96);
+  transform-origin: bottom right;
+  transition: opacity .3s ease, transform .3s ease;
+}
+.kumo__bubble--visible { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+.kumo__bubble::after {
+  content: '';
+  position: absolute; right: 26px; bottom: -9px;
+  width: 14px; height: 14px;
+  background: var(--white);
+  border-right: 1px solid var(--black);
+  border-bottom: 1px solid var(--black);
+  transform: rotate(45deg);
+}
+/* Инверсия, когда компаньон висит над тёмной секцией (класс ставит JS) */
+.kumo__figure.kumo--invert .kumo__art { filter: invert(1); }
+
+@media (max-width: 720px) {
+  .kumo { right: 14px; bottom: 14px; gap: 8px; }
+  .kumo__figure { width: 78px; height: 78px; }
+  .kumo__bubble { max-width: 200px; font-size: .78rem; padding: 10px 13px; }
+  .hero__kumo { display: none; }
+  .preloader__kumo { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preloader__kumo, .kumo__float { animation: none; }
+  .kumo__bubble { transition: opacity .2s ease; }
+}
