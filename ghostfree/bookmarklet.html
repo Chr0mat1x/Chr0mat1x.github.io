@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GhostFree — букмарклет</title>
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    .doc { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; font-family: var(--sans); }
+    .doc h1 { font-family: var(--mono); letter-spacing: 0.06em; font-size: 22px; }
+    .doc h1 span { color: rgb(var(--cyan)); }
+    .doc h2 { font-family: var(--mono); letter-spacing: 0.04em; font-size: 16px; margin: 26px 0 6px; color: rgb(var(--ink)); }
+    .doc p, .doc li { color: rgb(var(--ink) / 0.85); line-height: 1.7; font-size: 14.5px; }
+    .doc code { font-family: var(--mono); font-size: 13px; background: rgba(var(--cyan), 0.1); color: rgb(var(--cyan)); padding: 1px 5px; border-radius: 5px; }
+    .doc ol { padding-left: 22px; }
+    .bm { display: inline-flex; align-items: center; gap: 8px; margin: 6px 0 2px;
+      padding: 10px 18px; font: 600 14px var(--mono); text-decoration: none;
+      color: rgb(var(--bg)); background: rgb(var(--cyan)); border-radius: 10px; }
+    .bm:active { transform: scale(0.97); }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 14px 0 6px; }
+    .copy { padding: 9px 14px; font: 600 13px var(--mono); color: rgb(var(--ink));
+      background: rgba(0,0,0,0.35); border: 1px solid rgb(var(--line)); border-radius: 10px; cursor: pointer; }
+    .copy:hover { border-color: rgb(var(--cyan) / 0.5); }
+    .note { border: 1px solid rgb(var(--line)); border-radius: 12px; padding: 14px 16px; background: rgba(0,0,0,0.28); }
+    .warn { color: rgb(var(--amber)); }
+    .back { font-family: var(--mono); font-size: 13px; color: rgb(var(--dim)); }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <p class="back"><a href="index.html">← к оверлею</a></p>
+    <h1>GHOST<span>FREE</span> · букмарклет</h1>
+    <p>Наложи невидимый оверлей поверх любой страницы — включая Google Meet, Zoom в браузере, HackerRank и онлайн-IDE. Оверлей живёт в отдельном <code>iframe</code>, поэтому не конфликтует со стилями и скриптами чужого сайта.</p>
+
+    <div class="row">
+      <a class="bm" id="bm-link" href="javascript:void(0)">👻 GhostFree</a>
+      <button class="copy" id="copy" type="button">Скопировать код</button>
+    </div>
+
+    <ol>
+      <li>Перетащи кнопку <b>👻 GhostFree</b> на панель закладок браузера. Если панели не видно — <code>Ctrl+Shift+B</code>.</li>
+      <li>Открой страницу собеседования и нажми закладку.</li>
+      <li>Тащи оверлей за ручку <code>⠿</code>, спрячь кнопкой <code>✕</code> или клавишей <code>Esc</code>.</li>
+    </ol>
+
+    <h2>Собеседование в другой вкладке</h2>
+    <p>Страница не может рисовать поверх другой вкладки — это запрет браузера, обойти его нельзя. Поэтому для этого случая есть <b>окно поверх всех вкладок</b>:</p>
+    <ol>
+      <li>Открой GhostFree в отдельной вкладке и нажми <code>⧉</code> в шапке.</li>
+      <li>Панель переедет в маленькое окно, которое висит поверх всех вкладок.</li>
+      <li>Переключись на вкладку с собеседованием — окно останется видимым.</li>
+    </ol>
+    <p>Работает в Chrome 116+ (Document Picture-in-Picture). Микрофон в таком окне работает как на обычной странице, в отличие от оверлея-<code>iframe</code>.</p>
+    <p class="warn">Вкладка GhostFree должна оставаться открытой: окно — это та же страница, просто в отдельном окне.</p>
+
+    <div class="note">
+      <p><b>Важно:</b> страница GhostFree должна быть доступна по адресу (<code id="origin"></code>). Букмарклет обращается к нему как к источнику оверлея и прокси к модели.</p>
+      <p class="warn">Голосовой ввод и микрофон работают только на страницах по HTTPS (или на <code>localhost</code>).</p>
+    </div>
+  </div>
+
+  <script type="text/plain" id="bm-src">
+(function(){
+  if (window.__ghostfree) return;
+  var O = "__ORIGIN__";
+  var host = document.createElement("div");
+  host.style.cssText = "position:fixed;top:16px;right:16px;width:440px;height:620px;max-width:calc(100vw - 24px);max-height:calc(100vh - 32px);z-index:2147483647;border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.6);overflow:hidden;background:rgba(15,18,24,.35);";
+  var frame = document.createElement("iframe");
+  frame.setAttribute("allow", "microphone");
+  frame.src = O + "/?embed=1";
+  frame.style.cssText = "width:100%;height:100%;border:0;background:transparent;";
+  host.appendChild(frame);
+  var grip = document.createElement("div");
+  grip.textContent = "\u283F"; grip.title = "Перетащи";
+  grip.style.cssText = "position:absolute;top:8px;left:8px;width:22px;height:22px;border-radius:6px;background:rgba(0,0,0,.5);color:#40e8d6;font:14px/22px monospace;text-align:center;cursor:grab;z-index:2;user-select:none;";
+  var close = document.createElement("button");
+  close.textContent = "\u2715"; close.title = "Закрыть (Esc)";
+  close.style.cssText = "position:absolute;top:8px;right:8px;width:22px;height:22px;border:0;border-radius:6px;background:rgba(0,0,0,.5);color:#ff5ca8;font:13px/1 monospace;cursor:pointer;z-index:2;";
+  host.appendChild(grip); host.appendChild(close);
+  document.documentElement.appendChild(host);
+  var dx = 0, dy = 0, drag = false;
+  function down(e){ drag = true; var p = e.touches ? e.touches[0] : e; dx = p.clientX - host.offsetLeft; dy = p.clientY - host.offsetTop; e.preventDefault(); }
+  function move(e){ if(!drag) return; var p = e.touches ? e.touches[0] : e; host.style.left = (p.clientX - dx) + "px"; host.style.top = (p.clientY - dy) + "px"; host.style.right = "auto"; }
+  function up(){ drag = false; }
+  grip.addEventListener("mousedown", down); grip.addEventListener("touchstart", down, {passive:false});
+  document.addEventListener("mousemove", move); document.addEventListener("touchmove", move, {passive:false});
+  document.addEventListener("mouseup", up); document.addEventListener("touchend", up);
+  function kill(){
+    window.removeEventListener("message", onmsg);
+    document.removeEventListener("keydown", onesc);
+    host.remove();
+    window.__ghostfree = null;
+  }
+  function onmsg(e){ if (e.data && e.data.type === "ghostfree:close") kill(); }
+  function onesc(e){ if (e.key === "Escape") kill(); }
+  window.addEventListener("message", onmsg);
+  document.addEventListener("keydown", onesc);
+  close.addEventListener("click", kill);
+  window.__ghostfree = kill;
+})();
+  </script>
+
+  <script>
+    (function () {
+      // Base directory of this page, so the overlay resolves whether GhostFree
+      // is served from the domain root or from a subpath (e.g. GitHub Pages).
+      var origin = location.href.replace(/[^/]*$/, '').replace(/\/$/, '');
+      document.getElementById('origin').textContent = origin;
+      var src = document.getElementById('bm-src').textContent.trim().replace('__ORIGIN__', origin);
+      var href = 'javascript:(' + src + ')()';
+      document.getElementById('bm-link').setAttribute('href', href);
+      document.getElementById('copy').addEventListener('click', function () {
+        navigator.clipboard.writeText(href).then(function () {
+          var b = document.getElementById('copy');
+          b.textContent = 'Скопировано ✓';
+          setTimeout(function () { b.textContent = 'Скопировать код'; }, 1600);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

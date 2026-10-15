@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GhostFree — невидимый ассистент</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="vendor/katex/katex.min.css" />
+</head>
+<body>
+  <div id="root" class="ghost" data-collapsed="false" data-state="idle">
+    <header class="ghost__bar" id="dragbar" title="Перетащи за шапку · двойной клик — сбросить позицию">
+      <span class="ghost__grip" aria-hidden="true">⠿</span>
+      <span class="ghost__title">GHOST<span class="ghost__title-dim">FREE</span></span>
+      <span class="ghost__status" id="status" data-state="idle">готов</span>
+      <span class="ghost__net" id="net" data-state="checking" title="Связь с сервером"><i></i><b id="net-text">связь…</b></span>
+      <nav class="ghost__actions">
+        <button class="iconbtn" id="btn-auto" title="Авто-ответ на вопросы, которые слышит (Ctrl+L)" aria-label="Авто-режим" aria-pressed="false">👂</button>
+        <button class="iconbtn" id="btn-mic" title="Голосовой ввод в поле вопроса (Ctrl+M)" aria-label="Голосовой ввод">🎙</button>
+        <button class="iconbtn" id="btn-float" hidden title="Окно поверх всех вкладок — видно, пока собеседование в другой вкладке" aria-label="Окно поверх вкладок">⧉</button>
+        <button class="iconbtn" id="btn-collapse" title="Свернуть / развернуть (Ctrl+B)" aria-label="Свернуть">–</button>
+        <button class="iconbtn iconbtn--danger" id="btn-hide" title="Спрятать (Ctrl+H)" aria-label="Спрятать">✕</button>
+      </nav>
+    </header>
+    <div class="ghost__body">
+      <div class="modes" id="modes" role="tablist" aria-label="Режимы"></div>
+
+      <div class="auto" id="auto-panel" hidden>
+        <div class="auto__row">
+          <span class="auto__label">Авто-ответ</span>
+          <select id="auto-mode" class="auto__select" title="Режим авто-ответов"></select>
+          <label class="auto__check" title="Спрашивать перед ответом">
+            <input type="checkbox" id="auto-confirm" /> <span>подтверждать</span>
+          </label>
+        </div>
+        <div class="auto__row">
+          <span class="auto__label">Триггеры</span>
+          <input id="auto-triggers" class="auto__input" spellcheck="false"
+                 placeholder="?, как, что, почему, расскажи, explain, how, what" />
+        </div>
+        <div class="auto__row">
+          <span class="auto__label">Язык</span>
+          <input id="auto-lang" class="auto__input" spellcheck="false"
+                 placeholder="ru-RU" title="Язык распознавания речи, например ru-RU или en-US" />
+        </div>
+        <p class="auto__note" id="auto-note">Слушаю микрофон. Когда услышу вопрос — отвечу сам.</p>
+        <div class="auto__heard" id="auto-heard" hidden></div>
+      </div>
+
+      <details class="context" id="context-box">
+        <summary>Контекст кандидата <span class="context__hint">резюме, вакансия, заметки</span></summary>
+        <textarea id="context" rows="5" spellcheck="false" placeholder="Вставь резюме или описание вакансии. Ассистент будет опираться только на эти факты."></textarea>
+      </details>
+
+      <main class="stream" id="stream" aria-live="polite"></main>
+
+      <form class="composer" id="composer" autocomplete="off">
+        <textarea id="input" rows="1" placeholder="Вопрос интервьюера… (Enter — ответить, Shift+Enter — новая строка)"></textarea>
+        <button class="send" id="btn-send" type="submit" title="Ответить (Enter)">↵</button>
+      </form>
+    </div>
+
+    <footer class="ghost__foot">
+      <span id="model-badge" class="badge">…</span>
+      <span class="foot__hint">Ctrl+L — авто-ответ · Ctrl+M — микрофон · Ctrl+B — свернуть · Ctrl+H — спрятать</span>
+    </footer>
+  </div>
+
+  <button id="peek" class="peek" hidden title="Показать оверлей (Ctrl+H)">👻</button>
+
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/katex/auto-render.min.js"></script>
+  <script src="hosts.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
