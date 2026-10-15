@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0c0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>ПЛАН — визуальная новелла</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="grain"></div>
+
+<div id="app">
+
+  <!-- ШАПКА: личное дело + штампы-шкалы -->
+  <header id="hud">
+    <div class="hud-day">
+      <div class="lbl">ДЕНЬ</div>
+      <div class="daynum" id="dayNum">1</div>
+      <div class="dayname" id="dayName">Пролог · Приём на работу</div>
+    </div>
+    <div class="hud-scales" id="scales">
+      <div class="scale" data-k="stress" title="Стресс">
+        <span class="s-ico">⚡</span><span class="s-lbl">Стресс</span>
+        <div class="bar"><i id="barStress"></i></div><span class="s-val" id="valStress">1</span>
+      </div>
+      <div class="scale" data-k="humanity" title="Человечность">
+        <span class="s-ico">🫀</span><span class="s-lbl">Человечность</span>
+        <div class="bar"><i id="barHumanity"></i></div><span class="s-val" id="valHumanity">5</span>
+      </div>
+      <div class="scale" data-k="boss" title="Репутация у начальства">
+        <span class="s-ico">★</span><span class="s-lbl">Начальство</span>
+        <div class="bar"><i id="barBoss"></i></div><span class="s-val" id="valBoss">5</span>
+      </div>
+      <div class="scale" data-k="civ" title="Репутация у гражданских">
+        <span class="s-ico">◆</span><span class="s-lbl">Люди</span>
+        <div class="bar"><i id="barCiv"></i></div><span class="s-val" id="valCiv">5</span>
+      </div>
+    </div>
+    <div class="hud-plan">
+      <div class="lbl">ПЛАН</div>
+      <div class="plannum" id="planNum">0</div>
+      <div class="planbar"><i id="barPlan"></i></div>
+    </div>
+  </header>
+
+  <!-- СЦЕНА -->
+  <main id="stage">
+    <div id="bg" class="bg bg-office"></div>
+    <div id="vignette"></div>
+    <div id="portraitWrap"></div>
+    <div id="voiceLayer"></div>
+    <div id="chapterCard" class="hidden"></div>
+  </main>
+
+  <!-- ДИАЛОГ -->
+  <section id="dialog">
+    <div id="speaker" class="speaker"></div>
+    <div id="text" class="text"></div>
+    <div id="choices" class="choices"></div>
+    <div id="dialogFoot">
+      <div id="hint" class="hint"></div>
+      <button id="nextBtn" class="nextbtn" hidden>Далее ▸</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- МИНИ-ИГРЫ -->
+<div id="overlay" class="overlay hidden"></div>
+
+<!-- ЭКРАН КОНЦОВКИ -->
+<div id="ending" class="ending hidden"></div>
+
+<script src="script.js"></script>
+<script src="art.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
