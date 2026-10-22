@@ -53,12 +53,22 @@ function updateHUD() {
 function applyFx(fx) {
   if (!fx) return;
   const lines = [];
+  // Финальный выбор сам начисляет очки в те же шкалы, по которым считается
+  // концовка. Запоминаем состояние до его применения, иначе условие
+  // перебивает само себя и часть концовок становится недостижимой.
+  if (fx.flag && fx.flag.final && !S.preFinal) {
+    S.preFinal = { humanity: S.humanity, civ: S.civ, stress: S.stress, boss: S.boss, plan: S.plan };
+  }
   if (fx.stress)    { S.stress = clamp(S.stress + fx.stress, 0, MAXSCALE); lines.push(`Стресс ${fx.stress > 0 ? '+' : ''}${fx.stress}`); }
   if (fx.humanity)  { S.humanity = clamp(S.humanity + fx.humanity, 0, MAXSCALE); lines.push(`Человечность ${fx.humanity > 0 ? '+' : ''}${fx.humanity}`); }
   if (fx.boss)      { S.boss = clamp(S.boss + fx.boss, 0, MAXSCALE); lines.push(`Начальство ${fx.boss > 0 ? '+' : ''}${fx.boss}`); }
   if (fx.civ)       { S.civ = clamp(S.civ + fx.civ, 0, MAXSCALE); lines.push(`Люди ${fx.civ > 0 ? '+' : ''}${fx.civ}`); }
   if (fx.plan)      { S.plan = clamp(S.plan + fx.plan, 0, 20); lines.push(`План ${fx.plan > 0 ? '+' : ''}${fx.plan}`); }
-  if (fx.flag)      for (const f in fx.flag) S.flags[f] = (S.flags[f] || 0) + fx.flag[f];
+  if (fx.flag)      for (const f in fx.flag) {
+    const v = fx.flag[f];
+    // Числовые флаги накапливаются, строковые (например, final/stance) — перезаписываются.
+    S.flags[f] = (typeof v === 'number') ? (S.flags[f] || 0) + v : v;
+  }
   if (fx.empathy)   S.empathyCount++;
   if (fx.aggression) S.aggressionCount++;
   updateHUD();
@@ -182,12 +192,16 @@ function skipTyping() {
   }
 }
 
-/* ─────────── РЕНДЕР УЗЛА ─────────── */
+/* ─────────── АКТИВНЫЙ СЦЕНАРИЙ ───────────
+   Часть I — script (пролог/акты/концовки), Часть II — script2. */
 let current = null;
+let EPISODE = 1;
+const SCRIPTS = { 1: () => script, 2: () => script2 };
+function nodes() { return SCRIPTS[EPISODE](); }
 const resolve = v => (typeof v === 'function' ? v() : v);
 
 function show(id) {
-  const node = script[id];
+  const node = nodes()[id];
   if (!node) { console.warn('нет узла', id); return; }
   current = node;
   el.hint.textContent = '';
@@ -436,15 +450,30 @@ function mgPersuade(node) {
 /* ─────────── КОНЦОВКИ ─────────── */
 function computeEnding() {
   const f = S.flags;
+  if (EPISODE === 2) return computeEnding2();
+  // Оцениваем состояние до финального выбора: он сам меняет те же шкалы.
+  const p = S.preFinal || S;
   // Осознанный выбор перед комиссией важнее накопленных шкал.
   if (f.final === 'break')  return 'E';                          // сломался
-  if (f.final === 'expose') return (f.ally_igor || S.civ >= 6) ? 'B' : 'D'; // сдал схему
+  if (f.final === 'expose') return (f.ally_igor || p.civ >= 6) ? 'B' : 'D'; // сдал схему
   if (f.final === 'quit')   return 'C';                          // ушёл сам
   if (f.final === 'cover')  return 'A';                          // прикрыл схему
   // Запасные ветки, если финального выбора почему-то не было.
   if (S.stress >= 10) return 'E';
   if (f.betrayed && !f.ally_igor) return 'D';
   return 'A';
+}
+
+function computeEnding2() {
+  const f = S.flags;
+  const p = S.preFinal || S;   // см. комментарий в computeEnding
+  if (f.final === 'break')    return 'E2';   // сломался на комиссии
+  if (f.final === 'scapegoat') return (p.humanity >= 7 && f.ally_dmytro) ? 'B2' : 'D2'; // взял вину
+  if (f.final === 'expose')   return (f.evidence >= 2 && (f.ally_dmytro || p.civ >= 6)) ? 'B2' : 'D2'; // сдал схему
+  if (f.final === 'quit')     return 'C2';   // ушёл
+  if (f.final === 'cover')    return 'A2';   // прикрыл всё
+  if (S.stress >= 10) return 'E2';
+  return 'A2';
 }
 
 const ENDINGS = {
@@ -457,13 +486,26 @@ const ENDINGS = {
   D: { code: 'Концовка D', title: 'По статье', tag: 'Ты сдал своих. Свои сдали тебя.',
        body: 'Увольнение по статье. Потом — дело. Потом — коридор с лампой,\nкоторая мигает так же, как в твоём подъезде.\n\nНа допросе тебя спрашивают, почему ты это сделал.\nТы хочешь сказать «потому что иначе было нельзя»,\nно понимаешь, что это та же фраза, которой Вася оправдывал всё.' },
   E: { code: 'Концовка E', title: 'Выгорание', tag: 'Ты не выбрал. Ты просто перестал.',
-       body: 'Ты не выходишь на работу. Ни в понедельник, ни во вторник.\nТелефон звонит и замолкает. Потом звонит Вася. Ты не берёшь.\n\nКабинет 14 стоит пустым. Ведомость с галочками лежит на столе,\nкак будто кто-то вышел на минуту. Он не вернётся.\n\nКот Шумер запрыгивает на подоконник и смотрит в серое окно.\nБольше в комнате никого нет.' }
+       body: 'Ты не выходишь на работу. Ни в понедельник, ни во вторник.\nТелефон звонит и замолкает. Потом звонит Вася. Ты не берёшь.\n\nКабинет 14 стоит пустым. Ведомость с галочками лежит на столе,\nкак будто кто-то вышел на минуту. Он не вернётся.\n\nКот Шумер запрыгивает на подоконник и смотрит в серое окно.\nБольше в комнате никого нет.' },
+
+  /* ── Часть II: «Бронь» ── */
+  A2: { code: 'Концовка II-A', title: 'Чистые руки', tag: 'Ты прикрыл всё. И всё осталось на своих местах.',
+        body: 'Ты сказал комиссии, что справки подлинные. Говорил ровно, спокойно, глядя в глаза — так, как учил Гриценко.\n\nЧерез месяц тебя повысили. Отдельный кабинет, та же дорожка бордо, часы, которые никто не должен замечать.\n\nИногда, вечером, ты открываешь список фамилий на неделю и понимаешь, что половину людей за этими фамилиями ты не помнишь. И не хочешь помнить. Ты стал тем, кем боялся стать. И самое страшное — это оказалось удобно.' },
+  B2: { code: 'Концовка II-B', title: 'Один из списка', tag: 'Ты не спас город. Ты вычеркнул одну фамилию.',
+        body: 'Схему вскрыли. Гриценко ушёл тихо, без скандала, как уходят люди с нужными связями. Ларису Борисовну перевели в область — «на повышение», которое на самом деле ссылка.\n\nТебя не повысили. Слишком неудобный, слишком громкий. Ты остался инспектором, только в другом отделе, подальше от приёмной.\n\nЗато Дмитро забрал детей. Он не звонит и не благодарит — просто раз в год присылает фотографию: он, дети, лето. Ни подписи, ни слов. Этого достаточно. Это не победа. Но это не ноль.' },
+  C2: { code: 'Концовка II-C', title: 'Заявление', tag: 'Ты ушёл сам. Это единственное, что ты успел выбрать.',
+        body: 'Ты написал заявление в тот же день. Никого не сдал, никого не спас — просто вышел из здания и не вернулся.\n\nТы снова преподаёшь. История, седьмые классы, задержки зарплаты. Дети слушают про выбор без правильного ответа и думают, что это про древний мир.\n\nИногда в новостях мелькает фамилия из того списка. Ты выключаешь телевизор. Ты не герой и не предатель. Ты просто человек, который однажды понял, что больше не может, — и ушёл. Это тоже выбор. Просто не самый громкий.' },
+  D2: { code: 'Концовка II-D', title: 'Крайний', tag: 'Ты назвал имена. Ими оказались твои.',
+        body: 'Ты сдал схему — но сдал её без улик, без союзников, без опоры. На комиссии тебе не поверили: слишком удобно валить всё на начальника, когда начальник в отпуске.\n\nУвольнение по статье. Потом — проверка твоих собственных дел. Потом — коридор с лампой, которая мигает как в твоём подъезде.\n\nНа допросе тебя спрашивают: «Зачем?» Ты хочешь сказать «потому что так было честно», но понимаешь, что это та же фраза, которой Гриценко оправдывал всё. Честность — плохой аргумент, когда ты один.' },
+  E2: { code: 'Концовка II-E', title: 'Пустой кабинет', tag: 'Ты не ответил. Просто перестал понимать вопрос.',
+        body: 'Ты не вышел на работу. Ни в среду, ни в четверг. Телефон звонил дважды, потом замолчал. Потом позвонил Гриценко — ты не взял. Потом Вася — ты не взял и его.\n\nТвой кабинет в райадминистрации стоит пустым. На столе — тридцать одна непроверенная справка, стопкой, как будто ты вышел на минуту.\n\nДома кот Шумер спит на подоконнике. За окном — город, который продолжает работать без тебя, и никто, кажется, этого не заметил. Именно это и было страшнее всего: не то, что тебя уберут. А то, что ничего не изменится.' }
 };
 
 function showEnding(node) {
   const key = computeEnding();
   const e = ENDINGS[key];
   const hidden = S.humanity >= 7 && S.empathyCount >= 3;
+  const hasPart2 = typeof script2 !== 'undefined';
   el.ending.classList.remove('hidden');
   el.ending.innerHTML = `
     <div class="code">${e.code}</div>
@@ -477,18 +519,50 @@ function showEnding(node) {
       Выполнение плана: <b>${S.plan}</b> · Актов эмпатии: <b>${S.empathyCount}</b>
       ${hidden ? '<br><span style="color:#7d9b6a">✦ Открыт скрытый эпилог</span>' : ''}
     </div>
-    <div>
+    <div class="endingbtns">
+      ${EPISODE === 1 && hasPart2 ? '<button onclick="startEpisode(2)">Часть II · Бронь ▸</button>' : ''}
       <button onclick="resetGame()">Пройти иначе</button>
+      <button class="ghost" onclick="episodeMenu()">Выбор части</button>
     </div>`;
 }
 
 function resetGame() {
   Object.assign(S, { stress: 1, humanity: 5, boss: 5, civ: 5, plan: 0, day: 1, flags: {}, empathyCount: 0, aggressionCount: 0 });
+  delete S.preFinal;
   el.ending.classList.add('hidden');
   el.overlay.classList.add('hidden');
   document.querySelectorAll('.bleed,.flash').forEach(e => e.remove());
   updateHUD();
-  show('start');
+  show(EPISODE === 2 ? 'b_start' : 'start');
+}
+
+/* ─────────── ВЫБОР ЧАСТИ ─────────── */
+function startEpisode(n) {
+  EPISODE = n;
+  localStorage.setItem('plan_episode', String(n));
+  resetGame();
+}
+
+function episodeMenu() {
+  const hasPart2 = typeof script2 !== 'undefined';
+  el.ending.classList.remove('hidden');
+  el.ending.innerHTML = `
+    <div class="code">ПЛАН</div>
+    <h1>Выбор части</h1>
+    <div class="tagline">Визуальная новелла · социальная драма</div>
+    <div class="epmenu">
+      <button class="epcard" onclick="startEpisode(1)">
+        <span class="epk">Часть I</span>
+        <span class="ept">План</span>
+        <span class="eps">День 1 — День 9 · Кабинет 14, рейды, комиссия.<br>~40 минут. Пять концовок.</span>
+      </button>
+      ${hasPart2 ? `<button class="epcard" onclick="startEpisode(2)">
+        <span class="epk">Часть II</span>
+        <span class="ept">Бронь</span>
+        <span class="eps">День 10 — День 18 · Райадминистрация, схема, свидетель.<br>~1 час. Пять новых концовок.</span>
+      </button>` : ''}
+    </div>
+    <div class="epnote">Часть II продолжает историю Алексея: новый отдел, новая схема, тот же выбор.</div>`;
 }
 
 /* ─────────── УПРАВЛЕНИЕ ─────────── */
@@ -544,8 +618,19 @@ document.onkeydown = e => {
 };
 
 /* ─────────── СТАРТ ─────────── */
-const jump = new URLSearchParams(location.search).get('node');
+const params = new URLSearchParams(location.search);
+const jump = params.get('node');
+const qEp = parseInt(params.get('ep') || '', 10);
+const savedEp = parseInt(localStorage.getItem('plan_episode') || '', 10);
+// Явный ?ep= открывает часть напрямую — это ссылка, которой можно поделиться.
+const explicitEp = qEp === 1 || qEp === 2;
+if (explicitEp) EPISODE = qEp;
+else if (savedEp === 2) EPISODE = 2;
+
 preloadArt().then(() => {
   updateHUD();
-  show(jump && script[jump] ? jump : 'start');
+  if (jump && nodes()[jump]) { show(jump); return; }
+  // С явной частью — сразу в бой, без экрана выбора.
+  if (explicitEp) { show(EPISODE === 2 ? 'b_start' : 'start'); return; }
+  episodeMenu();
 });

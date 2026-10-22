@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Прогон сценария</title></head>
+<body>
+<pre id="out">running…</pre>
+<script>
+/* Тестовый харнесс: проходит сценарий через настоящий движок без браузерных
+   таймеров. Разметку берём из index.html, скрипты подключаем сами.
+
+   Параметры:
+     ep    — часть (1 или 2)
+     mode  — single (по умолчанию) | batch
+     pick  — номер свободного варианта на развилках (single)
+     final — номер варианта на финальной развилке (single)
+     force — JSON {s,f}: принудительное состояние перед подсчётом концовки
+     runs  — число случайных полных прохождений (batch)
+     seed  — зерно генератора (batch)
+
+   Результат — JSON в <pre id="out">. */
+const q = new URLSearchParams(location.search);
+const ep = parseInt(q.get('ep') || '1', 10);
+const mode = q.get('mode') || 'single';
+const pick = parseInt(q.get('pick') || '0', 10);
+const finalPick = q.get('final') === null ? null : parseInt(q.get('final'), 10);
+const force = q.get('force');
+const errs = [];
+window.onerror = (m, s, l, c) => errs.push(m + '@' + l + ':' + c);
+
+const load = src => new Promise((res, rej) => {
+  const s = document.createElement('script');
+  s.src = src; s.onload = res; s.onerror = () => rej(new Error('не загрузился ' + src));
+  document.body.appendChild(s);
+});
+
+/* Одно прохождение. choose(i, options) возвращает индекс варианта. */
+function play(choose) {
+  startEpisode(ep);
+  const path = [];
+  let guard = 0, curId = null, chosenFinal = null, finalLocked = false;
+  const go = id => { curId = id; show(id); };
+
+  while (guard++ < 5000) {
+    const node = current;
+    if (!node) break;
+    if (node.chapter) { path.push('[' + node.chapter.t + ']'); go(node.next); continue; }
+    if (node.ending) break;
+    if (node.minigame) {
+      path.push('<мини-игра:' + node.minigame + '>');
+      if (node.data.onWin) applyFx(node.data.onWin);
+      go(node.data.winTo); continue;
+    }
+    if (node.choices) {
+      const free = node.choices.filter(c => !isLocked(c));
+      if (!free.length) { errs.push('тупик: все варианты залочены в ' + curId); break; }
+      const c = free[choose(free.length, curId)];
+      if (curId === 'a3_final_choice' || curId === 'b_a3_final_choice') chosenFinal = c.tag || c.t;
+      path.push('выбор<' + (c.tag || c.t) + '>');
+      if (c.fx) applyFx(c.fx);
+      go(c.to); continue;
+    }
+    if (node.text) path.push((node.speaker || '?') + ': ' + String(resolve(node.text)).slice(0, 30));
+    if (node.next) { go(node.next); continue; }
+    break;
+  }
+  return { path, guard, chosenFinal, finalLocked, curId };
+}
+
+(async () => {
+  const html = await (await fetch('/index.html')).text();
+  const body = html.replace(/[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*/i, '')
+                   .replace(/<script[\s\S]*?<\/script>/gi, '');
+  document.body.insertAdjacentHTML('beforeend', body);
+  try {
+    await load('/script.js'); await load('/script2.js');
+    await load('/art.js'); await load('/game.js');
+  } catch (e) {
+    document.getElementById('out').textContent = 'ошибка загрузки: ' + e.message;
+    return;
+  }
+
+  let out;
+  if (mode === 'graph') {
+    /* Полный перебор графа настоящими applyFx/computeEnding, без отрисовки:
+       show() заводит таймеры печати текста и на больших графах не успевает.
+       Дедупликация по снимку состояния — иначе перебор не сойдётся. */
+    Object.assign(S, { stress: 1, humanity: 5, boss: 5, civ: 5, plan: 0, day: 1,
+                      flags: {}, empathyCount: 0, aggressionCount: 0 });
+    delete S.preFinal;
+
+    const map = nodes();
+    const endings = {};
+    const seen = new Set();
+    let states = 0, maxDepth = 0;
+
+    (function walk(id, depth) {
+      if (depth > 400 || states > 3000000) return;
+      const node = map[id];
+      if (!node) { errs.push('нет узла ' + id); return; }
+      if (node.ending) {
+        const code = ep === 2 ? computeEnding2() : computeEnding();
+        endings[code] = (endings[code] || 0) + 1;
+        return;
+      }
+      const k = id + '|' + JSON.stringify([S.stress, S.humanity, S.boss, S.civ, S.plan, S.flags]);
+      if (seen.has(k)) return;
+      seen.add(k); states++;
+      maxDepth = Math.max(maxDepth, depth);
+      const snap = JSON.stringify(S);
+      // Object.assign не удаляет ключи, появившиеся после снимка (preFinal),
+      // и они протекают в соседние ветки — поэтому восстанавливаем целиком.
+      const restore = () => { for (const key in S) delete S[key]; Object.assign(S, JSON.parse(snap)); };
+
+      if (node.choices) {
+        for (const c of node.choices) {
+          if (isLocked(c)) continue;
+          restore();
+          if (c.fx) applyFx(c.fx);
+          walk(c.to, depth + 1);
+        }
+        restore();
+        return;
+      }
+      if (node.minigame) {
+        const d = node.data;
+        for (const [fx, to] of [[d.onWin, d.winTo], [d.onLose, d.loseTo]]) {
+          if (!to) continue;
+          restore();
+          if (fx) applyFx(fx);
+          walk(to, depth + 1);
+        }
+        restore();
+        return;
+      }
+      if (node.fx) applyFx(node.fx);
+      if (node.next) walk(node.next, depth + 1);
+    })(ep === 2 ? 'b_start' : 'start', 0);
+
+    const need = ep === 2 ? ['A2', 'B2', 'C2', 'D2', 'E2'] : ['A', 'B', 'C', 'D', 'E'];
+    const missing = need.filter(c => !endings[c]);
+    out = { ep, mode, states, maxDepth, endings, missing, errs, ok: errs.length === 0 && !missing.length };
+  } else if (mode === 'batch') {
+    const runs = parseInt(q.get('runs') || '300', 10);
+    let seed = parseInt(q.get('seed') || '1', 10) >>> 0;
+    const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+    const byEnding = {};
+    let minPath = Infinity, maxPath = 0, sumPath = 0;
+    for (let i = 0; i < runs; i++) {
+      const r = play(n => Math.floor(rnd() * n));
+      let code = null;
+      try { code = ep === 2 ? computeEnding2() : computeEnding(); } catch (e) { errs.push('computeEnding: ' + e.message); }
+      byEnding[code] = (byEnding[code] || 0) + 1;
+      minPath = Math.min(minPath, r.path.length);
+      maxPath = Math.max(maxPath, r.path.length);
+      sumPath += r.path.length;
+    }
+    out = { ep, mode, runs, byEnding, minPath, maxPath, avgPath: Math.round(sumPath / runs), errs, ok: errs.length === 0 };
+  } else {
+    const r = play((n, id) => {
+      const isFinal = id === 'a3_final_choice' || id === 'b_a3_final_choice';
+      const idx = (isFinal && finalPick !== null) ? finalPick : pick;
+      return Math.min(idx, n - 1);
+    });
+    if (force) {
+      try {
+        const o = JSON.parse(force);
+        Object.assign(S, o.s || {}); Object.assign(S.flags, o.f || {});
+        // Снимок до финального выбора перебил бы заданное состояние.
+        delete S.preFinal;
+      }
+      catch (e) { errs.push('force: ' + e.message); }
+    }
+    let code = null, end = null;
+    try { code = ep === 2 ? computeEnding2() : computeEnding(); end = ENDINGS[code] || null; }
+    catch (e) { errs.push('computeEnding: ' + e.message); }
+    out = {
+      ep, ok: errs.length === 0, errs, steps: r.guard, pathLen: r.path.length,
+      endingCode: code, endingTitle: end && end.title,
+      chosenFinal: r.chosenFinal, finalLocked: r.finalLocked, tail: r.path.slice(-6)
+    };
+  }
+
+  document.getElementById('out').textContent = JSON.stringify(out, null, 1);
+})();
+</script>
+</body></html>

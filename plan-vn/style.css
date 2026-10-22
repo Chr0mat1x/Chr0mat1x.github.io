@@ -226,6 +226,19 @@ body.stress-hi .scale[data-k="stress"]{animation:pulse 1.4s infinite}
   padding:13px 30px;background:transparent;color:#e7e1d4;border:1.5px solid #6f685c;cursor:pointer;transition:.2s;margin:5px}
 .ending button:hover{border-color:#e7e1d4;background:#e7e1d4;color:#0a0907}
 
+/* выбор части */
+.ending .epmenu{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;max-width:760px;margin-bottom:26px}
+.ending .epcard{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;
+  width:320px;max-width:88vw;padding:22px 24px;background:transparent;border:1.5px solid #4a453c;
+  color:#e7e1d4;cursor:pointer;transition:.2s;text-transform:none;letter-spacing:normal;font-family:var(--serif)}
+.ending .epcard:hover{border-color:#e7e1d4;background:#141310;transform:translateY(-2px)}
+.ending .epcard .epk{font-family:var(--mono);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#8a8270}
+.ending .epcard .ept{font-size:26px;color:#f3eee2;letter-spacing:.02em}
+.ending .epcard .eps{font-size:13px;line-height:1.6;color:#a89f8c}
+.ending .epnote{font-family:var(--mono);font-size:11px;color:#6f685c;max-width:560px;line-height:1.8;letter-spacing:.04em}
+.ending .endingbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ending button.ghost{opacity:.6}
+
 /* штампы, «протекающие» в UI при стрессе */
 .bleed{position:fixed;z-index:120;pointer-events:none;font-family:var(--serif);font-weight:bold;
   color:rgba(150,40,25,.5);border:3px solid rgba(150,40,25,.45);padding:4px 12px;transform:rotate(-13deg);

@@ -1,0 +1,75 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>smoke</title></head>
+<body>
+<pre id="out">…</pre>
+<iframe id="f" style="border:0;width:1000px;height:800px"></iframe>
+<script>
+/* Дымовой тест настоящей игры в браузере: экран выбора части, карточка главы,
+   реплика со спрайтом и фоном, переход по клику, мини-игра, концовка.
+   Плюс проверка консоли на ошибки. */
+const q = new URLSearchParams(location.search);
+const errs = [];
+const f = document.getElementById('f');
+f.src = '/index.html?ep=' + (q.get('ep') || '1') + (q.get('node') ? '&node=' + q.get('node') : '');
+
+const d = () => f.contentWindow.document;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const vis = s => { const e = d().querySelector(s); return !!e && !e.classList.contains('hidden'); };
+const painted = s => { const e = d().querySelector(s); if (!e) return false;
+  const r = e.getBoundingClientRect(); return r.width > 0 && e.children.length > 0; };
+const text = () => (d().getElementById('text') || {}).textContent.trim();
+
+(async () => {
+  try {
+    await wait(2500);
+    f.contentWindow.addEventListener('error', e => errs.push(e.message));
+    const R = {};
+
+    const cards = d().querySelectorAll('.epcard');
+    R.episodeMenu = cards.length === 2 && vis('#ending');
+    if (cards.length) cards[q.get('ep') === '2' ? 1 : 0].click();
+    await wait(600);
+
+    R.chapterCard = vis('#chapterCard');
+    if (vis('#chapterCard')) { d().getElementById('chapterCard').click(); await wait(800); }
+
+    // Кликаем по сцене, пока не появятся реплика, спрайт и фон.
+    for (let i = 0; i < 60; i++) {
+      if (text().length > 0 && painted('#portraitWrap') && painted('#bg')) break;
+      if (vis('#chapterCard')) d().getElementById('chapterCard').click();
+      else if (d().querySelectorAll('.choice').length) break;
+      else d().getElementById('stage').click();
+      await wait(120);
+    }
+    R.textLen = text().length;
+    R.textSample = text().slice(0, 60);
+    R.speaker = (d().getElementById('speaker') || {}).textContent;
+    R.portrait = painted('#portraitWrap');
+    R.bg = painted('#bg');
+    R.hudScales = d().querySelectorAll('.scale').length;
+    R.hasNextBtn = !!d().getElementById('nextBtn');
+
+    const before = text();
+    const nb = d().getElementById('nextBtn');
+    if (nb && !nb.hidden) nb.click(); else d().getElementById('stage').click();
+    await wait(500);
+    R.advanced = text() !== before || d().querySelectorAll('.choice').length > 0;
+
+    if (d().querySelector('.panel')) {
+      R.minigameTitle = (d().querySelector('.panel h2') || {}).textContent;
+      R.minigameOpen = vis('.overlay');
+      R.hotCells = d().querySelectorAll('.hot').length;
+    }
+    if (d().querySelector('.ending h1') && vis('#ending')) {
+      R.endingTitle = d().querySelector('.ending h1').textContent;
+      R.endingBtns = d().querySelectorAll('.endingbtns button').length;
+      R.endingCode = (d().querySelector('.ending .code') || {}).textContent;
+    }
+
+    document.getElementById('out').textContent = JSON.stringify({ errs, ...R }, null, 1);
+  } catch (e) {
+    document.getElementById('out').textContent = JSON.stringify({ errs, fatal: String(e && e.stack || e) }, null, 1);
+  }
+})();
+</script>
+</body></html>

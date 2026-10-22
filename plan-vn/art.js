@@ -219,6 +219,50 @@ const SPRITES = {
     cloth: '#3f5a4a', clothSh: '#2f4438', clothHi: '#4f6d5a',
     shirt: '#e9e5da', shirtSh: '#d4cfc2',
     iris: '#4a3a2a', mouth: 'neutral', style: 'short'
+  }),
+
+  /* ── Часть 2: «Бронь» ── */
+  gritsenko: charSVG({
+    key: 'gritsenko', skin: '#dcb491', skinSh: '#bd9270',
+    hair: '#9a958c', hairSh: '#736f67',
+    cloth: '#2f3542', clothSh: '#232833', clothHi: '#3d4453',
+    shirt: '#e7e3d7', shirtSh: '#cfcabb',
+    iris: '#4a4a44', mouth: 'smirk', style: 'slick', wrinkles: 1, tie: '#5a2f2f'
+  }),
+  larysa: charSVG({
+    key: 'larysa', skin: '#ecc6a4', skinSh: '#cfa07e',
+    hair: '#5a3a2c', hairSh: '#412a20',
+    cloth: '#6a5560', clothSh: '#523f49', clothHi: '#7d6773',
+    shirt: '#efe9dd', shirtSh: '#dad2c4',
+    iris: '#5a4436', lip: '#a85a58', mouth: 'smile', style: 'long', earrings: 1, glasses: 1
+  }),
+  taras: charSVG({
+    key: 'taras', skin: '#e4c1a0', skinSh: '#c69b78',
+    hair: '#3a3228', hairSh: '#282218',
+    cloth: '#46586a', clothSh: '#354554', clothHi: '#57697c',
+    shirt: '#e6e6ea', shirtSh: '#d0d0d6',
+    iris: '#4a5a6a', mouth: 'neutral', glasses: 1, circles: 1, stubble: 1
+  }),
+  vlad: charSVG({
+    key: 'vlad', skin: '#e8c6a6', skinSh: '#cca27f',
+    hair: '#241f1c', hairSh: '#15110f',
+    cloth: '#3a3a3a', clothSh: '#2a2a2a', clothHi: '#4c4c4c',
+    shirt: '#f0f0f0', shirtSh: '#d8d8d8',
+    iris: '#3a3a3a', mouth: 'smirk', style: 'short', earrings: 1
+  }),
+  maryna: charSVG({
+    key: 'maryna', skin: '#eac4a2', skinSh: '#cf9f7d',
+    hair: '#2e2a28', hairSh: '#1c1917',
+    cloth: '#5a4a3a', clothSh: '#443628', clothHi: '#6d5b48',
+    shirt: '#e9e4d8', shirtSh: '#d4cec0',
+    iris: '#4a3a2a', lip: '#b0605a', mouth: 'neutral', style: 'long', earrings: 1
+  }),
+  dmytro: charSVG({
+    key: 'dmytro', skin: '#dcb491', skinSh: '#bd9270',
+    hair: '#3a2e26', hairSh: '#28201a',
+    cloth: '#44484a', clothSh: '#33363a', clothHi: '#565a5e',
+    shirt: '#ddd8cc', shirtSh: '#c6c1b4',
+    iris: '#4a4238', mouth: 'frown', stubble: 1, circles: 1
   })
 };
 
@@ -461,5 +505,198 @@ const BACKGROUNDS = {
     <ellipse cx="300" cy="596" rx="30" ry="10" fill="#d8cbb4"/>
     <ellipse cx="820" cy="636" rx="26" ry="9" fill="#d8cbb4"/>
     <rect x="0" y="0" width="1600" height="900" fill="#2a1e12" opacity=".22"/>
+  </svg>`,
+
+  /* ── Часть 2: «Бронь» ── */
+
+  /* Поликлиника: очередь, лампы, зелёные стены */
+  clinic: `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+    <defs>
+      <linearGradient id="c2w" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#a9b6a4"/><stop offset="1" stop-color="#c7cfc0"/>
+      </linearGradient>
+      <linearGradient id="c2f" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6f7a6b"/><stop offset="1" stop-color="#525a4e"/>
+      </linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#c2w)"/>
+    <rect y="560" width="1600" height="340" fill="url(#c2f)"/>
+    <g stroke="#8d9a86" stroke-width="3" opacity=".5">
+      ${Array.from({ length: 9 }).map((_, i) => `<line x1="0" y1="${60 + i * 56}" x2="1600" y2="${60 + i * 56}"/>`).join('')}
+    </g>
+    <rect x="120" y="120" width="300" height="200" fill="#dfe6da" stroke="#7d8a76" stroke-width="8"/>
+    <rect x="140" y="140" width="260" height="160" fill="#b9c7b2" opacity=".7"/>
+    <rect x="1180" y="90" width="340" height="250" fill="#e3e9dd" stroke="#7d8a76" stroke-width="8"/>
+    <text x="1350" y="230" font-family="monospace" font-size="52" fill="#5a6a54" text-anchor="middle">086/О</text>
+    <rect x="560" y="300" width="480" height="34" fill="#7c8a74"/>
+    <rect x="560" y="334" width="480" height="12" fill="#5f6b58"/>
+    <g fill="#4e5748">
+      <rect x="80" y="640" width="220" height="16" rx="6"/>
+      <rect x="96" y="656" width="18" height="90"/>
+      <rect x="266" y="656" width="18" height="90"/>
+      <rect x="360" y="640" width="220" height="16" rx="6"/>
+      <rect x="376" y="656" width="18" height="90"/>
+      <rect x="546" y="656" width="18" height="90"/>
+      <rect x="640" y="640" width="220" height="16" rx="6"/>
+      <rect x="656" y="656" width="18" height="90"/>
+      <rect x="826" y="656" width="18" height="90"/>
+      <rect x="920" y="640" width="220" height="16" rx="6"/>
+      <rect x="936" y="656" width="18" height="90"/>
+      <rect x="1106" y="656" width="18" height="90"/>
+    </g>
+    <g fill="#cfd6c8" opacity=".85">
+      <rect x="1360" y="620" width="180" height="120" rx="10"/>
+      <rect x="1380" y="600" width="140" height="30" rx="8"/>
+    </g>
+    <ellipse cx="800" cy="120" rx="230" ry="26" fill="#eef3ea" opacity=".5"/>
+    <rect x="0" y="0" width="1600" height="900" fill="#3a4a36" opacity=".14"/>
+  </svg>`,
+
+  /* Райадминистрация: длинный коридор, ковровая дорожка, портреты */
+  admin: `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+    <defs>
+      <linearGradient id="a2w" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#8a7f6d"/><stop offset="1" stop-color="#a89c86"/>
+      </linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#a2w)"/>
+    <rect y="620" width="1600" height="280" fill="#5b5244"/>
+    <polygon points="0,900 1600,900 1050,470 550,470" fill="#6d5c46"/>
+    <polygon points="550,470 1050,470 900,900 700,900" fill="#8c2f2f" opacity=".55"/>
+    <polygon points="0,0 1600,0 1050,470 550,470" fill="#4a4234" opacity=".85"/>
+    <g fill="#6a5f4c">
+      <rect x="0" y="0" width="560" height="480"/>
+      <rect x="1040" y="0" width="560" height="480"/>
+    </g>
+    <g fill="#b8ab8e" stroke="#3f382c" stroke-width="5">
+      ${Array.from({ length: 5 }).map((_, i) => `<rect x="${60 + i * 100}" y="90" width="70" height="92"/>`).join('')}
+      ${Array.from({ length: 5 }).map((_, i) => `<rect x="${1090 + i * 100}" y="90" width="70" height="92"/>`).join('')}
+    </g>
+    <g fill="#8f7a5c" opacity=".8">
+      ${Array.from({ length: 10 }).map((_, i) => `<circle cx="${95 + i * 100 - (i > 4 ? 60 : 0) + (i > 4 ? 1060 : 0)}" cy="130" r="20"/>`).join('')}
+    </g>
+    <g fill="#d8cdb4" opacity=".5">
+      <rect x="620" y="470" width="360" height="18"/>
+      <rect x="640" y="488" width="320" height="10"/>
+    </g>
+    <ellipse cx="800" cy="240" rx="300" ry="40" fill="#e6ddc8" opacity=".22"/>
+    <rect x="0" y="0" width="1600" height="900" fill="#2a2318" opacity=".26"/>
+  </svg>`,
+
+  /* Приёмная/очередь в ТЦК: стулья, табло, толпа силуэтами */
+  queue: `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+    <defs>
+      <linearGradient id="q2w" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#9aa094"/><stop offset="1" stop-color="#c2c5b8"/>
+      </linearGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#q2w)"/>
+    <rect y="600" width="1600" height="300" fill="#7c7a6c"/>
+    <g fill="#5f5f54" opacity=".55">
+      ${Array.from({ length: 11 }).map((_, i) => {
+        const x = 70 + i * 140;
+        const h = 190 + (i % 3) * 26;
+        return `<g><ellipse cx="${x}" cy="${700 - h}" rx="26" ry="30"/><path d="M${x - 40} ${700} Q${x - 34} ${700 - h + 30} ${x} ${700 - h + 24} Q${x + 34} ${700 - h + 30} ${x + 40} ${700} Z"/></g>`;
+      }).join('')}
+    </g>
+    <rect x="0" y="150" width="1600" height="120" fill="#3d3f38"/>
+    <rect x="40" y="180" width="1520" height="60" fill="#1c1d1a"/>
+    <text x="800" y="228" font-family="monospace" font-size="44" fill="#d8a13a" text-anchor="middle" letter-spacing="6">ЗАПРОС 07 · ОКНО 3</text>
+    <g fill="#e2ded0" opacity=".9">
+      ${Array.from({ length: 3 }).map((_, i) => `<rect x="${70 + i * 90}" y="300" width="70" height="240" rx="4"/>`).join('')}
+      ${Array.from({ length: 3 }).map((_, i) => `<rect x="${1300 + i * 90}" y="300" width="70" height="240" rx="4"/>`).join('')}
+    </g>
+    <g fill="#4e5046">
+      <rect x="420" y="720" width="120" height="16" rx="6"/>
+      <rect x="436" y="736" width="14" height="70"/>
+      <rect x="510" y="736" width="14" height="70"/>
+      <rect x="1060" y="720" width="120" height="16" rx="6"/>
+      <rect x="1076" y="736" width="14" height="70"/>
+      <rect x="1150" y="736" width="14" height="70"/>
+    </g>
+    <rect x="0" y="0" width="1600" height="900" fill="#2c2e28" opacity=".2"/>
+  </svg>`,
+
+  /* Кафе-подвал: тёплый свет, стол, ночь за окном */
+  cafe2: `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+    <defs>
+      <linearGradient id="cf2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#3a2c22"/><stop offset="1" stop-color="#241a14"/>
+      </linearGradient>
+      <radialGradient id="cf2l" cx=".5" cy=".3" r=".7">
+        <stop offset="0" stop-color="#e8b877" stop-opacity=".55"/><stop offset="1" stop-color="#e8b877" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#cf2)"/>
+    <rect width="1600" height="900" fill="url(#cf2l)"/>
+    <rect x="1180" y="120" width="340" height="260" rx="10" fill="#0e0c0a" stroke="#5a4436" stroke-width="10"/>
+    <g fill="#c9a35e" opacity=".5">
+      ${Array.from({ length: 12 }).map(() => `<circle cx="${1200 + Math.random() * 300}" cy="${140 + Math.random() * 220}" r="${1 + Math.random() * 2.4}"/>`).join('')}
+    </g>
+    <rect x="0" y="640" width="1600" height="60" fill="#5a3f2a"/>
+    <rect x="0" y="700" width="1600" height="200" fill="#3c2a1c"/>
+    <g fill="#6b4a30">
+      <rect x="180" y="700" width="180" height="22" rx="8"/>
+      <rect x="200" y="722" width="20" height="150"/>
+      <rect x="322" y="722" width="20" height="150"/>
+      <rect x="700" y="700" width="180" height="22" rx="8"/>
+      <rect x="720" y="722" width="20" height="150"/>
+      <rect x="842" y="722" width="20" height="150"/>
+    </g>
+    <g fill="#d9c7a4" opacity=".9">
+      <ellipse cx="270" cy="690" rx="34" ry="12"/>
+      <ellipse cx="270" cy="678" rx="22" ry="9"/>
+      <ellipse cx="790" cy="690" rx="34" ry="12"/>
+      <ellipse cx="790" cy="678" rx="22" ry="9"/>
+    </g>
+    <ellipse cx="800" cy="60" rx="300" ry="90" fill="#e8b877" opacity=".14"/>
+    <rect x="0" y="0" width="1600" height="900" fill="#120c08" opacity=".28"/>
+  </svg>`,
+
+  /* Ночь, парк у многоэтажки: фонари, дождь, силуэты деревьев */
+  night: `<svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">
+    <defs>
+      <linearGradient id="n2s" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1c2432"/><stop offset="1" stop-color="#2e3a48"/>
+      </linearGradient>
+      <radialGradient id="n2l" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#e8d8a0" stop-opacity=".5"/><stop offset="1" stop-color="#e8d8a0" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1600" height="900" fill="url(#n2s)"/>
+    <g fill="#151a22">
+      <rect x="40" y="240" width="360" height="420"/>
+      <rect x="440" y="180" width="300" height="480"/>
+      <rect x="1200" y="220" width="360" height="440"/>
+    </g>
+    <g fill="#d8c478" opacity=".75">
+      ${Array.from({ length: 26 }).map(() => {
+        const bx = [40, 440, 1200][Math.floor(Math.random() * 3)];
+        const bw = [360, 300, 360][[40, 440, 1200].indexOf(bx)];
+        return `<rect x="${bx + 24 + Math.random() * (bw - 70)}" y="${200 + Math.random() * 420}" width="26" height="18" opacity="${0.25 + Math.random() * 0.6}"/>`;
+      }).join('')}
+    </g>
+    <rect y="660" width="1600" height="240" fill="#1a2028"/>
+    <g stroke="#3c4654" stroke-width="3" opacity=".5">
+      ${Array.from({ length: 40 }).map(() => {
+        const x = Math.random() * 1600, y = Math.random() * 500;
+        return `<line x1="${x.toFixed(0)}" y1="${y.toFixed(0)}" x2="${(x - 10).toFixed(0)}" y2="${(y + 60).toFixed(0)}"/>`;
+      }).join('')}
+    </g>
+    <g>
+      <rect x="820" y="360" width="12" height="310" fill="#2a3038"/>
+      <circle cx="826" cy="350" r="34" fill="url(#n2l)"/>
+      <circle cx="826" cy="350" r="12" fill="#f0e2b0"/>
+      <rect x="1100" y="420" width="10" height="250" fill="#2a3038"/>
+      <circle cx="1105" cy="412" r="28" fill="url(#n2l)"/>
+      <circle cx="1105" cy="412" r="10" fill="#f0e2b0"/>
+    </g>
+    <g fill="#0f141a">
+      <ellipse cx="640" cy="640" rx="90" ry="60"/>
+      <rect x="632" y="560" width="16" height="90"/>
+      <ellipse cx="200" cy="660" rx="70" ry="46"/>
+      <rect x="194" y="600" width="12" height="70"/>
+    </g>
+    <rect x="0" y="0" width="1600" height="900" fill="#0a0e14" opacity=".22"/>
   </svg>`
 };
