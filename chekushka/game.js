@@ -1,6 +1,8 @@
 const W = 576;
 const H = 1024;
 
+const RED_STREAK = 3; // столько поражений подряд — и Меллстрой уже красный
+
 const PHYS = {
   gravity: 0.5,
   damping: 0.999,
@@ -37,6 +39,7 @@ const G = {
   shake: 0,
   winTimer: 0,
   loseReason: '',
+  loseStreak: 0,
   saved: loadProgress(),
 };
 
@@ -303,6 +306,7 @@ function win() {
   G.mode = 'win';
   G.melState = 'chew';
   G.winTimer = 0;
+  G.loseStreak = 0;
   const b = G.bottle;
   const m = mouthPoint();
   b.x = m.x;
@@ -322,7 +326,8 @@ function win() {
 function lose(reason) {
   if (G.mode !== 'play') return;
   G.mode = 'lose';
-  G.melState = 'sad';
+  G.loseStreak += 1;
+  G.melState = G.loseStreak >= RED_STREAK ? 'red' : 'sad';
   G.loseReason = reason;
   G.shake = 16;
   Sfx.fail();
@@ -478,7 +483,12 @@ function draw() {
       Art.drawMellstroy(ctx, G.mel.x, G.mel.y, G.mel.s, G.t, 'bravo');
     }
   }
-  if (G.mode === 'lose') drawLoseOverlay();
+  if (G.mode === 'lose') {
+    drawLoseOverlay();
+    if (G.melState === 'red') {
+      Art.drawMellstroy(ctx, G.mel.x, G.mel.y, G.mel.s, G.t, 'red');
+    }
+  }
 
   ctx.restore();
 }
@@ -514,7 +524,7 @@ function drawWorld() {
     ctx.restore();
   }
 
-  if (G.melState !== 'bravo') {
+  if (G.melState !== 'bravo' && G.melState !== 'red') {
     Art.drawMellstroy(ctx, G.mel.x, G.mel.y, G.mel.s, G.t, G.melState);
   }
 
@@ -810,21 +820,34 @@ function drawWinOverlay() {
 }
 
 function drawLoseOverlay() {
+  const red = G.melState === 'red' && Assets.get('red');
   ctx.save();
   ctx.fillStyle = 'rgba(40, 10, 2, 0.35)';
   ctx.fillRect(0, 0, W, H);
-  drawPanel(360, 250);
-
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#ffd0a0';
-  ctx.font = '900 30px "Trebuchet MS", sans-serif';
-  ctx.fillText('МЕЛЛСТРОЙ РАССТРОЕН', W / 2, 412);
-  ctx.fillStyle = 'rgba(255, 233, 189, 0.7)';
-  ctx.font = '600 18px "Trebuchet MS", sans-serif';
-  ctx.fillText(G.loseReason, W / 2, 452);
 
-  drawPillButton(W / 2 - 120, 500, 240, 66, 'ЕЩЁ РАЗ', 'retry');
+  if (red) {
+    drawPanel(336, 296);
+    ctx.fillStyle = '#ff8f6e';
+    ctx.font = '900 27px "Trebuchet MS", sans-serif';
+    ctx.fillText('Я УЖЕ КРАСНЫЙ,', W / 2, 388);
+    ctx.fillText('КУЛЬТУРНО НЕ ПОЛУЧИТСЯ', W / 2, 424);
+    ctx.fillStyle = 'rgba(255, 233, 189, 0.7)';
+    ctx.font = '600 18px "Trebuchet MS", sans-serif';
+    ctx.fillText(G.loseReason, W / 2, 464);
+    ctx.fillText(`проигрышей подряд: ${G.loseStreak}`, W / 2, 494);
+    drawPillButton(W / 2 - 120, 524, 240, 66, 'ЕЩЁ РАЗ', 'retry');
+  } else {
+    drawPanel(360, 250);
+    ctx.fillStyle = '#ffd0a0';
+    ctx.font = '900 30px "Trebuchet MS", sans-serif';
+    ctx.fillText('МЕЛЛСТРОЙ РАССТРОЕН', W / 2, 412);
+    ctx.fillStyle = 'rgba(255, 233, 189, 0.7)';
+    ctx.font = '600 18px "Trebuchet MS", sans-serif';
+    ctx.fillText(G.loseReason, W / 2, 452);
+    drawPillButton(W / 2 - 120, 500, 240, 66, 'ЕЩЁ РАЗ', 'retry');
+  }
   ctx.restore();
 }
 

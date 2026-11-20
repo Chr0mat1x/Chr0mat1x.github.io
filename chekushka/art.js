@@ -648,6 +648,7 @@ const Art = (() => {
   const MEME_SHEETS = {
     eat: { key: 'eat', cols: 6, rows: 5, fw: 200, fh: 154, count: 30, fps: 14, k: 1.92, oy: 0.6 },
     bravo: { key: 'bravo', cols: 7, rows: 6, fw: 200, fh: 175, count: 38, fps: 13, k: 1.9, oy: 0.50 },
+    red: { key: 'red', cols: 6, rows: 4, fw: 200, fh: 226, count: 22, fps: 7, k: 1.95, oy: 0.55 },
   };
 
   function drawMemeSheet(ctx, x, y, s, t, name) {
@@ -682,6 +683,7 @@ const Art = (() => {
   function drawMellstroySprite(ctx, x, y, s, t, state) {
     if (state === 'chew' && drawMemeSheet(ctx, x, y, s, t, 'eat')) return true;
     if (state === 'bravo' && drawMemeSheet(ctx, x, y, s, t, 'bravo')) return true;
+    if (state === 'red' && drawMemeSheet(ctx, x, y, s, t, 'red')) return true;
     const im = melFrame(state, t);
     if (!im) return false;
     const k = s * 1.16;
