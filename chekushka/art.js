@@ -647,7 +647,7 @@ const Art = (() => {
   // Мемные нарезки: «сладость, приятность и вкусность» и «браво, босс».
   const MEME_SHEETS = {
     eat: { key: 'eat', cols: 6, rows: 5, fw: 200, fh: 154, count: 30, fps: 14, k: 1.92, oy: 0.6 },
-    bravo: { key: 'bravo', cols: 7, rows: 6, fw: 112, fh: 98, count: 38, fps: 13, k: 3.4, oy: 0.50 },
+    bravo: { key: 'bravo', cols: 7, rows: 6, fw: 200, fh: 175, count: 38, fps: 13, k: 1.9, oy: 0.50 },
   };
 
   function drawMemeSheet(ctx, x, y, s, t, name) {
