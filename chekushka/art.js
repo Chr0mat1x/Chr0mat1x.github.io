@@ -648,7 +648,7 @@ const Art = (() => {
   const MEME_SHEETS = {
     eat: { key: 'eat', cols: 6, rows: 5, fw: 200, fh: 154, count: 30, fps: 14, k: 1.92, oy: 0.6 },
     bravo: { key: 'bravo', cols: 7, rows: 6, fw: 200, fh: 175, count: 38, fps: 13, k: 1.9, oy: 0.50 },
-    red: { key: 'red', cols: 6, rows: 4, fw: 200, fh: 226, count: 22, fps: 7, k: 1.95, oy: 0.55 },
+    red: { key: 'red', cols: 6, rows: 4, fw: 200, fh: 240, count: 24, fps: 9, k: 1.3, oy: 0.63 },
   };
 
   function drawMemeSheet(ctx, x, y, s, t, name) {
@@ -665,11 +665,7 @@ const Art = (() => {
     ctx.shadowColor = 'rgba(42, 22, 6, 0.55)';
     ctx.shadowBlur = 16 * s;
     ctx.shadowOffsetY = 7 * s;
-    ctx.drawImage(
-      im,
-      col * m.fw, row * m.fh, m.fw, m.fh,
-      -dw / 2, -dh * m.oy, dw, dh,
-    );
+    ctx.drawImage(im, col * m.fw, row * m.fh, m.fw, m.fh, -dw / 2, -dh * m.oy, dw, dh);
     ctx.restore();
     return true;
   }

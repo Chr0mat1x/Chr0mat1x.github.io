@@ -11,7 +11,7 @@ const Assets = (() => {
     bottle: 'assets/bottle.png',
     eat: 'assets/eat_sheet.png',
     bravo: 'assets/bravo_sheet.png',
-    red: 'assets/red_sheet.png',
+    red: 'assets/red_sheet.png?v=2',
     button: 'assets/button.png',
     shashlik: 'assets/shashlik.png',
     crayfish: 'assets/crayfish.png',
