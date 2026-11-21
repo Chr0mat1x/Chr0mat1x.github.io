@@ -50,6 +50,65 @@ const Art = (() => {
   }
 
   // ---------- фон: гофрокартон с наклеенными кусками ----------
+
+  // Скотч, пятна и царапки поверх фото-картона: у каждого уровня свой расклад
+  function dressCardboard(ctx, R, w, h) {
+    for (let i = 0; i < 5; i++) {
+      const cx = 40 + R() * (w - 80);
+      const cy = 40 + R() * (h - 80);
+      const len = 60 + R() * 110;
+      const rot = R() * Math.PI;
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(rot);
+      ctx.globalAlpha = 0.10 + R() * 0.09;
+      ctx.fillStyle = '#f6e6bd';
+      ctx.fillRect(-len / 2, -13, len, 26);
+      ctx.globalAlpha = 0.16;
+      ctx.fillStyle = '#fffbe8';
+      ctx.fillRect(-len / 2, -13, len, 5);
+      ctx.restore();
+    }
+
+    for (let i = 0; i < 3; i++) {
+      const cx = 60 + R() * (w - 120);
+      const cy = 60 + R() * (h - 120);
+      const r = 18 + R() * 30;
+      const g = ctx.createRadialGradient(cx, cy, 2, cx, cy, r);
+      g.addColorStop(0, 'rgba(64, 34, 6, 0.18)');
+      g.addColorStop(1, 'rgba(64, 34, 6, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    for (let i = 0; i < 14; i++) {
+      const x = R() * w;
+      const y = R() * h;
+      ctx.strokeStyle = R() > 0.5 ? 'rgba(60, 32, 6, 0.16)' : 'rgba(255, 234, 190, 0.20)';
+      ctx.lineWidth = 0.8 + R() * 1.6;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (R() - 0.5) * 90, y + R() * 26);
+      ctx.stroke();
+    }
+
+    const props = ['crayfish', 'shashlik'];
+    // держим стикеры по краям: центр снизу занят Меллстроем, сверху — якорями
+    const slots = [[64, 300], [512, 330], [70, 700], [508, 640], [420, 470]];
+    for (let i = slots.length - 1; i > 0; i--) {
+      const j = Math.floor(R() * (i + 1));
+      [slots[i], slots[j]] = [slots[j], slots[i]];
+    }
+    const count = 2 + Math.floor(R() * 2);
+    for (let i = 0; i < count; i++) {
+      const [x, y] = slots[i];
+      sticker(ctx, props[i % props.length], x + (R() - 0.5) * 30, y + (R() - 0.5) * 30,
+        0.7 + R() * 0.22, (R() - 0.5) * 0.4);
+    }
+  }
+
   function buildBackground(w, h, seed = 7) {
     const cv = document.createElement('canvas');
     cv.width = w;
@@ -59,9 +118,9 @@ const Art = (() => {
 
     const plate = Assets.get('cardboard');
     if (plate) {
+      const R = rng(seed * 977 + 13);
       ctx.drawImage(plate, 0, 0, w, h);
-      sticker(ctx, 'crayfish', 96, 548, 0.9, -0.1);
-      sticker(ctx, 'shashlik', 494, 715, 0.78, 0.16);
+      dressCardboard(ctx, R, w, h);
       return cv;
     }
 
@@ -542,6 +601,23 @@ const Art = (() => {
   // ---------- шипы ----------
   function drawHazard(ctx, h) {
     ctx.save();
+    // рельса, по которой ездят патрулирующие шипы
+    if (h.patrol) {
+      const p = h.patrol;
+      ctx.strokeStyle = 'rgba(70, 45, 25, 0.35)';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([9, 9]);
+      ctx.beginPath();
+      if (p.axis === 'y') {
+        ctx.moveTo(h.bx, h.by - p.amp);
+        ctx.lineTo(h.bx, h.by + p.amp);
+      } else {
+        ctx.moveTo(h.bx - p.amp, h.by);
+        ctx.lineTo(h.bx + p.amp, h.by);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
     ctx.translate(h.x, h.y);
     const w = h.w;
     const n = Math.max(3, Math.round(w / 24));
@@ -577,9 +653,10 @@ const Art = (() => {
   function drawFan(ctx, f, t) {
     ctx.save();
     ctx.translate(f.x, f.y);
-    ctx.globalAlpha = f.used ? 0.25 : 1;
+    const off = f.used || f.on === false;
+    ctx.globalAlpha = f.used ? 0.25 : f.on === false ? 0.55 : 1;
 
-    if (!f.used) {
+    if (!off) {
       // струи воздуха уходят вверх
       for (let i = 0; i < 3; i++) {
         const ph = (t * 1.1 + i / 3) % 1;
@@ -598,7 +675,7 @@ const Art = (() => {
     // корпус
     ctx.beginPath();
     ctx.arc(0, 0, 30, 0, Math.PI * 2);
-    ctx.fillStyle = f.used ? '#5a6068' : '#c9d3dc';
+    ctx.fillStyle = off ? '#7d858e' : '#c9d3dc';
     ctx.fill();
     ctx.lineWidth = 3;
     ctx.strokeStyle = '#8c98a4';

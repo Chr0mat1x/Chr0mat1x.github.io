@@ -80,7 +80,10 @@ function buildLevel(index) {
   const L = LEVELS[index];
   G.level = index;
   G.bottle = { x: L.bottle.x, y: L.bottle.y, px: L.bottle.x, py: L.bottle.y, vx: 0, vy: 0, rot: 0 };
-  G.mel = { x: L.mel.x, y: L.mel.y, s: L.mel.s, state: 'idle' };
+  G.mel = {
+    x: L.mel.x, y: L.mel.y, s: L.mel.s, state: 'idle',
+    bx: L.mel.x, patrol: L.mel.patrol || null,
+  };
   G.melState = 'idle';
   G.particles = [];
   G.trail = [];
@@ -90,8 +93,8 @@ function buildLevel(index) {
   G.loseReason = '';
   G.levelTime = 0;
   G.stars = L.stars.map((s) => ({ x: s.x, y: s.y, got: false, pop: 0 }));
-  G.hazards = L.hazards.map((h) => ({ ...h }));
-  G.fans = L.fans.map((f) => ({ ...f, used: false }));
+  G.hazards = L.hazards.map((h) => ({ ...h, bx: h.x, by: h.y }));
+  G.fans = L.fans.map((f) => ({ ...f, used: false, on: true }));
   G.ropes = L.ropes.map((r) => makeRope(r, L.bottle));
 }
 
@@ -146,14 +149,43 @@ function stepPhysics(dt) {
   const t = G.t;
   const b = G.bottle;
 
+  // Патрулирующие шипы, мигающие вентиляторы и шагающий Меллстрой.
+  // Всё считается от G.t, поэтому трассировка в tools/check-levels даёт те же уровни.
+  for (const h of G.hazards) {
+    const p = h.patrol;
+    if (!p) continue;
+    const s = Math.sin(t * p.speed + (p.phase || 0)) * p.amp;
+    if (p.axis === 'y') h.y = h.by + s;
+    else h.x = h.bx + s;
+  }
+  for (const f of G.fans) {
+    if (!f.pulse) { f.on = true; continue; }
+    const ph = ((t + (f.pulse.phase || 0)) % f.pulse.period) / f.pulse.period;
+    f.on = ph < (f.pulse.duty || 0.55);
+  }
+  if (G.mel.patrol) {
+    const p = G.mel.patrol;
+    G.mel.x = G.mel.bx + Math.sin(t * p.speed + (p.phase || 0)) * p.amp;
+  }
+
   for (const rope of G.ropes) {
     if (!rope.active) { rope.alpha = Math.max(0, rope.alpha - dt * 1.8); continue; }
     rope.age += dt;
-    // качающийся якорь
+    // качающийся якорь: по горизонтали, по вертикали или по кругу
     if (rope.osc) {
-      const nx = rope.baseX + Math.sin(t * rope.osc.speed + (rope.osc.phase || 0)) * rope.osc.amp;
+      const o = rope.osc;
+      const a = t * o.speed + (o.phase || 0);
+      let nx = rope.baseX;
+      let ny = rope.baseY;
+      if (o.axis === 'y') ny += Math.sin(a) * o.amp;
+      else if (o.axis === 'circle') {
+        nx += Math.sin(a) * o.amp;
+        ny += Math.cos(a) * o.amp * (o.ratio || 0.55);
+      } else nx += Math.sin(a) * o.amp;
       rope.pts[0].x = nx;
       rope.pts[0].px = nx;
+      rope.pts[0].y = ny;
+      rope.pts[0].py = ny;
     }
     for (let i = 1; i < rope.pts.length; i++) verlet(rope.pts[i], 0, PHYS.gravity);
   }
@@ -250,7 +282,7 @@ function stepPhysics(dt) {
 
   // вентилятор
   for (const f of G.fans) {
-    if (f.used) continue;
+    if (f.used || f.on === false) continue;
     if (dist(b.x, b.y, f.x, f.y) < f.r) {
       f.used = true;
       b.px = b.x - f.dir.x;
@@ -450,11 +482,14 @@ function cutAlong(a, b) {
 }
 
 // ---------- отрисовка ----------
+let bgLevel = -1;
+
 function ensureBg() {
   // ждём, пока догрузится фото-картон из видео
   if (!Assets.get('cardboard')) { bgDirty = true; return; }
-  if (bgDirty || !bg) {
-    bg = Art.buildBackground(W, H, 11);
+  if (bgDirty || !bg || bgLevel !== G.level) {
+    bg = Art.buildBackground(W, H, 11 + G.level * 131);
+    bgLevel = G.level;
     bgDirty = false;
   }
 }
@@ -474,6 +509,7 @@ function draw() {
     return;
   }
 
+  drawLevelTint();
   drawWorld();
   drawHud();
 
@@ -490,6 +526,35 @@ function draw() {
     }
   }
 
+  ctx.restore();
+}
+
+// у каждого уровня своя палитра картона: глаза не слипаются на сотне подряд
+const TINTS = [
+  ['#ff9a2e', '#ffd08a'], ['#ff5a3c', '#ffb08a'], ['#3c8cff', '#a8d4ff'],
+  ['#a45cff', '#d9bcff'], ['#22b48c', '#9ce8d0'], ['#ffcc44', '#fff0a8'],
+  ['#ff5cb0', '#ffc2e2'], ['#4c6cff', '#bcc8ff'],
+];
+
+function drawLevelTint() {
+  const [c1, c2] = TINTS[G.level % TINTS.length];
+  ctx.save();
+  ctx.globalCompositeOperation = 'color';
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  ctx.globalAlpha = 0.34;
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+
+  // виньетка держит края в тон и не даёт картону сливаться с фоном страницы
+  ctx.save();
+  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.72);
+  v.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  v.addColorStop(1, 'rgba(40, 18, 0, 0.22)');
+  ctx.fillStyle = v;
+  ctx.fillRect(0, 0, W, H);
   ctx.restore();
 }
 
