@@ -409,7 +409,8 @@ function handleButton(b) {
       startLevel(G.level);
       break;
     case 'mute':
-      Sfx.toggleMute();
+      // Включили звук — сразу слышно, что он работает
+      if (!Sfx.toggleMute()) Sfx.meme('bravo', { dur: 0.7 });
       break;
   }
 }
@@ -873,11 +874,11 @@ function drawLoseOverlay() {
 // Звук под мемные гифки: каждая нарезка Меллстроя озвучена своей цитатой
 const MEL_SFX = {
   // «сладость, приятность и вкусность» — Меллстрой жуёт добычу
-  chew: ['eat', { dur: 1.9, peak: 0.9 }],
+  chew: ['eat', { dur: 1.9, peak: 1 }],
   // аплодисменты на «Браво, босс!»
-  bravo: ['bravo', { dur: 3.2, peak: 0.7 }],
+  bravo: ['bravo', { dur: 3.2, peak: 1 }],
   // «я уже красный, культурно не получится»
-  red: ['red', { dur: 3.4, peak: 0.85 }],
+  red: ['red', { dur: 3.4, peak: 1 }],
 };
 let lastMelState = 'idle';
 
