@@ -10,14 +10,17 @@ python3 -m http.server 12000   # затем http://localhost:12000
 
 ## Публикация
 GitHub Pages: `Chr0mat1x/Chr0mat1x.github.io`, папка `chekushka/`.
-Живой адрес: https://chr0mat1x.github.io/chekushka/
+Живой адрес: https://chr0mat1x.github.io/chekushka/ (с ?v=42 и 100 уровнями)
 
 Токен `GITHUB_TOKEN` не умеет создавать репозитории (`Resource not accessible by integration`),
 но пушит в существующие. Поэтому новый репозиторий не заводим — деплой идёт в личный GitHub Pages.
 
 ```bash
 git clone https://x-access-token:$GITHUB_TOKEN@github.com/Chr0mat1x/Chr0mat1x.github.io.git /tmp/pages
-# скопировать файлы игры в /tmp/pages/chekushka, затем commit + push
+# без rsync: cp -a assets /tmp/pages/chekushka/assets (rsync в образе нет)
+cp index.html style.css assets.js audio.js art.js levels.js game.js /tmp/pages/chekushka/
+rm -rf /tmp/pages/chekushka/assets && cp -a assets /tmp/pages/chekushka/assets
+# затем commit + push; Pages подхватывает примерно за минуту
 ```
 
 ## Правила кода
@@ -54,7 +57,33 @@ git clone https://x-access-token:$GITHUB_TOKEN@github.com/Chr0mat1x/Chr0mat1x.gi
   (`stars` берутся из результата подбора, `def` их не затирает).
 * `node tools/fix-stars.js <номер> [попыток]` — пересобирает только звёзды готового уровня по
   реальным траекториям побед и правит строку `stars` в `levels.js`.
-* `node tools/regen-level.js <номер>` — перегенерировать один уровень.
+* `node tools/regen-level.js <номер> [архетип] [порог]` — перегенерировать один уровень.
+* `node tools/rebuild-levels.js` — пересобрать все 100 уровней из `tools/archetypes2.js` + `tools/gen-levels.js`.
+* `node tools/audit-stars.js` — проверяет, что тройка звёзд лежит на реальных траекториях побед.
+* `node tools/name-levels.js` — переименовывает уровни по их архетипу (`KINDS` — план архетипов по номерам).
+
+
+
+## Разнообразие уровней
+26 архетипов, раскладка задаётся в `tools/gen-levels.js` (`ORDER`) и `tools/archetypes2.js`.
+Динамика уровня живёт в полях данных:
+* `hazards[].patrol` — шипы ездят (`axis`, `amp`, `speed`, `phase`), позиция считается от `G.t`.
+* `mel.patrol` — Меллстрой ходит по `x` (`amp`, `speed`, `phase`).
+* `fans[].pulse` — вентилятор мигает (`period`, `duty`, `phase`), в `stepPhysics` выключенный поток пропускается.
+* `ropes[].osc` — якорь качается/ездит (`axis` — `x`/`y`, либо круг при `orbit`).
+
+Картон уникален для каждого уровня: `ensureBg` передаёт `11 + G.level * 131` в `Art.buildBackground`,
+`dressCardboard` раскидывает скотч, пятна, царапки и стикеры. Цвет фона не перекрашивается: слой
+`drawLevelTint` с палитрами `TINTS` убран, фон «плыл» от уровня к уровню. Подсказки на канве тоже убраны
+(поле `hint` в данных осталось неиспользуемым).
+Проверка вёрстки без прохождения: `_preview.html?lvl=N` (не деплоить).
+
+
+## Звук под мемные гифки
+`GIF_SFX` в game.js привязывает звуки к номерам кадров спрайт-листа (`fps` и `count` должны совпадать
+с `MEME_SHEETS` в art.js): `chew` — чавканье и хлебальник (`bite`, `slurp`), `bravo` — аплодисменты и свист,
+`red` — утробный стон. `gifSfx()` вызывается из игрового цикла и помнит последний кадр (`gifHit`),
+поэтому звук не дублируется на каждом тике. Сами звуки — синтез в `audio.js`.
 
 Критерий готовности уровня: win ≥ ~15% и хотя бы одна траектория на 3 звезды
 (на практике держим средний win ~40% и 3★ у 10–30% побед).
@@ -81,3 +110,14 @@ node -e "const {LEVELS}=require('./tools/check-levels');let b=0;LEVELS.forEach((
 ## Особенности отрисовки
 `drawWorld` рисует Меллстроя, но в состоянии `bravo` он рисуется ПОСЛЕ `drawWinOverlay`,
 иначе гифка уходит под панель победы.
+
+## Звук мемных гифок
+Нарезки лежат в `assets/sfx/` (`eat.mp3` — «сладость, приятность и вкусность»,
+`bravo.mp3` — аплодисменты, `red.mp3` — «я уже красный»). Источник — myinstants.
+`audio.js` декодирует их один раз в `loadMemes()`; `Sfx.preload()` вызывается при загрузке страницы,
+иначе первый звук после победы не успевает декодироваться.
+Файлы с myinstants часто начинаются с 1–3 с тишины и записаны тихо, поэтому `measure()`
+считает первый громкий участок (`lead`) и пик, а `meme()` играет с этой точки и с поднятой громкостью.
+Без этого срез в 1.5 с попадал в тишину и звук «не слышно».
+Привязка к состояниям — `MEL_SFX` в `game.js` (`chew`, `bravo`, `red`), запуск — `melSfx()`
+по смене `G.melState`.

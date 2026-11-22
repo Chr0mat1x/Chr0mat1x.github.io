@@ -85,6 +85,8 @@ function buildLevel(index) {
     bx: L.mel.x, patrol: L.mel.patrol || null,
   };
   G.melState = 'idle';
+  lastMelState = 'idle';
+  Sfx.stopMemes();
   G.particles = [];
   G.trail = [];
   G.swipePrev = null;
@@ -347,8 +349,6 @@ function win() {
   b.py = b.y;
   b.rot = 0;
   for (const r of G.ropes) { r.active = false; r.alpha = 0; }
-  Sfx.chomp();
-  Sfx.win();
   const got = G.stars.filter((s) => s.got).length;
   const key = String(G.level);
   G.saved[key] = Math.max(G.saved[key] || 0, got);
@@ -362,7 +362,7 @@ function lose(reason) {
   G.melState = G.loseStreak >= RED_STREAK ? 'red' : 'sad';
   G.loseReason = reason;
   G.shake = 16;
-  Sfx.fail();
+  if (G.melState !== 'red') Sfx.fail();
 }
 
 // ---------- ввод ----------
@@ -870,23 +870,22 @@ function drawLoseOverlay() {
   ctx.restore();
 }
 
-// Звук под мемные гифки: попадания привязаны к номерам кадров спрайт-листа
-const GIF_SFX = {
-  chew: { fps: 14, count: 30, hits: { 2: 'bite', 9: 'bite', 16: 'slurp', 23: 'bite' } },
-  bravo: { fps: 13, count: 38, hits: { 1: 'applause', 21: 'whistle' } },
-  red: { fps: 9, count: 24, hits: { 0: 'groan', 13: 'groan' } },
+// Звук под мемные гифки: каждая нарезка Меллстроя озвучена своей цитатой
+const MEL_SFX = {
+  // «сладость, приятность и вкусность» — Меллстрой жуёт добычу
+  chew: ['eat', { dur: 1.9, peak: 0.9 }],
+  // аплодисменты на «Браво, босс!»
+  bravo: ['bravo', { dur: 3.2, peak: 0.7 }],
+  // «я уже красный, культурно не получится»
+  red: ['red', { dur: 3.4, peak: 0.85 }],
 };
-let gifHit = '';
+let lastMelState = 'idle';
 
-function gifSfx() {
-  const clip = GIF_SFX[G.melState];
-  if (!clip) { gifHit = ''; return; }
-  const f = Math.floor((G.t * clip.fps) % clip.count);
-  const key = `${G.melState}:${f}`;
-  if (key === gifHit) return;
-  gifHit = key;
-  const name = clip.hits[f];
-  if (name) Sfx[name]();
+function melSfx() {
+  if (G.melState === lastMelState) return;
+  lastMelState = G.melState;
+  const clip = MEL_SFX[G.melState];
+  if (clip) Sfx.meme(clip[0], clip[1]);
 }
 
 // ---------- цикл ----------
@@ -916,7 +915,7 @@ function frame(now) {
       p.life -= STEP * 1.6;
     }
     G.particles = G.particles.filter((p) => p.life > 0);
-    gifSfx();
+    melSfx();
     for (const t of G.trail) t.life -= STEP * 3;
     G.trail = G.trail.filter((t) => t.life > 0);
 
@@ -941,5 +940,6 @@ resize();
 
 buildLevel(0);
 G.mode = 'title';
+Sfx.preload();
 
 requestAnimationFrame(frame);
