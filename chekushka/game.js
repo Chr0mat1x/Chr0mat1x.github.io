@@ -509,7 +509,6 @@ function draw() {
     return;
   }
 
-  drawLevelTint();
   drawWorld();
   drawHud();
 
@@ -526,35 +525,6 @@ function draw() {
     }
   }
 
-  ctx.restore();
-}
-
-// у каждого уровня своя палитра картона: глаза не слипаются на сотне подряд
-const TINTS = [
-  ['#ff9a2e', '#ffd08a'], ['#ff5a3c', '#ffb08a'], ['#3c8cff', '#a8d4ff'],
-  ['#a45cff', '#d9bcff'], ['#22b48c', '#9ce8d0'], ['#ffcc44', '#fff0a8'],
-  ['#ff5cb0', '#ffc2e2'], ['#4c6cff', '#bcc8ff'],
-];
-
-function drawLevelTint() {
-  const [c1, c2] = TINTS[G.level % TINTS.length];
-  ctx.save();
-  ctx.globalCompositeOperation = 'color';
-  const g = ctx.createLinearGradient(0, 0, W, H);
-  g.addColorStop(0, c1);
-  g.addColorStop(1, c2);
-  ctx.globalAlpha = 0.34;
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-  ctx.restore();
-
-  // виньетка держит края в тон и не даёт картону сливаться с фоном страницы
-  ctx.save();
-  const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.72);
-  v.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  v.addColorStop(1, 'rgba(40, 18, 0, 0.22)');
-  ctx.fillStyle = v;
-  ctx.fillRect(0, 0, W, H);
   ctx.restore();
 }
 
@@ -657,22 +627,6 @@ function drawHud() {
   drawIconButton(rBtn, 'restart');
   drawIconButton(mBtn, 'mute');
 
-  // подсказка уровня
-  const hint = LEVELS[G.level].hint;
-  if (hint && G.mode === 'play' && G.levelTime < 4) {
-    const a = clamp(Math.min(G.levelTime * 2, (4 - G.levelTime) * 1.4), 0, 1);
-    ctx.save();
-    ctx.globalAlpha = a * 0.85;
-    Art.roundRect(ctx, W / 2 - 168, 120, 336, 40, 20);
-    ctx.fillStyle = 'rgba(46, 26, 6, 0.55)';
-    ctx.fill();
-    ctx.fillStyle = '#ffe9bd';
-    ctx.font = '600 16px "Trebuchet MS", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(hint, W / 2, 141);
-    ctx.restore();
-  }
 }
 
 function drawIconButton(rect, id) {
@@ -916,6 +870,25 @@ function drawLoseOverlay() {
   ctx.restore();
 }
 
+// Звук под мемные гифки: попадания привязаны к номерам кадров спрайт-листа
+const GIF_SFX = {
+  chew: { fps: 14, count: 30, hits: { 2: 'bite', 9: 'bite', 16: 'slurp', 23: 'bite' } },
+  bravo: { fps: 13, count: 38, hits: { 1: 'applause', 21: 'whistle' } },
+  red: { fps: 9, count: 24, hits: { 0: 'groan', 13: 'groan' } },
+};
+let gifHit = '';
+
+function gifSfx() {
+  const clip = GIF_SFX[G.melState];
+  if (!clip) { gifHit = ''; return; }
+  const f = Math.floor((G.t * clip.fps) % clip.count);
+  const key = `${G.melState}:${f}`;
+  if (key === gifHit) return;
+  gifHit = key;
+  const name = clip.hits[f];
+  if (name) Sfx[name]();
+}
+
 // ---------- цикл ----------
 let last = performance.now();
 let acc = 0;
@@ -943,6 +916,7 @@ function frame(now) {
       p.life -= STEP * 1.6;
     }
     G.particles = G.particles.filter((p) => p.life > 0);
+    gifSfx();
     for (const t of G.trail) t.life -= STEP * 3;
     G.trail = G.trail.filter((t) => t.life > 0);
 

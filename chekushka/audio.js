@@ -88,6 +88,27 @@ const Sfx = (() => {
       noise({ dur: 0.5, peak: 0.16, hp: 500 });
       tone({ freq: 300, type: 'sine', dur: 0.4, peak: 0.08, slide: 900 });
     },
+    bite() {
+      noise({ dur: 0.08, peak: 0.22, hp: 900 });
+      tone({ freq: 150, type: 'square', dur: 0.07, peak: 0.1, slide: 70 });
+    },
+    slurp() {
+      tone({ freq: 430, type: 'sine', dur: 0.2, peak: 0.12, slide: 170 });
+      noise({ dur: 0.18, peak: 0.1, hp: 700 });
+    },
+    applause() {
+      for (let i = 0; i < 16; i++) {
+        noise({ dur: 0.06, peak: 0.09 + Math.random() * 0.07, hp: 1500, delay: i * 0.085 });
+      }
+      tone({ freq: 660, type: 'triangle', dur: 0.5, peak: 0.07, delay: 0.1 });
+    },
+    whistle() {
+      tone({ freq: 1150, type: 'sine', dur: 0.28, peak: 0.09, slide: 2100 });
+    },
+    groan() {
+      tone({ freq: 115, type: 'sawtooth', dur: 0.85, peak: 0.12, slide: 68 });
+      noise({ dur: 0.6, peak: 0.09, hp: 160, delay: 0.08 });
+    },
     click() {
       tone({ freq: 660, type: 'square', dur: 0.05, peak: 0.1 });
     },
