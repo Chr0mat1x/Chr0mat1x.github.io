@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ЛАБ-ТРЕК — готовься к ОГЭ по физике, проходя сектора ускорителя, отвечая на вопросы и сражаясь с боссами.">
+<meta name="theme-color" content="#0a0f16">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<title>ЛАБ-ТРЕК · Физика ОГЭ в игре</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Unbounded:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=11">
+</head>
+<body>
+<canvas id="particles" aria-hidden="true"></canvas>
+<div class="grid-bg" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<header class="hud" id="hud" hidden>
+  <button class="hud-brand" data-nav="map" aria-label="На карту">
+    <svg viewBox="0 0 24 24" class="bolt" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5L19.5 10.5H13l1-8.5Z"/></svg>
+    <span>ЛАБ-ТРЕК</span>
+  </button>
+  <nav class="hud-nav">
+    <button data-nav="map">Карта</button>
+    <button data-nav="formulas">Формулы</button>
+    <button data-nav="achievements">Метки</button>
+  </nav>
+  <div class="hud-player">
+    <div class="hud-name" id="hudName">—</div>
+    <div class="hud-xp"><div class="hud-xp-inner" id="hudXpBar"></div></div>
+    <div class="hud-meta"><span id="hudLevel">Ур. 1</span><span class="hud-streak" id="hudStreak">✦ 0</span></div>
+  </div>
+</header>
+
+<main id="app" aria-live="polite"></main>
+<div class="toast-wrap" id="toasts" aria-live="assertive"></div>
+
+<script src="js/data.js?v=11"></script>
+<script src="js/app.js?v=11"></script>
+</body>
+</html>
